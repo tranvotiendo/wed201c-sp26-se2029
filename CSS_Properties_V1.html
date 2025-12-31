@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý CSS - tvtiendo</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --accent-blue: #3ec4ff;
+            --bg-body: #f4f7fe;
+            --bg-sidebar: #ffffff;
+            --text-main: #2b3674;
+            --text-muted: #a3aed0;
+            --border-color: #e0e5f2;
+            --code-bg: #1b254b;
+            --radius-custom: 25px;
+            --shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR DESKTOP --- */
+        .sidebar {
+            width: 75px;
+            background: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: auto;
+            max-height: 80vh;
+            border-radius: 40px;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .sidebar-item {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 8px 0;
+            cursor: pointer;
+            border-radius: 50%;
+            color: var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .sidebar-item:hover {
+            color: var(--primary-color);
+            background: #f8faff;
+        }
+
+        .sidebar-item.active {
+            background: var(--accent-blue);
+            color: white !important;
+            box-shadow: 0px 8px 16px rgba(62, 196, 255, 0.4);
+        }
+
+        /* --- MAIN CONTAINER --- */
+        .main-container {
+            flex: 1;
+            margin-left: 110px;
+            padding: 30px 40px;
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s;
+        }
+
+        /* --- TOPBAR --- */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px 35px;
+            border-radius: var(--radius-custom);
+            box-shadow: var(--shadow);
+            margin-bottom: 35px;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .search-bar {
+            background: #f4f7fe;
+            padding: 10px 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 350px;
+        }
+
+        .search-bar input {
+            border: none;
+            background: none;
+            outline: none;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .top-icons {
+            display: flex;
+            gap: 25px;
+            color: var(--text-muted);
+        }
+
+        /* --- TABS & GRID --- */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* --- CARD STYLE --- */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid transparent;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            border-color: var(--primary-color);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            color: #5d68ff;
+            font-weight: 700;
+            font-size: 1.15rem;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            background: #f4f7fe;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+            color: #2b3674;
+            text-transform: uppercase;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: #707ebe;
+            margin: 15px 0;
+            line-height: 1.6;
+        }
+
+        /* Box Preview & Code */
+        .preview-box {
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fafbff;
+        }
+
+        .value-box {
+            background: var(--code-bg);
+            color: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            margin-top: auto;
+        }
+
+        .value-box b {
+            color: #a3aed0;
+            display: block;
+            margin-bottom: 5px;
+            font-family: 'Inter';
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .demo-rect {
+            width: 100%;
+            height: 45px;
+            transition: 0.3s;
+        }
+
+        /* --- FOOTER (Khôi phục nguyên bản) --- */
+        .footer-card {
+            background: white;
+            border-radius: var(--radius-custom);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            margin-top: 20px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .footer-brand img {
+            width: 45px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+        }
+
+        .footer-brand h3 {
+            font-size: 1.25rem;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .footer-brand p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-col h4 {
+            margin-bottom: 20px;
+            font-size: 1rem;
+            color: var(--text-main);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 12px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .footer-bottom {
+            padding-top: 25px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .home-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* --- MOBILE --- */
+        /* --- MOBILE & TABLET OPTIMIZATION --- */
+        @media (max-width: 1024px) {
+            /* Tăng breakpoint để hỗ trợ nhiều dòng máy hơn */
+
+            /* 1. Đưa Sidebar xuống dưới nằm ngang */
+            .sidebar {
+                top: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                transform: none !important;
+                width: 100% !important;
+                height: 70px !important;
+                flex-direction: row !important;
+                justify-content: space-around !important;
+                padding: 0 10px !important;
+                border-radius: 0 !important;
+                border-top: 1px solid var(--border-color) !important;
+                border-right: none !important;
+                border-left: none !important;
+                max-height: none !important;
+                box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05) !important;
+            }
+
+            .sidebar-item {
+                margin: 0 !important;
+                width: 50px !important;
+                height: 50px !important;
+            }
+
+            /* 2. Căn đều nội dung chính, không cho Sidebar đè */
+            .main-container {
+                margin-left: 0 !important;
+                padding: 15px 16px 100px 16px !important;
+                /* Padding trái phải đều 16px */
+                width: 100% !important;
+                display: block !important;
+            }
+
+            /* 3. Sửa Topbar: Xếp dọc và ẩn icon theo yêu cầu */
+            .topbar {
+                flex-direction: column !important;
+                gap: 15px !important;
+                padding: 20px !important;
+                align-items: center !important;
+                text-align: center !important;
+            }
+
+            .topbar-left {
+                justify-content: center !important;
+                width: 100% !important;
+            }
+
+            .search-bar {
+                width: 100% !important;
+                max-width: none !important;
+            }
+
+            /* Ẩn các icon Bookmark, Ngôn ngữ, Trăng trên Mobile */
+            .top-icons {
+                display: none !important;
+            }
+
+            /* 4. Dàn đều các khối Stats và Grid */
+            .home-stats,
+            .grid {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 16px !important;
+                width: 100% !important;
+            }
+
+            .card,
+            .home-hero,
+            .footer-card {
+                width: 100% !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+
+            /* 5. Sửa Footer trên Mobile */
+            .footer-grid {
+                grid-template-columns: 1fr !important;
+                text-align: center !important;
+                gap: 30px !important;
+            }
+
+            .footer-brand,
+            .footer-col {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+            }
+
+            .scroll-top {
+                bottom: 85px !important;
+                right: 15px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-item active" onclick="openTab(event, 'home-tab')" title="Trang chủ"><i
+                data-lucide="home"></i></div>
+        <div class="sidebar-item" onclick="openTab(event, 'background-tab')" title="Background"><i
+                data-lucide="layers"></i></div>
+        <div class="sidebar-item" onclick="openTab(event, 'border-tab')" title="Border"><i data-lucide="square"></i>
+        </div>
+        <div class="sidebar-item" onclick="openTab(event, 'margin-tab')" title="Margin"><i data-lucide="maximize"></i>
+        </div>
+        
+        <!-- <div class="sidebar-item" title="Tin nhắn"><i data-lucide="mail"></i></div> -->
+        <div class="sidebar-item" onclick="openTab(event, 'padding-tab')" title="Padding"><i data-lucide="box"></i>
+        </div>
+        <div class="sidebar-item" onclick="openTab(event, 'size-tab')" title="Kích thước"><i data-lucide="ruler"></i>
+        </div>
+       <div class="sidebar-item"
+     onclick="window.open('/version2.html', '_blank')"
+     title="Người dùng">
+  <i data-lucide="users"></i>
+</div>
+
+    </aside>
+
+    <div class="main-container">
+        <header class="topbar">
+            <div class="topbar-left"><i data-lucide="terminal" style="color: var(--primary-color)"></i>
+                <div class="page-title">CSS Properties</div>
+            </div>
+            <div class="search-bar"><i data-lucide="search" size="18" style="color:var(--text-muted)"></i><input
+                    type="text" placeholder="Tìm kiếm thuộc tính..."></div>
+            <div class="top-icons"><i data-lucide="bookmark"></i><i data-lucide="languages"></i><i
+                    data-lucide="moon"></i></div>
+        </header>
+
+        <!-- TAB 1: HOME -->
+        <div id="home-tab" class="tab-content active">
+            <div
+                style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); padding: 45px; border-radius: var(--radius-custom); color: white; margin-bottom: 35px;">
+                <h1 style="font-size: 2rem;">CSS Master Reference</h1>
+                <p style="opacity: 0.9; margin-top: 10px;">WED201c - FPTU - SP26</p>
+            </div>
+            <div class="home-stats">
+                <div class="stat-item">
+                    <div class="stat-icon"><i data-lucide="image"></i></div>
+                    <div><b>9</b>
+                        <p style="font-size:12px; color:var(--text-muted)">Background Props</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i data-lucide="square"></i></div>
+                    <div><b>12</b>
+                        <p style="font-size:12px; color:var(--text-muted)">Border Props</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i data-lucide="maximize"></i></div>
+                    <div><b>5</b>
+                        <p style="font-size:12px; color:var(--text-muted)">Margin Props</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i data-lucide="box"></i></div>
+                    <div><b>3</b>
+                        <p style="font-size:12px; color:var(--text-muted)">Padding Props</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i data-lucide="ruler"></i></div>
+                    <div><b>3</b>
+                        <p style="font-size:12px; color:var(--text-muted)">Size Props</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i data-lucide="zap"></i></div>
+                    <div><b>100%</b>
+                        <p style="font-size:12px; color:var(--text-muted)">Tài liệu chuẩn</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h4 style="color: var(--text-main)">Ghi chú hệ thống</h4>
+                <p class="card-desc">Bản cập nhật này tập trung vào ý nghĩa chi tiết của từng giá trị và minh họa
+                    Preview để bạn dễ hình dung code thực tế.</p>
+            </div>
+        </div>
+
+        <!-- TAB 2: BACKGROUND (Đủ 9 cái) -->
+        <div id="background-tab" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">background</span><span
+                            class="badge">Shorthand</span></div>
+                    <p class="card-desc">Viết gộp nhanh. Thứ tự chuẩn: <b>màu ảnh vị trí / kích thước lặp lại
+                            bám-dính</b>.</p>
+                    <div class="value-box"><b>Ví dụ:</b>red url('img.jpg') center / cover no-repeat fixed</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">background-attachment</span></div>
+                    <p class="card-desc">
+                        <b>scroll:</b> Ảnh nền cuộn theo trang (Mặc định).<br>
+                        <b>fixed:</b> Ảnh đứng im, nội dung trượt qua ảnh.<br>
+                        <b>local:</b> Ảnh cuộn theo thanh cuộn riêng của chính khối đó.
+                    </p>
+                    <div class="value-box"><b>Giá trị:</b>scroll | fixed | local</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">background-clip</span></div>
+                    <p class="card-desc">Ảnh nền được phép hiện ra đến đâu:<br>
+                        <b>border-box:</b> Đến tận mép viền.<br>
+                        <b>padding-box:</b> Trong viền (không đè lên viền).<br>
+                        <b>content-box:</b> Chỉ trong vùng nội dung.
+                    </p>
+                    <div class="preview-box">
+                        <div
+                            style="border: 10px rgba(99,102,241,0.2) solid; background: var(--primary-color); background-clip: border-box; width: 50px; height: 50px; margin-right: 15px;">
+                        </div>
+                        <div
+                            style="border: 10px rgba(99,102,241,0.2) solid; padding: 10px; background: var(--primary-color); background-clip: content-box; width: 50px; height: 50px;">
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Giá trị:</b>border-box | padding-box | content-box | text</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">background-color</span></div>
+                    <p class="card-desc">Đặt màu nền phía sau ảnh.</p>
+                    <div class="value-box"><b>Giá trị:</b>transparent | #hex | rgba() | hsl()</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">background-image</span></div>
+                    <p class="card-desc">Ảnh hoặc màu gradient làm nền.</p>
+                    <div class="preview-box">
+                        <div
+                            style="width: 100%; height: 40px; background: linear-gradient(to right, #6366f1, #a855f7); border-radius: 8px;">
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Giá trị:</b>url("path") | linear-gradient() | none</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">background-origin</span></div>
+                    <p class="card-desc">Điểm bắt đầu đặt ảnh nền (0,0) nằm ở đâu.</p>
+                    <div class="value-box"><b>Giá trị:</b>padding-box | border-box | content-box</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">background-position</span></div>
+                    <p class="card-desc">Tọa độ đặt ảnh (trái, phải, trên, dưới, trung tâm).</p>
+                    <div class="value-box"><b>Ví dụ:</b>top right | center | 50% 50%</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">background-repeat</span></div>
+                    <p class="card-desc">
+                        <b>repeat:</b> Lặp đầy.<br>
+                        <b>no-repeat:</b> Hiện 1 lần.<br>
+                        <b>space:</b> Tự chia khoảng cách đều.<br>
+                        <b>round:</b> Tự co giãn cho khít.
+                    </p>
+                    <div class="value-box"><b>Giá trị:</b>repeat | no-repeat | space | round</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">background-size</span></div>
+                    <p class="card-desc">
+                        <b>cover:</b> Phủ kín khung.<br>
+                        <b>contain:</b> Hiện toàn bộ hình.<br>
+                        <b>100% 100%:</b> Kéo giãn khít khung.
+                    </p>
+                    <div class="value-box"><b>Giá trị:</b>auto | cover | contain | 100px 50%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: BORDER (Đủ 12 cái) -->
+        <div id="border-tab" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border</span><span class="badge">Shorthand</span>
+                    </div>
+                    <p class="card-desc">Gộp nhanh cho cả 4 cạnh.</p>
+                    <div class="preview-box">
+                        <div class="demo-rect" style="border: 2px solid var(--primary-color)"></div>
+                    </div>
+                    <div class="value-box"><b>Ví dụ:</b>border: 2px solid red;</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-width</span></div>
+                    <p class="card-desc">Độ dày viền:<br>
+                        • <b>1 giá trị:</b> Cả 4 cạnh giống nhau.<br>
+                        • <b>2 giá trị:</b> [Trên-Dưới] [Trái-Phải].<br>
+                        • <b>3 giá trị:</b> [Trên] [Trái-Phải] [Dưới].<br>
+                        • <b>4 giá trị:</b> Trên - Phải - Dưới - Trái (Kim đồng hồ).
+                    </p>
+                    <div class="value-box"><b>Ví dụ:</b>1px | 2px 10px | 1px 2px 3px 4px</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-style</span></div>
+                    <p class="card-desc">Kiểu hiển thị của đường viền.</p>
+                    <div class="preview-box" style="flex-direction: column; gap: 10px;">
+                        <div class="demo-rect" style="border-bottom: 2px dashed var(--primary-color);"></div>
+                        <div class="demo-rect" style="border-bottom: 2px dotted var(--primary-color);"></div>
+                    </div>
+                    <div class="value-box"><b>Giá trị:</b>solid | dashed | dotted | double | outset</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-color</span></div>
+                    <p class="card-desc">Màu sắc viền.</p>
+                    <div class="value-box"><b>Giá trị:</b>transparent | #hex | rgba() | currentColor</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-radius</span></div>
+                    <p class="card-desc">Bo tròn góc. Dùng giá trị lớn để tạo hình viên thuốc.</p>
+                    <div class="preview-box">
+                        <div class="demo-rect"
+                            style="background:var(--primary-color); border-radius: 999px; width: 150px;"></div>
+                    </div>
+                    <div class="value-box"><b>Ví dụ:</b>12px | 50% | 999px</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-side (Shorthand)</span></div>
+                    <p class="card-desc">Thiết lập nhanh cho 1 cạnh nhất định.</p>
+                    <div class="preview-box">
+                        <div class="demo-rect"
+                            style="border-left: 5px solid var(--primary-color); background: rgba(99,102,241,0.1);">
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Ví dụ:</b>border-top: 2px solid blue;</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-[side]-width</span></div>
+                    <p class="card-desc">Độ dày cho duy nhất 1 cạnh.</p>
+                    <div class="value-box"><b>Giá trị:</b>5px | 1rem | thin</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-[side]-style</span></div>
+                    <p class="card-desc">Kiểu viền cho duy nhất 1 cạnh.</p>
+                    <div class="value-box"><b>Giá trị:</b>solid | dashed | none</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-[side]-color</span></div>
+                    <p class="card-desc">Màu viền cho duy nhất 1 cạnh.</p>
+                    <div class="value-box"><b>Giá trị:</b>red | #000</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-image</span></div>
+                    <p class="card-desc">Dùng ảnh làm viền thay cho màu.</p>
+                    <div class="value-box"><b>Cú pháp:</b>source slice width outset repeat</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">border-collapse</span></div>
+                    <p class="card-desc">Gộp các viền của bảng lại thành một đường duy nhất.</p>
+                    <div class="value-box"><b>Giá trị:</b>collapse | separate</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><span class="card-title">outline</span></div>
+                    <p class="card-desc">Đường viền bao ngoài cùng của `border`, không chiếm diện tích khối.</p>
+                    <div class="value-box"><b>Ví dụ:</b>outline: 2px solid gold;</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MARGIN -->
+        <div id="margin-tab" class="tab-content">
+            <div class="grid">
+                <!-- Tổng quan -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">margin</span><span class="badge">Shorthand</span>
+                    </div>
+                    <p class="card-desc">
+                        Dùng để tạo khoảng cách <b>bên ngoài</b> đường viền của phần tử. Nó đẩy các phần tử lân cận ra
+                        xa.<br><br>
+                        • <b>1 giá trị:</b> Cả 4 cạnh (VD: 20px).<br>
+                        • <b>2 giá trị:</b> [Trên-Dưới] [Trái-Phải] (VD: 10px 40px).<br>
+                        • <b>3 giá trị:</b> [Trên] [Trái-Phải] [Dưới] (VD: 10px 50px 20px).<br>
+                        • <b>4 giá trị:</b> [Trên] [Phải] [Dưới] [Trái] (Theo chiều kim đồng hồ).
+                    </p>
+                    <div class="preview-box">
+                        <!-- Minh họa margin đẩy box ra khỏi lề -->
+                        <div style="border: 1px dashed var(--text-muted); padding: 0; width: 100%;">
+                            <div
+                                style="margin: 20px; background: var(--primary-color); color: white; padding: 10px; text-align: center; border-radius: 8px;">
+                                Box có margin: 20px
+                            </div>
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Ví dụ:</b>margin: 10px 20px 15px 5px;</div>
+                </div>
+
+                <!-- Các cạnh riêng lẻ -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Margin side</span></div>
+                    <p class="card-desc">
+                        Thiết lập khoảng cách cho duy nhất một phía cụ thể:<br>
+                        • <b>margin-top:</b> Khoảng cách phía trên.<br>
+                        • <b>margin-right:</b> Khoảng cách bên phải.<br>
+                        • <b>margin-bottom:</b> Khoảng cách phía dưới.<br>
+                        • <b>margin-left:</b> Khoảng cách bên trái.
+                    </p>
+                    <div class="preview-box">
+                        <div style="border: 1px dashed var(--text-muted); width: 100%;">
+                            <div
+                                style="margin-left: 50px; margin-top: 10px; background: var(--accent-blue); color: white; padding: 10px; border-radius: 8px; width: fit-content;">
+                                margin-left: 50px
+                            </div>
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Code:</b>margin-left: 50px;</div>
+                </div>
+
+                <!-- Giá trị đặc biệt -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Margin values</span></div>
+                    <p class="card-desc">
+                        Ý nghĩa các loại đơn vị:<br>
+                        • <b>auto:</b> Trình duyệt tự tính toán (thường dùng để căn giữa khối).<br>
+                        • <b>px, rem, pt:</b> Khoảng cách cố định cụ thể.<br>
+                        • <b>%:</b> Khoảng cách tính theo % chiều rộng của phần tử cha.<br>
+                        • <b>inherit:</b> Kế thừa giá trị margin từ phần tử cha.
+                    </p>
+                    <div class="value-box"><b>Giá trị:</b>auto | 20px | 5% | inherit</div>
+                </div>
+
+                <!-- Căn giữa với Auto -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">margin: auto</span><span class="badge">Mẹo</span>
+                    </div>
+                    <p class="card-desc">
+                        Để căn giữa một khối (block) theo chiều ngang, ta đặt <b>width</b> cố định và <b>margin:
+                            auto</b>.
+                    </p>
+                    <div class="preview-box">
+                        <div style="border: 1px dashed var(--text-muted); width: 100%;">
+                            <div
+                                style="margin: 0 auto; width: 60%; background: #a855f7; color: white; padding: 10px; text-align: center; border-radius: 8px;">
+                                Đã căn giữa (Auto)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Code:</b>width: 60%; margin: 0 auto;</div>
+                </div>
+            </div>
+        </div>
+        <!-- TAB 5: PADDING -->
+        <div id="padding-tab" class="tab-content">
+            <div class="grid">
+                <!-- Tổng quan Padding -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">padding</span><span class="badge">Shorthand</span>
+                    </div>
+                    <p class="card-desc">
+                        Tạo khoảng trống <b>bên trong</b> phần tử, giữa nội dung và đường viền (Border).<br><br>
+                        • <b>1 giá trị:</b> Áp dụng cho cả 4 phía.<br>
+                        • <b>2 giá trị:</b> [Trên-Dưới] [Trái-Phải].<br>
+                        • <b>3 giá trị:</b> [Trên] [Trái-Phải] [Dưới].<br>
+                        • <b>4 giá trị:</b> [Trên] [Phải] [Dưới] [Trái] (Theo chiều kim đồng hồ).
+                    </p>
+                    <div class="preview-box">
+                        <div
+                            style="border: 2px solid var(--primary-color); background: white; padding: 30px; border-radius: 8px; width: 100%;">
+                            <div
+                                style="background: rgba(99,102,241,0.1); border: 1px dashed var(--primary-color); text-align: center; padding: 5px;">
+                                Nội dung (Padding: 30px)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Ví dụ:</b>padding: 20px 40px;</div>
+                </div>
+
+                <!-- Các phía riêng lẻ -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Padding từng phía</span></div>
+                    <p class="card-desc">
+                        Kiểm soát khoảng cách cho từng cạnh cụ thể:<br>
+                        • <b>padding-top:</b> Phía trên nội dung.<br>
+                        • <b>padding-right:</b> Bên phải nội dung.<br>
+                        • <b>padding-bottom:</b> Phía dưới nội dung.<br>
+                        • <b>padding-left:</b> Bên trái nội dung.
+                    </p>
+                    <div class="preview-box">
+                        <div
+                            style="border: 2px solid var(--accent-blue); padding-left: 50px; background: white; width: 100%;">
+                            <div style="background: var(--accent-blue); color: white; padding: 5px;">Lề trái: 50px</div>
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Code:</b>padding-left: 50px;</div>
+                </div>
+
+                <!-- Box Sizing quan trọng -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">box-sizing</span><span class="badge">Cực quan
+                            trọng</span></div>
+                    <p class="card-desc">
+                        Quyết định cách tính chiều rộng/cao của khối:<br>
+                        • <b>content-box:</b> (Mặc định) Width chỉ tính nội dung. Padding sẽ làm khối **to thêm** ra
+                        ngoài.<br>
+                        • <b>border-box:</b> Width bao gồm cả nội dung + padding + border. Khối sẽ **giữ nguyên kích
+                        thước** ban đầu.
+                    </p>
+                    <div class="preview-box" style="flex-direction: column; gap: 10px;">
+                        <div
+                            style="width: 150px; padding: 15px; border: 5px solid #333; box-sizing: content-box; background: #eee; font-size: 10px;">
+                            content-box (Bị to ra)</div>
+                        <div
+                            style="width: 150px; padding: 15px; border: 5px solid #333; box-sizing: border-box; background: #ddd; font-size: 10px;">
+                            border-box (Chuẩn 150px)</div>
+                    </div>
+                    <div class="value-box"><b>Mẹo:</b> Nên luôn dùng border-box.</div>
+                </div>
+            </div>
+        </div>
+        <!-- TAB 6: KÍCH THƯỚC (SIZE) -->
+        <div id="size-tab" class="tab-content">
+            <div class="grid">
+                <!-- Width & Height -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">width & height</span></div>
+                    <p class="card-desc">
+                        Xác định chiều rộng và chiều cao của phần tử.<br>
+                        • <b>auto:</b> Tự động theo nội dung (Mặc định).<br>
+                        • <b>px, cm, em:</b> Kích thước cố định.<br>
+                        • <b>%:</b> Tính theo phần trăm của phần tử cha.<br>
+                        • <b>vw, vh:</b> Tính theo % của màn hình (Viewport).
+                    </p>
+                    <div class="preview-box">
+                        <div
+                            style="width: 50%; height: 40px; background: var(--primary-color); border-radius: 4px; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px;">
+                            width: 50%
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Giá trị:</b>auto | 300px | 100% | 50vh</div>
+                </div>
+
+                <!-- Max Width - Tối ưu Mobile -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">max-width</span><span class="badge">Mobile
+                            Friendly</span></div>
+                    <p class="card-desc">
+                        Đặt chiều rộng <b>tối đa</b>. Nếu màn hình nhỏ hơn giá trị này, khối sẽ tự co lại (không bị tràn
+                        màn hình).<br><br>
+                        <b>Tại sao dùng?</b> Nếu đặt width: 1000px, vào mobile sẽ bị lỗi. Dùng max-width: 1000px sẽ giúp
+                        khối co giãn linh hoạt.
+                    </p>
+                    <div class="value-box"><b>Giá trị:</b>none | 500px | 100% | initial</div>
+                </div>
+
+                <!-- Min/Max Height/Width -->
+                <div class="card">
+                    <div class="card-header"><span class="card-title">Giới hạn kích thước</span></div>
+                    <p class="card-desc">
+                        • <b>min-width:</b> Chiều rộng tối thiểu (không thể nhỏ hơn).<br>
+                        • <b>min-height:</b> Chiều cao tối thiểu.<br>
+                        • <b>max-height:</b> Chiều cao tối đa (thường đi kèm với overflow để tạo thanh cuộn).
+                    </p>
+                    <div class="preview-box">
+                        <div
+                            style="min-height: 80px; width: 100px; border: 2px solid var(--accent-blue); background: rgba(62, 196, 255, 0.1); text-align: center; font-size: 10px; display: flex; align-items: center;">
+                            min-height: 80px
+                        </div>
+                    </div>
+                    <div class="value-box"><b>Ví dụ:</b>min-height: 200px; max-width: 100%;</div>
+                </div>
+            </div>
+        </div>
+        <!-- FOOTER (TRẢ LẠI NGUYÊN BẢN) -->
+        <footer class="footer-card">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <img src="logo.jpg" alt="Logo">
+                    <h3>tvtiendo</h3>
+                    <p>Hệ thống quản lý thuộc tính CSS. Phiên bản 10.0.1.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Learn</h4>
+                    <ul>
+                        <li>HTML</li>
+                        <li>JavaScript</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li>Blogger Theme</li>
+                        <li>Other Product</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <ul>
+                        <li>Contact</li>
+                        <li>Documentation</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2025 · <b>CSS Properties Management System</b> · tvtiendo</span>
+            </div>
+        </footer>
+    </div>
+
+    <div class="scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"><i data-lucide="chevron-up"></i>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        function openTab(evt, tabName) {
+            let contents = document.getElementsByClassName("tab-content");
+            for (let content of contents) content.classList.remove("active");
+            let items = document.getElementsByClassName("sidebar-item");
+            for (let item of items) item.classList.remove("active");
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>
