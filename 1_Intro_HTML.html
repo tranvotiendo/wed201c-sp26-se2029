@@ -1,0 +1,109 @@
+<!-- File No: HTML.01 - Lesson 01 - Introduction to HTML -->
+
+<!-- All HTML documents must start with a document type declaration -->
+<!-- ! + Enter để ra mẫu sẵn -->
+<!--HTML không phân biệt hoa thường-->
+<!-- FILE THUẦN HTML -->
+
+<!DOCTYPE html> 
+<html lang="en">  <!--Khai báo ngôn ngữ-->
+    <!--Bắt đầu bằng thẻ <html> và kết thúc </html> -->
+<head>
+    <!--Favicon-->
+    <link rel="icon" href="data:image/svg+xml,
+    <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+    <text y='.9em' font-size='90'>🔥</text>
+    </svg>">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+ 
+    <!--Mỗi trang thì dùng duy nhất 1 thẻ <h1> -->
+    <h1 style="font-size:60px;">Introdcution to HTML</h1> <!--Tùy chỉnh size cho Heading-->
+    <h1>This is heading 1</h1> <!--Thẻ tiêu đề <h1> đến <h6>, <h1> là tiêu đề cao nhất-->
+    <h2>This is heading 2</h2> <!--Lưu ý không dùng thẻ Heading để formart chữ lớn/ nhỏ-->
+    
+    <p>This is paragraph 1</p> <!--Thẻ đoạn văn <p> -->
+    <p>This is paragraph 2</p>
+    <p style="color:red;">This is a red paragraph.</p> <!--Tùy chỉnh màu-->
+    
+    <p title="I'm a tooltip">I'm a tooltip. Try it now!.</p> <!--Chú thích phần tử-->
+    
+
+    <!--HTML Attributes-------------------------------->
+    <!--
+    Tất cả các phần tử HTML đều có thể có thuộc tính.
+    Thuộc tính cung cấp thông tin bổ sung về phần tử, được quy định ở thẻ mở (start tag).
+    Thuộc tính thường đi theo cặp tên/giá trị: name="value"
+    -->
+
+    <a href="https://daihoc.fpt.edu.vn/">Visit FPTU Website <br></a> <!--Liên kết-->
+    <img src="MySchool.png" width="300" height="300" alt="Đại Học FPT trong tôi"> <!--Hình ảnh-->
+
+    <!--HTML Styles------------------------------------->
+    <body style="background-color:powderblue;"> <!--Màu nền cả <body> -->
+    
+    <!--Màu nền của 1 phần tử-->
+    <h1 style="background-color:rgb(7, 229, 22);">This is a heading with green background color</h1>
+    
+    <!--Màu chữ-->
+    <h1 style="color:blue;">This is a heading with blue text color</h1>
+    <p style="color:red;">This is a paragraph with red color.</p>
+
+    <h1 style="background-color:rgb(255, 38, 0);">RGB</h1>
+    <h1 style="background-color:#ff6347;">HEX</h1>
+    <h1 style="background-color:hsl(9, 100%, 64%);">HSL</h1>
+    <h1 style="background-color:rgba(255, 99, 71, 0.5);">RGBA</h1>
+
+    <!--Font chữ-->
+    <h1 style="font-family:verdana;">This is a heading using font verdana</h1>
+    <p style="font-family:courier;">This is a paragraph using font courier.</p>
+
+    <!--Size chữ-->
+    <h1 style="font-size:300%;">This is a heading with size 300%</h1>
+
+    <!--Căn lề-->
+    <h1 style="text-align:center;">Centered Heading</h1>
+    <p style="text-align:center;">Centered paragraph.</p>
+
+    <!--HTML Text Formatting -->
+    <b>This text is bold</b> <br>
+    <strong>This text is important!</strong> <br>
+
+    <i>This text is italic</i> <br>
+    <em>This text is emphasized</em> <br>
+
+    <small>This is some smaller text.</small> <br>
+
+    <p>Do not forget to buy <mark>milk</mark> today.</p>
+
+    <p>My favorite color is <del>blue</del> <ins>red</ins>.</p> 
+
+    <p>This is <sub>subscripted</sub> text.</p> 
+    <p>This is <sup>superscripted</sup> text.</p>
+
+    <!--HTML Quotation and Citation ------------------------------------->
+    <p>The <abbr title="World Health Organization">WHO</abbr> was founded in 1948.</p>
+    <address>
+        Written by Tien Do.<br>
+        Visit us at:<br>
+        tvtiendo.com<br>
+        S603, Vinhomes Grand Park<br>
+        Vietnam
+    </address>
+
+
+    <table><tr><th></th><th>Header 1</th></tr><tr><th>Row 1</th><td>Data 1</td></tr></table>
+
+    <!--Icon
+    <i class="fa-brands fa-pinterest" aria-label="Pinterest"></i> -->
+
+</body>
+</html>
+<!--Một phần tử gồm mội thứ từ thẻ mở (start tag) đến thẻ đóng (end tag)-->
+<!--Các thẻ <br> - xuống dòng, thẻ <hr> - kẻ ngang, <pre> - giữ nguyên khoảng trắng và xuống dòng/
+    không có nội dung/ gọi là phần tử rỗng/ không có thẻ đóng-->

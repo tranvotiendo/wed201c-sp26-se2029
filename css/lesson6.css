@@ -1,0 +1,279 @@
+/* ==========================================================================
+   TỔNG HỢP CSS TỪ TÀI LIỆU WED201c - MOOC 2
+   Nguồn tham khảo: Slide bài giảng (Sources 1-1215)
+   ========================================================================== */
+
+/* --- PHẦN 2 & 3: CƠ BẢN VỀ CSS & TÍNH CHẤT CASCADING --- */
+
+ /* 2.1.2 Cấu trúc cơ bản [cite: 74-81] */
+h1.basic-style {
+    color: blue;
+}
+
+ /* 2.1.5 Nhiều thuộc tính [cite: 99-102] */
+h1.multiple-props {
+    color: blue;
+    background-color: yellow;
+}
+
+ /* 3.2 Thứ tự ưu tiên (Cascading) [cite: 146-153] 
+   Lưu ý: Trong CSS, quy tắc viết sau sẽ ghi đè quy tắc viết trước nếu cùng độ ưu tiên.
+*/
+h1.cascade-example {
+    font-family: Arial;
+    font-family: Times; /* Times sẽ được áp dụng vì viết sau */
+}
+
+ /* 3.3 !important [cite: 162-168] 
+   Lưu ý: !important sẽ phá vỡ quy tắc xếp chồng thông thường.
+*/
+h1.important-example {
+    font-family: Arial !important; /* Arial được áp dụng dù Times viết sau */
+    font-family: Times;
+}
+
+/* --- PHẦN 4: ĐỊNH KIỂU VĂN BẢN (TYPOGRAPHY) --- */
+
+ /* 4.2 Font-family [cite: 185-192] */
+.text-font {
+    /* Cung cấp các phương án thay thế */
+    font-family: Courier, Impact, Arial;
+}
+
+ /* 4.2.2 Custom Fonts (@font-face) [cite: 203-212] 
+   Lưu ý: Cần có file font thực tế (ví dụ Colleen.ttf) để hoạt động.
+*/
+@font-face {
+    font-family: mySpecialFont;
+    src: url('Colleen.ttf'); /* Đường dẫn giả định từ tài liệu */
+}
+
+.custom-font-apply {
+    font-family: mySpecialFont;
+}
+
+ /* 4.4 Font-variant [cite: 224-227] */
+.small-caps {
+    font-variant: small-caps;
+}
+
+ /* 4.6 Màu sắc và Màu nền [cite: 244-247] */
+.color-example {
+    color: #0006CC; /* Xanh dương đậm */
+    background-color: #d3d3d3; /* Xám nhạt (đã chỉnh lại mã hex từ tài liệu vì #3B3B3B3 thừa số) */
+}
+
+ /* 4.8 Line-height (Chiều cao dòng) [cite: 263-269] */
+.line-height-small {
+    line-height: 50%; /* Rất sát nhau */
+}
+.line-height-large {
+    line-height: 200%; /* Rất thoáng */
+}
+
+/* --- PHẦN 10: LIÊN KẾT (LINKS) VÀ DANH SÁCH (LISTS) --- */
+
+ /* 10.1 Định kiểu Link [cite: 529-538] */
+a.button-link {
+    display: block;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #0006CC;
+    width: 200px;
+    text-align: center;
+    padding: 4px;
+    text-decoration: none;
+}
+
+ /* 10.3 & 10.4 Các trạng thái Link (Pseudo-classes) [cite: 545-556] 
+   QUY TẮC NHỚ: "LoVe HAte" (Link - Visited - Hover - Active)
+*/
+a.state-demo:link { color: blue; }
+a.state-demo:visited { color: purple; }
+a.state-demo:hover { color: red; text-decoration: underline; } /* Di chuột vào */
+a.state-demo:active { color: orange; } /* Khi click giữ */
+
+ /* 10.5 List Styles [cite: 566-581] */
+ul.roman-list {
+    list-style-type: upper-roman; /* I, II, III... */
+}
+ul.alpha-list {
+    list-style-type: upper-alpha; /* A, B, C... */
+}
+ul.image-list {
+    /* Cần file ảnh thật để hiển thị */
+    list-style-image: url('icon.gif'); 
+}
+
+/* --- PHẦN 11: CÁC BỘ CHỌN NÂNG CAO (SELECTORS) --- */
+
+ /* 11.3 ID Selector [cite: 609-613] */
+#mainLogo {
+    border: 5px solid #0006CC;
+    margin: 0 auto;
+    width: 100px; /* Thêm width để thấy hiệu ứng margin auto */
+    text-align: center;
+}
+
+ /* 11.4 Class Selector [cite: 618-621] */
+.thumb {
+    border: 1px solid #0006CC;
+    width: 20%;
+}
+
+ /* 12.2 & 12.3 Attribute Selectors [cite: 663-676] */
+/* Link có href bắt đầu bằng http */
+a[href^='http'] {
+    background-color: yellow; 
+}
+/* Link có href chứa chữ 'fpt' (ví dụ thêm) */
+a[href*='fpt'] {
+    font-weight: bold;
+}
+/* Ảnh có đuôi .png */
+img[src$='.png'] {
+    border: 2px solid red;
+}
+
+/* --- PHẦN 17: MÔ HÌNH HỘP (BOX MODEL) --- */
+
+ /* 17.1.2 Border [cite: 835-857] */
+.box-border {
+    border: solid 1px #CC00AA;
+    /* Ví dụ border riêng lẻ */
+    border-width: 3px 10px 20px 1px; /* Trên - Phải - Dưới - Trái */
+    border-style: solid;
+    border-color: green;
+}
+/* Note không hiểu */
+ /* 17.1.6 Tính toán kích thước (Additive) [cite: 882-888] */
+.box-calc {
+    width: 100px;
+    height: 50px;
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid black;
+    background-color: lightblue;
+    /* Thực tế chiếm dụng: 100 + 10*2 + 1*2 = 122px chiều rộng */
+}
+
+ /* 17.1.8 Box Sizing [cite: 906] */
+.box-sizing-fix {
+    box-sizing: border-box; /* Width đã bao gồm padding và border */
+    width: 100px;
+    padding: 10px;
+    border: 1px solid black;
+    background-color: lightcoral;
+}
+
+/* --- PHẦN 8 & 9: BỐ CỤC (GRID & FLEXBOX) --- */
+
+ /* 8.2 Grid Layout [cite: 425-438] */
+.grid-container-3 {
+    display: grid;
+    grid-template-columns: 25% 25% 25%; /* 3 cột */
+    gap: 10px; /* Thêm khoảng cách cho dễ nhìn */
+    background-color: #f0f0f0;
+    margin-bottom: 20px;
+}
+
+ /* 9.2 Flexbox [cite: 478-499] */
+.flex-container {
+    display: flex;
+    flex-direction: row; /* Mặc định là row, tài liệu ví dụ column ở 9.2.3 */
+    justify-content: space-around; /* 9.3 */
+    flex-wrap: wrap; /* 9.2.2 */
+    background-color: #e0e0e0;
+    padding: 10px;
+}
+
+/* --- PHẦN 19: ĐỊNH VỊ (POSITION) --- */
+
+ /* 19.1.5 Position examples [cite: 976-1003] */
+.pos-relative {
+    position: relative;
+    top: 20px;
+    left: 20px;
+    background-color: yellow;
+    border: 1px solid black;
+    z-index: 1;
+}
+
+.pos-absolute {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: red;
+    color: white;
+    padding: 5px;
+    /* Absolute sẽ so với cha gần nhất có position (ở đây giả sử nằm trong thẻ có class container-relative) */
+}
+
+/* --- PHẦN 14, 21, 22: HIỆU ỨNG & HÌNH NỀN --- */
+
+ /* 14.1 Background Image [cite: 723-732] */
+.bg-image-demo {
+    background-image: url('https://placehold.co/600x400'); /* Dùng ảnh placeholder online */
+    background-color: black;
+    height: 200px;
+    background-position: center;
+    background-size: cover;
+    color: white;
+}
+
+ /* 14.1.3 Opacity [cite: 734-738] */
+.opacity-demo {
+    opacity: 0.5; /* Mờ 50% */
+}
+
+ /* 21.3.1 Transitions (Chuyển đổi) [cite: 1066-1089] */
+.transition-box {
+    color: #000000;
+    background: #2db34a;
+    line-height: 200px; /* Để chữ ra giữa theo chiều dọc */
+    text-align: center;
+    width: 250px;
+    height: 200px;
+    border-radius: 6px;
+    
+    /* Thiết lập chuyển đổi */
+    transition-property: color, width, background, border-radius;
+    transition-duration: 2s; /* Đã chỉnh lại 2s cho nhanh hơn ví dụ 5s */
+    transition-timing-function: linear;
+}
+
+.transition-box:hover {
+    color: #ffffff;
+    width: 350px;
+    background: #2D31B3;
+    border-radius: 50%;
+}
+
+ /* 22.2 Transforms (Biến đổi 2D) [cite: 1111-1129] */
+.transform-rotate {
+    transform: rotate(30deg);
+    background-color: pink;
+    display: inline-block;
+    margin: 20px;
+    padding: 10px;
+}
+
+.transform-skew {
+    transform: skew(20deg, 10deg);
+    background-color: cyan;
+    display: inline-block;
+    margin: 20px;
+    padding: 10px;
+}
+
+/* --- PHẦN 23: ACCESSIBILITY (KHẢ NĂNG TRUY CẬP) --- */
+
+ /* 23.5 Off-page headings (Ẩn khỏi màn hình nhưng SR vẫn đọc) [cite: 1176-1179] */
+.offpage {
+    position: absolute;
+    left: -10000px; /* Đẩy ra xa khỏi màn hình */
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}

@@ -1,0 +1,347 @@
+/*Phần 1. Cú pháp và Selector cơ bản (Basic Selectors)*/
+
+/* 1. Selector theo tên thẻ (Tag Selector) */
+p {
+  color: red; /* Đổi màu chữ thành đỏ */
+  background-color: pink; /* Đổi màu nền thành hồng */
+}
+
+/* 2. Selector theo Class (Dùng dấu chấm .) */
+/* Dùng cho nhóm các phần tử có chung kiểu dáng */
+.le {
+  background-color: aqua;
+  color: red;
+}
+
+.chan {
+  background-color: violet;
+  color: yellow;
+}
+
+/* 3. Selector theo ID (Dùng dấu thăng #) */
+/* Dùng cho phần tử duy nhất, độ ưu tiên cao nhất */
+#para3 {
+  background-color: brown;
+  color: white;
+}
+
+/*Phần 2. Thuộc tính Font chữ (Font Properties)*/
+
+h1 {
+  /* Chọn font chữ, nếu máy không có font đầu sẽ lấy font sau */
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', sans-serif;
+  
+  /* Chỉnh kích thước chữ */
+  font-size: 40px; /* Mặc định trình duyệt thường là 16px */
+  
+  /* Kiểu chữ: in nghiêng */
+  font-style: italic;
+  
+  /* Độ đậm của chữ (bold, hoặc số từ 100-900) */
+  font-weight: bold; /* hoặc 600 */
+  
+  /* Trang trí văn bản: gạch chân */
+  text-decoration: underline; /* hoặc dotted underline (gạch chân nét chấm) */
+}
+
+/*Phần 3. Thuộc tính về khoảng cách (Box Model Properties)*/
+.box {
+  /* --- Border (Đường viền) --- */
+  /* Cú pháp tắt: độ dày - kiểu - màu */
+  border: 5px solid red; 
+  /* Các kiểu viền khác: dashed (gạch đứt), dotted (chấm), double (đôi)... */
+
+  /* Bo tròn góc */
+  border-radius: 10px; 
+  /* Nếu muốn bo tròn thành hình tròn thì để 50% (với hình vuông) */
+
+  /* --- Padding (Vùng đệm) --- */
+  /* Khoảng cách từ nội dung (content) đến đường viền (border) */
+  padding: 10px; /* Cách đều 4 phía */
+  /* Hoặc viết riêng: padding-top, padding-left... */
+
+  /* --- Margin (Lề) --- */
+  /* Khoảng cách từ đường viền ra các phần tử xung quanh */
+  margin: 10px; /* Cách đều 4 phía */
+  margin-top: 20px; /* Chỉ cách lề trên */
+}
+
+/*Phần 4. Thuộc tính về nền (Background Properties)*/
+body {
+  /* Màu nền đơn sắc */
+  /* background-color: skyblue; */
+
+  /* Màu nền Gradient (chuyển màu) */
+  /* linear-gradient(hướng, màu 1, màu 2) */
+  background-image: linear-gradient(to right, skyblue, lightgreen);
+
+  /* --- Ảnh nền (Background Image) --- */
+  background-image: url('link_anh.jpg');
+  
+  /* Ngăn ảnh lặp lại nếu ảnh nhỏ hơn màn hình */
+  background-repeat: no-repeat;
+  
+  /* Cố định ảnh nền khi cuộn trang */
+  background-attachment: fixed;
+  
+  /* Chỉnh vị trí ảnh ra giữa */
+  background-position: center;
+  
+  /* Chỉnh kích thước ảnh bao phủ toàn bộ khung hình */
+  background-size: cover; 
+}
+
+/*Phần 5. Thuộc tính về bố cục (Layout Properties)*/
+
+/* Static: Mặc định, phần tử nằm theo thứ tự bình thường */
+
+/* Relative: Vị trí tương đối so với vị trí ban đầu của nó */
+
+.box1 {
+  position: relative;
+  top: 50px; /* Dịch xuống 50px so với vị trí gốc */
+  left: 100px; /* Dịch sang phải 100px so với vị trí gốc */
+}
+
+/* Absolute: Vị trí tuyệt đối so với phần tử cha gần nhất có position (khác static) */
+.box2 {
+  position: absolute;
+  top: 30px; /* Cách mép trên của phần tử cha 30px */
+  left: 30px; /* Cách mép trái của phần tử cha 30px */
+}
+
+/* Fixed: Cố định trên màn hình, không trôi khi cuộn chuột (ví dụ: nút menu, chatbox) */
+.menu {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+}
+
+/* Sticky: "Dính". Hoạt động như relative cho đến khi cuộn tới điểm đó thì thành fixed */
+.header {
+  position: sticky;
+  top: 0; /* Dính chặt vào mép trên khi cuộn tới */
+}
+
+/* Phần 6. Thuộc tính về hiển thị (Display Properties) */
+/* Inline: Hiển thị trên cùng một dòng, không thể chỉnh chiều rộng và chiều cao */
+span {
+  display: inline;
+  color: blue;
+}       
+/* Block: Hiển thị trên dòng riêng, có thể chỉnh chiều rộng và chiều cao */
+div {
+    display: block;
+    width: 200px;
+    height: 100px;
+    background-color: lightgray;
+    }
+
+/* Inline-block: Kết hợp cả hai, hiển thị trên cùng dòng nhưng có thể chỉnh kích thước */
+.box3 {
+    display: inline-block;
+    width: 150px;
+    height: 80px;
+    background-color: lightcoral;
+    }       
+/* None: Ẩn phần tử khỏi trang web */
+.hidden {
+    display: none;
+    }   
+/* Phần 7. Thuộc tính về căn chỉnh văn bản (Text Alignment Properties) */
+.center-text {
+    text-align: center; /* Căn giữa */
+    }
+
+.left-text {
+    text-align: left; /* Căn trái */
+    }
+.right-text {
+    text-align: right; /* Căn phải */
+    }
+.justify-text {
+    text-align: justify; /* Căn đều hai bên */
+    }
+/* Phần 8. Thuộc tính về màu sắc (Color Properties) */
+.color-sample {
+    color: #FF5733; /* Màu chữ bằng mã hex */
+    background-color: rgb(100, 150, 200); /* Màu nền bằng mã RGB */
+    }
+/* Phần 9. Thuộc tính về kích thước (Size Properties) */
+.size-sample {
+    width: 300px; /* Chiều rộng */
+    height: 150px; /* Chiều cao */
+    }
+
+/* Phần 10. Thuộc tính về hiển thị hình ảnh (Image Display Properties) */
+.image-sample {
+    width: 100%; /* Ảnh chiếm toàn bộ chiều rộng khung chứa */
+    height: auto; /* Chiều cao tự động theo tỷ lệ ảnh */
+    border-radius: 15px; /* Bo tròn góc ảnh */
+    }
+/* Phần 11. Thuộc tính về hiệu ứng chuyển động (Animation Properties) */
+@keyframes example {
+    from {background-color: red;}
+    to {background-color: yellow;}
+    }
+.animated-box {
+    animation-name: example;
+    animation-duration: 4s;
+    animation-iteration-count: infinite; /* Lặp vô hạn */
+    }
+/* Phần 12. Thuộc tính về hiển thị liên kết (Link Display Properties) */
+a:link {
+    color: blue; /* Màu liên kết chưa truy cập */
+    }
+a:visited {
+    color: purple; /* Màu liên kết đã truy cập */
+    }
+a:hover {
+    color: red; /* Màu khi di chuột qua liên kết */
+    }
+a:active {
+    color: orange; /* Màu khi nhấn liên kết */
+    }
+/* Phần 13. Thuộc tính về hiển thị bảng (Table Display Properties) */
+table {
+    border-collapse: collapse; /* Gộp viền bảng */
+    width: 100%; /* Chiếm toàn bộ chiều rộng khung chứa */
+    }
+th, td {
+    border: 1px solid black; /* Viền cho ô bảng */
+    padding: 8px; /* Khoảng cách bên trong ô */
+    text-align: left; /* Căn trái nội dung ô */
+    }
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* Màu nền cho hàng chẵn */
+    }
+tr:hover {
+    background-color: #ddd; /* Màu nền khi di chuột qua hàng */
+    }
+/* Phần 14. Thuộc tính về hiển thị danh sách (List Display Properties) */
+ul.custom-list {
+    list-style-type: square; /* Kiểu dấu đầu dòng */
+    padding-left: 20px; /* Khoảng cách từ lề trái */
+    }
+ol.custom-list {
+    list-style-type: upper-roman; /* Kiểu số La Mã */
+    padding-left: 20px; /* Khoảng cách từ lề trái */
+    }
+/* Phần 15. Thuộc tính về hiển thị form (Form Display Properties) */
+input[type="text"], textarea {  
+    width: 100%; /* Chiếm toàn bộ chiều rộng khung chứa */
+    padding: 10px; /* Khoảng cách bên trong ô nhập liệu */
+    border: 1px solid #ccc; /* Viền cho ô nhập liệu */
+    border-radius: 5px; /* Bo tròn góc ô nhập liệu */
+    }
+input[type="submit"] {
+    background-color: blue; /* Màu nền nút gửi */   
+    color: white; /* Màu chữ nút gửi */
+    padding: 10px 20px; /* Khoảng cách bên trong nút gửi
+    border: none; /* Bỏ viền nút gửi */
+    border-radius: 5px; /* Bo tròn góc nút gửi */
+    cursor: pointer; /* Con trỏ chuột khi hover qua nút gửi */
+    }
+input[type="submit"]:hover {
+    background-color: darkblue; /* Màu nền khi di chuột qua nút gửi */
+    }
+/* Phần 16. Thuộc tính về hiển thị media (Media Display Properties) */
+video, audio {
+    width: 100%; /* Chiếm toàn bộ chiều rộng khung chứa */
+    height: auto; /* Chiều cao tự động theo tỷ lệ */
+    }
+/* Phần 17. Thuộc tính về hiển thị flexbox (Flexbox Display Properties) */
+.flex-container {
+    display: flex; /* Kích hoạt flexbox */
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    }
+.flex-item {
+    background-color: lightgray; /* Màu nền phần tử flex */
+    margin: 10px; /* Khoảng cách giữa các phần tử flex */
+    padding: 20px; /* Khoảng cách bên trong phần tử flex */
+    }
+/* Phần 18. Thuộc tính về hiển thị grid (Grid Display Properties) */
+.grid-container {
+    display: grid; /* Kích hoạt grid */
+    grid-template-columns: repeat(3, 1fr); /* 3 cột đều nhau */
+    gap: 10px; /* Khoảng cách giữa các ô lưới */
+    }
+.grid-item {
+    background-color: lightblue; /* Màu nền phần tử grid */
+    padding: 20px; /* Khoảng cách bên trong phần tử grid */
+    }
+/* Phần 19. Thuộc tính về hiển thị chuyển đổi (Transform Properties) */
+.transform-sample {
+    transform: rotate(15deg); /* Xoay 15 độ */
+    transition: transform 0.5s; /* Hiệu ứng chuyển đổi trong 0.5 giây */
+    }
+.transform-sample:hover {
+    transform: scale(1.2); /* Phóng to 1.2 lần khi di chuột qua */
+    }
+/* Phần 20. Thuộc tính về hiển thị bóng đổ (Box Shadow Properties) */
+.shadow-sample {
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3); /* Bóng đổ với độ mờ */
+    }
+
+
+/* Đổ bóng cho chữ (Text Shadow) */
+h1 {
+  /* Cú pháp: X-offset Y-offset Blur-radius Color */
+  text-shadow: 5px 5px 5px gray;
+  /* Có thể tạo nhiều bóng bằng dấu phẩy */
+  text-shadow: 5px 5px 0px blue, 10px 10px 0px red;
+}
+
+/* Đổ bóng cho hộp (Box Shadow) */
+.card {
+  box-shadow: 10px 10px 5px yellow;
+}
+/* Phần 21. Thuộc tính về hiển thị độ mờ (Opacity Properties) */
+.opacity-sample {
+    opacity: 0.7; /* Độ mờ 70% */
+    }
+/* Phần 22. Lớp giả (Pseudo-classes) */
+/* :hover - Khi di chuột vào */
+button:hover {
+  background-color: red;
+}
+
+/* :active - Khi đang nhấn giữ chuột */
+button:active {
+  background-color: green;
+}
+
+/* :nth-child() - Chọn phần tử con theo công thức */
+/* Chọn thẻ li thứ 5 */
+li:nth-child(5) { color: red; }
+
+/* Chọn các thẻ lẻ (odd) */
+li:nth-child(odd) { color: red; }
+
+/* Chọn các thẻ chẵn (even) */
+li:nth-child(even) { color: blue; }
+
+/* Chọn theo công thức (ví dụ: mỗi 3 phần tử chọn 1) */
+li:nth-child(3n+1) { color: purple; }
+
+/* Phần 23. Responsive Design (Thiết kế đáp ứng) */
+/* Mặc định (cho màn hình to) */
+h1 {
+  color: yellow;
+}
+
+/* Khi màn hình nhỏ hơn 700px (Tablet/Mobile ngang) */
+@media only screen and (max-width: 700px) {
+  h1 {
+    color: red; /* Chữ chuyển sang màu đỏ */
+  }
+}
+
+/* Khi màn hình nhỏ hơn 480px (Mobile dọc) */
+@media only screen and (max-width: 480px) {
+  h1 {
+    color: blue; /* Chữ chuyển sang màu xanh dương */
+  }
+}
+
