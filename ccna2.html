@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCNA1 Checkpoint Exam Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js" type="module"></script>
+    
+    <!-- Chosen Palette: Warm Neutrals -->
+    <style>
+        body {
+            background-color: #FAF9F6;
+            color: #2D3748;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background-color: #D97706;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #B45309;
+        }
+        .nav-item {
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid transparent;
+            color: #6B7280;
+            font-weight: 500;
+        }
+        .nav-item.active {
+            border-bottom-color: #D97706;
+            color: #D97706;
+        }
+        .answer-option {
+            cursor: pointer;
+            padding: 0.75rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+        .answer-option:hover {
+            background-color: #FFF7ED;
+            border-color: #FDBA74;
+        }
+        .answer-option.correct {
+            background-color: #D1FAE5;
+            border-color: #10B981;
+            color: #065F46;
+        }
+        .answer-option.incorrect {
+            background-color: #FEE2E2;
+            border-color: #EF4444;
+            color: #991B1B;
+        }
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        #sync-status {
+            font-size: 0.75rem;
+            color: #9CA3AF;
+        }
+    </style>
+    <!-- Application Structure Plan: 
+         1. Dashboard: Overview with sync status.
+         2. Quiz: Core learning with cloud save logic.
+         3. Explorer: Browse topics.
+         4. Cheat Sheet: IOS Commands.
+         Persistence Strategy: Use Firestore to store user progress (current question, total score) tied to the authenticated user ID.
+    -->
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-gray-800 tracking-tight">CCNA1 <span class="text-amber-600">Checkpoint</span></span>
+                    <span id="sync-status" class="ml-4 italic hidden">Đang đồng bộ...</span>
+                </div>
+                <div class="flex space-x-4 sm:space-x-8 items-center" id="nav-container">
+                    <div class="nav-item active" data-target="dashboard">Dashboard</div>
+                    <div class="nav-item" data-target="quiz">Practice</div>
+                    <div class="nav-item hidden sm:block" data-target="explorer">Explorer</div>
+                    <div class="nav-item" data-target="cheatsheet">Commands</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboard" class="view-section">
+            <div class="mb-8 text-center sm:text-left">
+                <h1 class="text-3xl font-bold text-gray-900">Exam Overview</h1>
+                <p class="mt-2 text-lg text-gray-600 max-w-3xl">
+                    Chào mừng bạn quay trở lại! Tiến độ của bạn đã được lưu trữ an toàn trên đám mây.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="card p-6 flex flex-col justify-center items-center text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 uppercase tracking-wide">Điểm của bạn</h3>
+                    <p class="text-5xl font-bold text-amber-600 mt-2" id="dash-correct">0</p>
+                    <p class="text-sm text-gray-400 mt-1">Câu trả lời đúng</p>
+                </div>
+                <div class="card p-6 flex flex-col justify-center items-center text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 uppercase tracking-wide">Tiến độ câu hỏi</h3>
+                    <p class="text-5xl font-bold text-gray-700 mt-2" id="dash-progress">0/0</p>
+                    <p class="text-sm text-gray-400 mt-1">Vị trí hiện tại</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Topic Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="topicChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Hướng dẫn nhanh</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm mr-3">✓</span>
+                                <span class="text-gray-600"><strong>Tự động lưu:</strong> Mọi câu trả lời của bạn sẽ được lưu lại ngay lập tức.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="flex-shrink-0 h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm mr-3">✓</span>
+                                <span class="text-gray-600"><strong>Đa thiết bị:</strong> Bạn có thể học tiếp trên bất kỳ máy tính nào khi đăng nhập lại.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button onclick="app.navTo('quiz')" class="btn-primary w-full mt-6">Tiếp tục luyện tập</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUIZ VIEW -->
+        <div id="quiz" class="view-section hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <div class="card p-6 min-h-[400px] flex flex-col relative" id="quiz-card">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm font-semibold text-amber-600 uppercase tracking-wider" id="quiz-topic-badge">Topic</span>
+                            <span class="text-sm text-gray-400" id="quiz-counter">1 / 10</span>
+                        </div>
+                        <h3 class="text-xl font-medium text-gray-800 mb-6 leading-relaxed" id="quiz-question">Đang tải...</h3>
+                        <div id="quiz-options" class="space-y-3 mb-6 flex-grow"></div>
+                        <div id="quiz-explanation" class="hidden bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 text-sm text-blue-800">
+                            <p class="font-bold mb-1">Giải thích:</p>
+                            <p id="explanation-text"></p>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 border-t mt-auto">
+                            <button id="prev-btn" class="text-gray-500 hover:text-gray-800">Câu trước</button>
+                            <button id="next-btn" class="btn-primary">Câu tiếp theo</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="card p-6">
+                        <h4 class="font-bold text-gray-800 mb-4">Thống kê</h4>
+                        <div class="flex justify-between items-center mb-2"><span>Đúng</span><span class="text-green-600 font-bold" id="score-correct">0</span></div>
+                        <div class="flex justify-between items-center mb-4"><span>Sai</span><span class="text-red-500 font-bold" id="score-wrong">0</span></div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5"><div id="progress-bar" class="bg-amber-600 h-2.5 rounded-full" style="width: 0%"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPLORER & CHEATSHEET (Same as before) -->
+        <div id="explorer" class="view-section hidden">
+             <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <h2 class="text-2xl font-bold text-gray-900">Topic Explorer</h2>
+                <input type="text" id="explorer-search" placeholder="Tìm kiếm..." class="mt-2 sm:mt-0 px-4 py-2 border rounded-lg">
+            </div>
+            <div class="flex flex-wrap gap-2 mb-6" id="topic-filters">
+                <button class="filter-btn active px-4 py-1.5 rounded-full text-sm font-medium bg-gray-800 text-white" data-filter="all">Tất cả</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="explorer-grid"></div>
+        </div>
+
+        <div id="cheatsheet" class="view-section hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">IOS Commands</h2>
+            <div class="card overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">
+                            <tr><th class="px-6 py-3">Command</th><th class="px-6 py-3">Mode</th><th class="px-6 py-3">Description</th></tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200 text-sm" id="cheat-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js';
+
+        // --- FIREBASE INIT ---
+        const firebaseConfig = JSON.parse(window.__firebase_config);
+        const firebaseApp = initializeApp(firebaseConfig);
+        const auth = getAuth(firebaseApp);
+        const db = getFirestore(firebaseApp);
+        const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+
+        const examData = [
+            { id: 1, question: "A technician discovers software secretly collecting website visit data. What type of threat is this?", options: ["DoS attack", "Identity theft", "Spyware", "Zero-day attack"], answer: 2, topic: "Security", explanation: "Spyware is software installed on a network device that secretly collects information." },
+            { id: 2, question: "Which network provides secure access to corporate offices by suppliers, customers, and collaborators?", options: ["Internet", "Intranet", "Extranet", "Extendednet"], answer: 2, topic: "Network Types", explanation: "Extranets provide secure access to suppliers, customers, and collaborators." },
+            { id: 3, question: "Users accessing network resources from personal laptops/smartphones describes which trend?", options: ["Cloud computing", "Online collaboration", "Bring your own device (BYOD)", "Video conferencing"], answer: 2, topic: "Trends", explanation: "BYOD allows users to use personal devices on corporate networks." },
+            { id: 4, question: "What is an ISP?", options: ["Standards body", "Network protocol", "Organization enabling Internet connection", "Networking device"], answer: 2, topic: "Connectivity", explanation: "ISP provides access to the Internet for businesses and individuals." },
+            { id: 15, question: "What function does pressing the Tab key have when entering a command in IOS?", options: ["Aborts command", "Exits mode", "Moves cursor", "Completes command"], answer: 3, topic: "IOS Basics", explanation: "Pressing Tab completes the remainder of a partially typed command." },
+            { id: 19, question: "SwitchA(config)# interface vlan 1; SwitchA(config-if)# ip address 192.168.1.1 255.255.255.0. What is being configured?", options: ["Telnet", "SVI", "Encryption", "Switchport"], answer: 1, topic: "Switching", explanation: "Configuring IP on VLAN 1 creates a Switch Virtual Interface (SVI)." },
+            { id: 35, question: "PDU at the Transport layer is called?", options: ["Frame", "Packet", "Segment", "Bit"], answer: 2, topic: "Models", explanation: "Transport = Segment. Network = Packet. Data Link = Frame." }
+        ];
+
+        const iosCommands = [
+            { cmd: "enable", mode: "User EXEC", desc: "Enter Privileged EXEC mode" },
+            { cmd: "configure terminal", mode: "Privileged EXEC", desc: "Enter Global Config mode" },
+            { cmd: "show ip interface brief", mode: "Privileged EXEC", desc: "Check status of interfaces" }
+        ];
+
+        const app = {
+            user: null,
+            currentView: 'dashboard',
+            currentQuizIndex: 0,
+            score: { correct: 0, wrong: 0 },
+            charts: {},
+
+            async init() {
+                this.bindNav();
+                this.setupAuth();
+                this.renderDashboard();
+                this.renderExplorer();
+                this.renderCheatsheet();
+                this.renderQuizCard();
+            },
+
+            async setupAuth() {
+                try {
+                    if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
+                        await signInWithCustomToken(auth, window.__initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (err) {
+                    console.error("Auth error", err);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    this.user = user;
+                    if (user) {
+                        this.loadProgress();
+                    }
+                });
+            },
+
+            async loadProgress() {
+                if (!this.user) return;
+                const docRef = doc(db, 'artifacts', appId, 'users', this.user.uid, 'progress', 'current');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    this.currentQuizIndex = data.currentQuizIndex || 0;
+                    this.score = data.score || { correct: 0, wrong: 0 };
+                    this.updateUI();
+                    this.renderQuizCard();
+                }
+            },
+
+            async saveProgress() {
+                if (!this.user) return;
+                const statusEl = document.getElementById('sync-status');
+                statusEl.classList.remove('hidden');
+                
+                const docRef = doc(db, 'artifacts', appId, 'users', this.user.uid, 'progress', 'current');
+                await setDoc(docRef, {
+                    currentQuizIndex: this.currentQuizIndex,
+                    score: this.score,
+                    updatedAt: new Date().toISOString()
+                });
+                
+                setTimeout(() => statusEl.classList.add('hidden'), 1000);
+                this.updateUI();
+            },
+
+            updateUI() {
+                document.getElementById('dash-correct').innerText = this.score.correct;
+                document.getElementById('dash-progress').innerText = `${this.currentQuizIndex + 1}/${examData.length}`;
+                document.getElementById('score-correct').innerText = this.score.correct;
+                document.getElementById('score-wrong').innerText = this.score.wrong;
+                
+                const totalSolved = this.score.correct + this.score.wrong;
+                const pct = totalSolved > 0 ? (this.score.correct / totalSolved) * 100 : 0;
+                document.getElementById('progress-bar').style.width = `${pct}%`;
+            },
+
+            bindNav() {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => this.navTo(e.target.dataset.target));
+                });
+                document.getElementById('next-btn').addEventListener('click', () => {
+                    if (this.currentQuizIndex < examData.length - 1) {
+                        this.currentQuizIndex++;
+                        this.renderQuizCard();
+                        this.saveProgress();
+                    }
+                });
+                document.getElementById('prev-btn').addEventListener('click', () => {
+                    if (this.currentQuizIndex > 0) {
+                        this.currentQuizIndex--;
+                        this.renderQuizCard();
+                        this.saveProgress();
+                    }
+                });
+            },
+
+            navTo(viewId) {
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                document.querySelector(`.nav-item[data-target="${viewId}"]`).classList.add('active');
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById(viewId).classList.remove('hidden');
+                this.currentView = viewId;
+            },
+
+            renderQuizCard() {
+                const q = examData[this.currentQuizIndex];
+                document.getElementById('quiz-topic-badge').innerText = q.topic;
+                document.getElementById('quiz-counter').innerText = `${this.currentQuizIndex + 1} / ${examData.length}`;
+                document.getElementById('quiz-question').innerText = q.question;
+                
+                const optsContainer = document.getElementById('quiz-options');
+                optsContainer.innerHTML = '';
+                document.getElementById('quiz-explanation').classList.add('hidden');
+
+                q.options.forEach((opt, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'answer-option';
+                    div.innerText = opt;
+                    div.onclick = () => {
+                        const isCorrect = idx === q.answer;
+                        if (isCorrect) {
+                            div.classList.add('correct');
+                            this.score.correct++;
+                        } else {
+                            div.classList.add('incorrect');
+                            this.score.wrong++;
+                            optsContainer.children[q.answer].classList.add('correct');
+                        }
+                        document.querySelectorAll('.answer-option').forEach(o => o.classList.add('disabled-option'));
+                        document.getElementById('explanation-text').innerText = q.explanation;
+                        document.getElementById('quiz-explanation').classList.remove('hidden');
+                        this.saveProgress();
+                    };
+                    optsContainer.appendChild(div);
+                });
+            },
+
+            renderDashboard() {
+                const ctx = document.getElementById('topicChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Security', 'Connectivity', 'Switching', 'Models'],
+                        datasets: [{ data: [2, 3, 2, 2], backgroundColor: ['#F59E0B', '#10B981', '#3B82F6', '#6366F1'], borderWidth: 0 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            },
+
+            renderExplorer() {
+                const grid = document.getElementById('explorer-grid');
+                examData.forEach(q => {
+                    const card = document.createElement('div');
+                    card.className = 'card p-5';
+                    card.innerHTML = `<span class="text-xs font-bold text-amber-600">${q.topic}</span><p class="font-medium mt-1">${q.question}</p>`;
+                    grid.appendChild(card);
+                });
+            },
+
+            renderCheatsheet() {
+                const tbody = document.getElementById('cheat-table');
+                iosCommands.forEach(c => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td class="px-6 py-4 font-mono text-amber-700">${c.cmd}</td><td class="px-6 py-4">${c.mode}</td><td class="px-6 py-4">${c.desc}</td>`;
+                    tbody.appendChild(tr);
+                });
+            }
+        };
+
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>

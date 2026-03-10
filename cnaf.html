@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCNA1 Checkpoint Exam Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Background: #FAF9F6 (Off White), Primary Text: #2D3748 (Dark Slate), Accent: #D97706 (Warm Amber) -->
+    <style>
+        body {
+            background-color: #FAF9F6;
+            color: #2D3748;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary {
+            background-color: #D97706;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #B45309;
+        }
+
+        .btn-secondary {
+            background-color: #E5E7EB;
+            color: #374151;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background-color: #D1D5DB;
+        }
+
+        .nav-item {
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid transparent;
+            color: #6B7280;
+            font-weight: 500;
+        }
+
+        .nav-item.active {
+            border-bottom-color: #D97706;
+            color: #D97706;
+        }
+
+        .answer-option {
+            cursor: pointer;
+            padding: 0.75rem;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .answer-option:hover {
+            background-color: #FFF7ED;
+            border-color: #FDBA74;
+        }
+
+        .answer-option.correct {
+            background-color: #D1FAE5;
+            border-color: #10B981;
+            color: #065F46;
+        }
+
+        .answer-option.incorrect {
+            background-color: #FEE2E2;
+            border-color: #EF4444;
+            color: #991B1B;
+        }
+
+        .disabled-option {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+    </style>
+    <!-- Application Structure Plan: 
+         1. Dashboard (Home): High-level overview of the exam content. Doughnut chart for topic distribution to show scope. Intro text.
+         2. Interactive Quiz (Practice): The core learning mode. Users can answer questions one by one. Immediate feedback (Correct/Incorrect) with explanations extracted from the doc.
+         3. Flashcard Explorer (Review): A filtered list view to browse questions by topic without the pressure of a quiz. Good for quick review.
+         4. IOS Cheat Sheet (Reference): A dedicated table for all the Cisco IOS commands found in the exam, as this is a specific technical skill set tested.
+         Rationale: This structure separates "Testing" (Quiz) from "Learning" (Explorer/Cheat Sheet) while providing a "Progress" overview (Dashboard).
+    -->
+    <style type='text/css'>
+        body {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            -o-user-select: none;
+            user-select: none;
+        }
+    </style>
+
+</head>
+
+<body class="min-h-screen flex flex-col" onkeydown="return false">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-gray-800 tracking-tight">CCNA1 <span
+                            class="text-amber-600">Checkpoint</span></span>
+                </div>
+                <div class="flex space-x-8 items-center" id="nav-container">
+                    <div class="nav-item active" data-target="dashboard">Dashboard</div>
+                    <div class="nav-item" data-target="quiz">Practice Quiz</div>
+                    <div class="nav-item" data-target="explorer">Topic Explorer</div>
+                    <div class="nav-item" data-target="cheatsheet">IOS Commands</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboard" class="view-section">
+            <div class="mb-8 text-center sm:text-left">
+                <h1 class="text-3xl font-bold text-gray-900">Exam Overview</h1>
+                <p class="mt-2 text-lg text-gray-600 max-w-3xl">
+                    Welcome to the Basic Network Connectivity and Communications interactive guide.
+                    This application breaks down the CCNA1 Checkpoint Exam into consumable modules.
+                    Explore network fundamentals, security concepts, IOS commands, and protocol models.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Stat Card 1 -->
+                <div class="card p-6 flex flex-col justify-center items-center text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 uppercase tracking-wide">Total Questions</h3>
+                    <p class="text-5xl font-bold text-amber-600 mt-2" id="total-q-count">0</p>
+                    <p class="text-sm text-gray-400 mt-1">Ready for review</p>
+                </div>
+                <!-- Stat Card 2 -->
+                <div class="card p-6 flex flex-col justify-center items-center text-center">
+                    <h3 class="text-lg font-semibold text-gray-500 uppercase tracking-wide">Key Topics</h3>
+                    <p class="text-5xl font-bold text-gray-700 mt-2">6</p>
+                    <p class="text-sm text-gray-400 mt-1">From Security to Addressing</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Visualization 1: Topic Distribution -->
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Topic Distribution</h3>
+                    <p class="text-sm text-gray-500 mb-4">Breakdown of exam questions by category. Click a slice to jump
+                        to the Explorer.</p>
+                    <!-- Visualization & Content Choices: Doughnut chart chosen to clearly show the proportion of questions per topic (Security, IOS, Protocols, etc.). Interactive click filters content. -->
+                    <div class="chart-container">
+                        <canvas id="topicChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Contextual Info -->
+                <div class="card p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Quick Start Guide</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span
+                                    class="flex-shrink-0 h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm mr-3">1</span>
+                                <span class="text-gray-600"><strong>Review IOS Modes:</strong> A significant portion of
+                                    the exam covers Cisco IOS navigation (User > Privileged > Global). Check the <em>IOS
+                                        Commands</em> tab.</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span
+                                    class="flex-shrink-0 h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm mr-3">2</span>
+                                <span class="text-gray-600"><strong>Understand Models:</strong> Distinguish between OSI
+                                    and TCP/IP layers. Know your PDUs (Segment vs Packet vs Frame).</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span
+                                    class="flex-shrink-0 h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-sm mr-3">3</span>
+                                <span class="text-gray-600"><strong>Network Characteristics:</strong> Memorize the
+                                    definitions of Fault Tolerance, Scalability, QoS, and Security.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <button onclick="app.navTo('quiz')"
+                        class="btn-primary w-full mt-6 flex justify-center items-center">
+                        Start Practice Quiz
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUIZ VIEW -->
+        <div id="quiz" class="view-section hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Practice Quiz</h2>
+                <p class="text-gray-600">Test your knowledge. Feedback is immediate.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Question Card -->
+                <div class="lg:col-span-2">
+                    <div class="card p-6 min-h-[400px] flex flex-col relative" id="quiz-card">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-sm font-semibold text-amber-600 uppercase tracking-wider"
+                                id="quiz-topic-badge">Topic</span>
+                            <span class="text-sm text-gray-400" id="quiz-counter">1 / 10</span>
+                        </div>
+                        <h3 class="text-xl font-medium text-gray-800 mb-6 leading-relaxed" id="quiz-question">Question
+                            text goes here...</h3>
+
+                        <div id="quiz-options" class="space-y-3 mb-6 flex-grow">
+                            <!-- Options injected by JS -->
+                        </div>
+
+                        <div id="quiz-explanation" class="hidden bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                            <p class="font-bold text-blue-700 text-sm mb-1">Explanation</p>
+                            <p class="text-blue-800 text-sm" id="explanation-text"></p>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-4 border-t mt-auto">
+                            <button id="prev-btn"
+                                class="text-gray-500 hover:text-gray-800 font-medium">Previous</button>
+                            <button id="next-btn" class="btn-primary">Next Question</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Stats Sidebar -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="card p-6">
+                        <h4 class="font-bold text-gray-800 mb-4">Session Stats</h4>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-600">Correct</span>
+                            <span class="text-green-600 font-bold" id="score-correct">0</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-gray-600">Incorrect</span>
+                            <span class="text-red-500 font-bold" id="score-wrong">0</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progress-bar" class="bg-amber-600 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <p class="text-xs text-center text-gray-400 mt-2">Progress</p>
+                    </div>
+
+                    <div class="card p-6">
+                        <h4 class="font-bold text-gray-800 mb-4">Score History</h4>
+                        <!-- Visualization & Content Choices: Bar chart to track correct/incorrect answers dynamically as the user progresses through the quiz session. Motivation through data. -->
+                        <div class="chart-container h-48">
+                            <canvas id="scoreChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EXPLORER VIEW -->
+        <div id="explorer" class="view-section hidden">
+            <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">Topic Explorer</h2>
+                    <p class="text-gray-600">Browse questions by category to focus your study.</p>
+                </div>
+                <div class="mt-4 sm:mt-0 relative">
+                    <input type="text" id="explorer-search" placeholder="Search keywords..."
+                        class="pl-4 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent w-full sm:w-64">
+                    <span class="absolute right-3 top-2.5 text-gray-400">🔍</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mb-6" id="topic-filters">
+                <button
+                    class="filter-btn active px-4 py-1.5 rounded-full text-sm font-medium bg-gray-800 text-white transition"
+                    data-filter="all">All</button>
+                <!-- Filters injected by JS -->
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="explorer-grid">
+                <!-- Cards injected by JS -->
+            </div>
+        </div>
+
+        <!-- CHEATSHEET VIEW -->
+        <div id="cheatsheet" class="view-section hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">IOS Command Reference</h2>
+                <p class="text-gray-600">A quick reference for Cisco IOS commands and shortcuts mentioned in the exam.
+                </p>
+            </div>
+
+            <div class="card overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Command / Key</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Mode / Context</th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Description</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="cheat-table">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t mt-auto">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+            Based on CCNA1 Modules 1–3 Checkpoint Exam ### Ver. 2026.02.12 | Author: Do Tran Vo Tien (FPT University)
+        </div>
+    </footer>
+
+    <!-- LOGIC -->
+    <script>
+        /* <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+           All visualizations use Chart.js(Canvas).Icons are Unicode or CSS - styled HTML.
+        */
+
+        // --- DATA STORE ---
+        const examData = [
+            { id: 1, question: "A technician discovers software secretly collecting website visit data. What type of threat is this?", options: ["DoS attack", "Identity theft", "Spyware", "Zero-day attack"], answer: 2, topic: "Security", explanation: "Spyware is software installed on a network device that secretly collects information." },
+            { id: 2, question: "Which network provides secure access to corporate offices by suppliers, customers, and collaborators?", options: ["Internet", "Intranet", "Extranet", "Extendednet"], answer: 2, topic: "Network Types", explanation: "Extranets provide secure access to suppliers, customers, and collaborators. Intranets are strictly internal." },
+            { id: 3, question: "Users accessing network resources from personal laptops/smartphones describes which trend?", options: ["Cloud computing", "Online collaboration", "Bring your own device (BYOD)", "Video conferencing"], answer: 2, topic: "Trends", explanation: "BYOD (Bring Your Own Device) allows end users to use personal tools to access the corporate network." },
+            { id: 4, question: "What is an ISP?", options: ["Standards body for cabling", "Local network protocol", "Organization enabling Internet connection", "Multi-function networking device"], answer: 2, topic: "Connectivity", explanation: "An ISP (Internet Service Provider) provides access to the Internet for businesses and individuals." },
+            { id: 5, question: "Which architecture requirement provides redundant links and devices?", options: ["Fault tolerance", "Scalability", "Security", "QoS"], answer: 0, topic: "Network Design", explanation: "Fault tolerance allows a network to continue functioning even if a component fails by using redundancy." },
+            { id: 6, question: "An employee needs to access confidential internal pricing from a branch office. Which network type is used?", options: ["Intranet", "Internet", "Extranet", "Local Area Network"], answer: 0, topic: "Network Types", explanation: "Intranets are private connections of LANs/WANs for an organization's members only." },
+            { id: 7, question: "How does powerline networking technology work?", options: ["Smart cabling extends LAN", "Wireless without cables", "Adapter uses existing electrical outlets", "APs distribute data via powerlines"], answer: 2, topic: "Connectivity", explanation: "Powerline networking uses existing electrical wiring to send data via adapters plugged into outlets." },
+            { id: 8, question: "Patients can accidentally see other patients' medical records on a clinic wireless network. Which characteristic is violated?", options: ["Fault tolerance", "Scalability", "Security", "QoS"], answer: 2, topic: "Security", explanation: "Security involves protecting data confidentiality. Unauthorized access violates this." },
+            { id: 9, question: "Which internet connection uses coaxial cable?", options: ["Cable", "Satellite", "DSL", "Dialup"], answer: 0, topic: "Connectivity", explanation: "Cable internet uses the same coaxial cabling that carries TV signals." },
+            { id: 10, question: "What criterion is used to select a network medium?", options: ["Cost of end devices", "Distance signal can carry", "Number of intermediate devices", "Software version"], answer: 1, topic: "Physical Layer", explanation: "Criteria include distance, environment, data speed/amount, and cost of the medium." },
+            { id: 11, question: "Which traffic type requires Quality of Service (QoS)?", options: ["Email", "Online purchasing", "Video conferencing", "Wiki"], answer: 2, topic: "QoS", explanation: "Real-time audio/video is time-sensitive and bandwidth-intensive, requiring priority (QoS)." },
+            { id: 12, question: "What are minimum security requirements for a small office network?", options: ["Firewall + Antivirus", "Wireless Network", "IDS", "IPS"], answer: 0, topic: "Security", explanation: "Firewalls and antivirus/antimalware are considered minimum security baselines for SOHO." },
+            { id: 13, question: "Which interface can be protected with a password?", options: ["VTY interface", "Boot Mode", "Ethernet", "Loopback"], answer: 0, topic: "IOS Security", explanation: "VTY (remote access) and Console lines can be restricted with passwords." },
+            { id: 14, question: "Which interface allows remote management of a Layer 2 switch?", options: ["AUX interface", "Console port", "Switch Virtual Interface (SVI)", "Ethernet port"], answer: 2, topic: "Switching", explanation: "An SVI (like VLAN 1) is a virtual interface assigned an IP to allow remote management." },
+            { id: 15, question: "What does the Tab key do in IOS?", options: ["Aborts command", "Exits mode", "Moves cursor", "Completes command"], answer: 3, topic: "IOS Basics", explanation: "Tab completes the remainder of a partially typed command or keyword." },
+            { id: 16, question: "How do you discard unsaved configuration changes?", options: ["reload", "delete vlan.dat", "restart terminal", "copy start run"], answer: 0, topic: "IOS Basics", explanation: "Issuing 'reload' without saving the running-config discards changes and reloads the startup-config." },
+            { id: 17, question: "What does Ctrl-Shift-6 do?", options: ["Restart ping", "Interrupt process", "Exit mode", "Complete command"], answer: 1, topic: "IOS Basics", explanation: "Ctrl-Shift-6 interrupts processes like ping or traceroute." },
+            { id: 18, question: "Which password protects user EXEC mode via console?", options: ["enable secret", "line vty password", "line console password", "service password"], answer: 2, topic: "IOS Security", explanation: "The password configured under 'line console 0' protects the console port." },
+            { id: 19, question: "Commands: 'interface vlan 1', 'ip address ...', 'no shutdown'. What is being configured?", options: ["Telnet", "SVI", "Encryption", "Switchport"], answer: 1, topic: "Switching", explanation: "Configuring an IP on Vlan 1 sets up the Switch Virtual Interface (SVI)." },
+            { id: 20, question: "Which command returns to the previous hierarchy level?", options: ["end", "exit", "Ctrl-Z", "Ctrl-C"], answer: 1, topic: "IOS Basics", explanation: "'exit' goes back one level. 'end' or 'Ctrl-Z' goes straight to Privileged EXEC." },
+            { id: 21, question: "Characteristic of RAM on a Cisco device?", options: ["Non-volatile", "Stores running-config", "Stores IOS permanently", "Component only in switches"], answer: 1, topic: "Hardware", explanation: "RAM is volatile memory that stores the active running configuration." },
+            { id: 22, question: "Valid Cisco hostname?", options: ["Branch2!", "SwBranch799", "Floor(15)", "HO Floor 17"], answer: 1, topic: "IOS Basics", explanation: "Hostnames must start with a letter, no spaces, end with letter/digit, and use only letters/digits/dashes." },
+            { id: 23, question: "Difference between SSH and Telnet?", options: ["SSH is out-of-band", "SSH is encrypted/secure", "SSH requires PuTTY", "SSH needs console"], answer: 1, topic: "Security", explanation: "SSH encrypts the session, while Telnet sends data (including passwords) in plain text." },
+            { id: 24, question: "Order of modes to config console password?", options: ["User>Priv>Global>Line", "Priv>User>Global>Line", "Global>Line>User", "User>Global>Priv"], answer: 0, topic: "IOS Basics", explanation: "User EXEC -> enable -> Privileged EXEC -> config t -> Global Config -> line console 0 -> Line Config." },
+            { id: 25, question: "Characteristic of SVI?", options: ["Physical port", "For remote management", "Required for switching", "Security protocol"], answer: 1, topic: "Switching", explanation: "SVIs are virtual interfaces used for remote management (SSH/Telnet) of the switch." },
+            { id: 26, question: "Command to verify IP interface status?", options: ["ipconfig", "ping", "show ip interface brief", "traceroute"], answer: 2, topic: "IOS Basics", explanation: "'show ip interface brief' gives a summary of IPs and status of interfaces." },
+            { id: 27, question: "Prompt ending in # indicates which mode?", options: ["User EXEC", "Privileged EXEC", "Global Config", "Line Config"], answer: 1, topic: "IOS Basics", explanation: "The '#' prompt indicates Privileged EXEC mode (Administrator level)." },
+            { id: 28, question: "Which key gives context-sensitive help?", options: ["Tab", "Space", "?", "Up Arrow"], answer: 2, topic: "IOS Basics", explanation: "Typing '?' provides a list of available commands or arguments." },
+            { id: 29, question: "In 'show running-config', what is 'running-config'?", options: ["Command", "Keyword", "Variable", "Prompt"], answer: 1, topic: "IOS Basics", explanation: "'show' is the command, 'running-config' is the keyword specifying what to show." },
+            { id: 30, question: "Result of 'copy running-config startup-config'?", options: ["Config saved to Flash", "Current config becomes startup in NVRAM", "IOS is updated", "Config is deleted"], answer: 1, topic: "IOS Basics", explanation: "It saves the current configuration in RAM to NVRAM (startup-config)." },
+            { id: 31, question: "Command to encrypt all plain text passwords?", options: ["enable secret", "password secret", "service password-encryption", "encrypt-all"], answer: 2, topic: "IOS Security", explanation: "'service password-encryption' encrypts passwords in the config file to prevent reading them." },
+            { id: 32, question: "What does flow control do?", options: ["Encapsulates data", "Manages timing/speed of transmission", "Routes packets", "Detects errors"], answer: 1, topic: "Communication", explanation: "Flow control prevents a sender from overwhelming a receiver by managing transmission speed." },
+            { id: 33, question: "Encapsulation: PC sending data. What comes after Transport?", options: ["Application", "Internet", "Network Access", "Physical"], answer: 1, topic: "Models", explanation: "TCP/IP Flow: Application -> Transport -> Internet -> Network Access." },
+            { id: 34, question: "Which is an Application layer protocol?", options: ["IP", "TCP", "DNS", "Ethernet"], answer: 2, topic: "Protocols", explanation: "DNS, DHCP, and FTP are Application layer protocols." },
+            { id: 35, question: "PDU at the Transport layer is called?", options: ["Frame", "Packet", "Segment", "Bit"], answer: 2, topic: "Models", explanation: "Transport = Segment. Network = Packet. Data Link = Frame. Physical = Bits." },
+            { id: 36, question: "IPv4 property identifying Network vs Host portion?", options: ["DNS", "Subnet Mask", "Gateway", "DHCP"], answer: 1, topic: "Addressing", explanation: "The Subnet Mask determines which part of the IP is the network and which is the host." },
+            { id: 37, question: "Layer responsible for routing messages?", options: ["Transport", "Internet", "Network Access", "Application"], answer: 1, topic: "Models", explanation: "The Internet layer (OSI Network layer) handles logical addressing and routing." },
+            { id: 38, question: "When ServerB sends to HostA (remote), destination MAC is?", options: ["HostA MAC", "Router MAC (Default Gateway)", "Switch MAC", "ServerB MAC"], answer: 1, topic: "Addressing", explanation: "For remote destinations, the frame is sent to the Default Gateway's (Router's) MAC address." },
+            { id: 39, question: "OSI layer where Logical Address (IP) is added?", options: ["Physical", "Data Link", "Network", "Transport"], answer: 2, topic: "Models", explanation: "Logical (IP) addresses are added at the Network layer (Layer 3)." },
+            { id: 40, question: "Characteristic of Multicast?", options: ["One-to-One", "One-to-All", "One-to-Group", "Must be acknowledged"], answer: 2, topic: "Communication", explanation: "Multicast sends data to a specific group of subscribers/hosts." },
+            { id: 41, question: "Advantage of open standard protocols?", options: ["Vendor lock-in", "Interoperability between vendors", "Controlled by one ISP", "More expensive"], answer: 1, topic: "Standards", explanation: "Open standards allow hardware/software from different vendors to communicate." },
+            { id: 42, question: "Device determining path for messages?", options: ["Switch", "Hub", "Router", "Server"], answer: 2, topic: "Hardware", explanation: "Routers operate at Layer 3 and determine the best path to a destination network." },
+            { id: 43, question: "Why does a Layer 2 switch need an IP?", options: ["Routing", "Default Gateway", "Remote Management", "Forwarding frames"], answer: 2, topic: "Switching", explanation: "L2 switches need an IP on an SVI solely for remote management access (SSH/Telnet)." },
+            { id: 44, question: "PDU received by NIC as bits is formatted into?", options: ["Packet", "Segment", "Frame", "File"], answer: 2, topic: "Models", explanation: "The Network Access/Data Link layer formats bits into Frames." },
+            { id: 45, question: "Which 2 OSI layers equal TCP/IP Network Access?", options: ["Transport/Network", "Data Link/Physical", "Session/Presentation", "App/Transport"], answer: 1, topic: "Models", explanation: "TCP/IP Network Access combines OSI Data Link and Physical layers." }
+        ];
+
+        const iosCommands = [
+            { cmd: "enable", mode: "User EXEC (>)", desc: "Enter Privileged EXEC mode" },
+            { cmd: "configure terminal", mode: "Privileged EXEC (#)", desc: "Enter Global Configuration mode" },
+            { cmd: "interface [name]", mode: "Global Config", desc: "Enter Interface Config mode" },
+            { cmd: "line console 0", mode: "Global Config", desc: "Enter Console Line Config mode" },
+            { cmd: "line vty 0 15", mode: "Global Config", desc: "Enter VTY (Remote) Line Config mode" },
+            { cmd: "password [pass]", mode: "Line Config", desc: "Set line password" },
+            { cmd: "login", mode: "Line Config", desc: "Enable password checking on login" },
+            { cmd: "enable secret [pass]", mode: "Global Config", desc: "Set encrypted privileged mode password" },
+            { cmd: "service password-encryption", mode: "Global Config", desc: "Encrypt all plain-text passwords" },
+            { cmd: "ip address [ip] [mask]", mode: "Interface Config", desc: "Assign IP address" },
+            { cmd: "no shutdown", mode: "Interface Config", desc: "Bring interface up" },
+            { cmd: "exit", mode: "Any", desc: "Go back one level" },
+            { cmd: "end / Ctrl-Z", mode: "Any Config", desc: "Return to Privileged EXEC" },
+            { cmd: "show running-config", mode: "Privileged EXEC", desc: "View current active config" },
+            { cmd: "copy running-config startup-config", mode: "Privileged EXEC", desc: "Save config to NVRAM" },
+            { cmd: "show ip interface brief", mode: "Privileged EXEC", desc: "Summary of IP status" },
+            { cmd: "reload", mode: "Privileged EXEC", desc: "Reboot device" },
+            { cmd: "ping [ip]", mode: "Privileged EXEC", desc: "Check connectivity" }
+        ];
+
+        // --- STATE ---
+        const app = {
+            currentView: 'dashboard',
+            currentQuizIndex: 0,
+            quizQuestions: [],
+            score: { correct: 0, wrong: 0, history: [] },
+            charts: {},
+
+            init: function () {
+                this.bindNav();
+                this.renderDashboard();
+                this.renderExplorer();
+                this.renderCheatsheet();
+                this.setupQuiz();
+            },
+
+            bindNav: function () {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const target = e.target.dataset.target;
+                        this.navTo(target);
+                    });
+                });
+
+                // Search Listener
+                document.getElementById('explorer-search').addEventListener('input', (e) => {
+                    this.filterExplorer(e.target.value, document.querySelector('.filter-btn.active').dataset.filter);
+                });
+            },
+
+            navTo: function (viewId) {
+                // Update Nav UI
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                document.querySelector(`.nav-item[data-target="${viewId}"]`).classList.add('active');
+
+                // Switch View
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+                document.getElementById(viewId).classList.remove('hidden');
+
+                this.currentView = viewId;
+                window.scrollTo(0, 0);
+            },
+
+            renderDashboard: function () {
+                document.getElementById('total-q-count').innerText = examData.length;
+
+                // Prepare Data for Chart
+                const topics = {};
+                examData.forEach(q => {
+                    topics[q.topic] = (topics[q.topic] || 0) + 1;
+                });
+
+                const ctx = document.getElementById('topicChart').getContext('2d');
+                this.charts.topic = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(topics),
+                        datasets: [{
+                            data: Object.values(topics),
+                            backgroundColor: [
+                                '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#EF4444'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right' }
+                        },
+                        onClick: (e, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const label = this.charts.topic.data.labels[index];
+                                this.filterExplorer('', label);
+                                this.navTo('explorer');
+
+                                // Update explorer UI filter buttons
+                                document.querySelectorAll('.filter-btn').forEach(btn => {
+                                    if (btn.dataset.filter === label) {
+                                        btn.click();
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
+            },
+
+            renderExplorer: function () {
+                const grid = document.getElementById('explorer-grid');
+                const filters = document.getElementById('topic-filters');
+
+                // Generate Unique Topics
+                const topics = [...new Set(examData.map(q => q.topic))].sort();
+
+                // Render Filters
+                topics.forEach(t => {
+                    const btn = document.createElement('button');
+                    btn.className = 'filter-btn px-4 py-1.5 rounded-full text-sm font-medium bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition';
+                    btn.dataset.filter = t;
+                    btn.innerText = t;
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.filter-btn').forEach(b => {
+                            b.classList.remove('active', 'bg-gray-800', 'text-white');
+                            b.classList.add('bg-white', 'text-gray-700');
+                        });
+                        e.target.classList.add('active', 'bg-gray-800', 'text-white');
+                        e.target.classList.remove('bg-white', 'text-gray-700');
+                        this.filterExplorer(document.getElementById('explorer-search').value, t);
+                    });
+                    filters.appendChild(btn);
+                });
+
+                // Initial Render
+                this.filterExplorer('', 'all');
+            },
+
+            filterExplorer: function (search, topic) {
+                const grid = document.getElementById('explorer-grid');
+                grid.innerHTML = '';
+
+                const filtered = examData.filter(q => {
+                    const matchesSearch = q.question.toLowerCase().includes(search.toLowerCase()) ||
+                        q.topic.toLowerCase().includes(search.toLowerCase());
+                    const matchesTopic = topic === 'all' || q.topic === topic;
+                    return matchesSearch && matchesTopic;
+                });
+
+                filtered.forEach(q => {
+                    const card = document.createElement('div');
+                    card.className = 'card p-5 flex flex-col h-full';
+                    card.innerHTML = `
+                        <div class="mb-3">
+                            <span class="inline-block bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded-full font-semibold">${q.topic}</span>
+                        </div>
+                        <h4 class="font-medium text-gray-800 mb-2">${q.question}</h4>
+                        <div class="mt-auto pt-3 border-t text-sm text-gray-500">
+                            <span class="font-bold text-green-600">Ans:</span> ${q.options[q.answer]}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            },
+
+            renderCheatsheet: function () {
+                const tbody = document.getElementById('cheat-table');
+                iosCommands.forEach(c => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono font-medium text-amber-700">${c.cmd}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.mode}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">${c.desc}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            },
+
+            setupQuiz: function () {
+                this.quizQuestions = [...examData]; // Shallow copy
+                this.currentQuizIndex = 0;
+
+                // Setup Score Chart
+                const ctx = document.getElementById('scoreChart').getContext('2d');
+                this.charts.score = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Attempt 1'],
+                        datasets: [
+                            { label: 'Correct', data: [0], backgroundColor: '#10B981' },
+                            { label: 'Incorrect', data: [0], backgroundColor: '#EF4444' }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                    }
+                });
+
+                this.renderQuizCard();
+
+                document.getElementById('next-btn').addEventListener('click', () => {
+                    if (this.currentQuizIndex < this.quizQuestions.length - 1) {
+                        this.currentQuizIndex++;
+                        this.renderQuizCard();
+                    } else {
+                        // Restart / Shuffle
+                        this.quizQuestions.sort(() => Math.random() - 0.5);
+                        this.currentQuizIndex = 0;
+                        // Reset session UI but keep history? For now reset UI
+                        document.getElementById('explanation-text').innerText = '';
+                        document.getElementById('quiz-explanation').classList.add('hidden');
+                        this.renderQuizCard();
+                    }
+                });
+
+                document.getElementById('prev-btn').addEventListener('click', () => {
+                    if (this.currentQuizIndex > 0) {
+                        this.currentQuizIndex--;
+                        this.renderQuizCard();
+                    }
+                });
+            },
+
+            renderQuizCard: function () {
+                const q = this.quizQuestions[this.currentQuizIndex];
+
+                document.getElementById('quiz-topic-badge').innerText = q.topic;
+                document.getElementById('quiz-counter').innerText = `${this.currentQuizIndex + 1} / ${this.quizQuestions.length}`;
+                document.getElementById('quiz-question').innerText = q.question;
+
+                const optsContainer = document.getElementById('quiz-options');
+                optsContainer.innerHTML = '';
+
+                // Hide explanation on new card load
+                document.getElementById('quiz-explanation').classList.add('hidden');
+                document.getElementById('next-btn').style.display = 'none';
+
+                q.options.forEach((opt, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'answer-option text-gray-700';
+                    div.innerText = opt;
+                    div.onclick = () => this.handleAnswer(idx, div, q);
+                    optsContainer.appendChild(div);
+                });
+            },
+
+            handleAnswer: function (selectedIndex, element, questionData) {
+                const isCorrect = selectedIndex === questionData.answer;
+                const opts = document.querySelectorAll('.answer-option');
+
+                // Disable further clicks
+                opts.forEach(el => el.classList.add('disabled-option'));
+
+                // Visual Feedback
+                if (isCorrect) {
+                    element.classList.add('correct');
+                    this.score.correct++;
+                } else {
+                    element.classList.add('incorrect');
+                    this.score.wrong++;
+                    // Highlight correct one
+                    opts[questionData.answer].classList.add('correct');
+                }
+
+                // Update Stats
+                document.getElementById('score-correct').innerText = this.score.correct;
+                document.getElementById('score-wrong').innerText = this.score.wrong;
+
+                const total = this.score.correct + this.score.wrong;
+                const pct = (this.score.correct / total) * 100;
+                document.getElementById('progress-bar').style.width = `${pct}%`;
+
+                // Update Chart
+                this.charts.score.data.datasets[0].data[0] = this.score.correct;
+                this.charts.score.data.datasets[1].data[0] = this.score.wrong;
+                this.charts.score.update();
+
+                // Show Explanation
+                document.getElementById('explanation-text').innerText = questionData.explanation;
+                document.getElementById('quiz-explanation').classList.remove('hidden');
+                document.getElementById('next-btn').style.display = 'block';
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+    <script type='text/javascript'>
+        var message = "NoRightClicking";
+        function defeatIE() {
+            if (document.all) {
+                (message);
+                return false;
+            }
+        }
+        function defeatNS(e) {
+            if (document.layers || (document.getElementById && !document.all)) {
+                if (e.which == 2 || e.which == 3) {
+                    (message);
+                    return false;
+                }
+            }
+        }
+        if (document.layers) {
+            document.captureEvents(Event.MOUSEDOWN);
+            document.onmousedown = defeatNS;
+        } else {
+            document.onmouseup = defeatNS;
+            document.oncontextmenu = defeatIE;
+        }
+        document.oncontextmenu = new Function("return false")
+    </script>
+    <script type='text/javascript'>
+        checkCtrl = false $('*').keydown(function (e) {
+            if (e.keyCode == '17') {
+                checkCtrl = false
+            }
+        }).keyup(function (ev) {
+            if (ev.keyCode == '17') {
+                checkCtrl = false
+            }
+        }).keydown(function (event) {
+            if (checkCtrl) {
+                if (event.keyCode == '85') {
+                    return false;
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
