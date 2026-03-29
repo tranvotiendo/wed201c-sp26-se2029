@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Tài chính - tvtiendo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary-color: #4318ff; /* Đổi sang màu xanh tài chính đậm hơn */
+            --success-color: #05cd99;
+            --danger-color: #ee5d50;
+            --bg-body: #f4f7fe;
+            --bg-sidebar: #ffffff;
+            --text-main: #2b3674;
+            --text-muted: #a3aed0;
+            --border-color: #e0e5f2;
+            --radius-lg: 20px;
+            --shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { width: 75px; background: var(--bg-sidebar); display: flex; flex-direction: column; align-items: center; padding: 25px 0; position: fixed; height: 100vh; border-right: 1px solid var(--border-color); z-index: 100; }
+        .sidebar-item { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; cursor: pointer; border-radius: 15px; color: var(--text-muted); transition: 0.3s; }
+        .sidebar-item:hover { background: #f4f7fe; color: var(--primary-color); }
+        .sidebar-item.active { background: var(--primary-color); color: white; box-shadow: 0px 10px 20px rgba(67, 24, 255, 0.3); }
+        .sidebar-bottom { margin-top: auto; }
+
+        /* --- MAIN CONTENT --- */
+        .main-container { flex: 1; margin-left: 75px; padding: 25px 40px; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .page-title { font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+        .search-bar { background: white; padding: 12px 20px; border-radius: 30px; display: flex; align-items: center; gap: 12px; width: 350px; box-shadow: var(--shadow); }
+        .search-bar input { border: none; outline: none; width: 100%; font-size: 0.9rem; color: var(--text-main); }
+
+        /* Tab Content Animation */
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- BANK CARDS (Dùng Grid) --- */
+        .bank-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .bank-card { 
+            position: relative; overflow: hidden; height: 200px; border-radius: 24px; padding: 25px; 
+            color: white; display: flex; flex-direction: column; justify-content: space-between;
+            transition: transform 0.3s; cursor: pointer;
+        }
+        .bank-card:hover { transform: translateY(-5px); }
+        .card-vcb { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
+        .card-tcb { background: linear-gradient(135deg, #e53935 0%, #b71c1c 100%); }
+        .card-mb { background: linear-gradient(135deg, #0041ff 0%, #001c6e 100%); }
+        
+        .bank-card .bank-name { font-weight: 700; font-size: 1.2rem; display: flex; justify-content: space-between; }
+        .bank-card .acc-number { font-family: 'Fira Code', monospace; letter-spacing: 2px; font-size: 0.9rem; margin-top: 5px; opacity: 0.8; }
+        .bank-card .balance { font-size: 1.6rem; font-weight: 700; margin-top: auto; }
+
+        /* --- TABLE STYLE (LỊCH SỬ GIAO DỊCH) --- */
+        .card-table { background: white; border-radius: var(--radius-lg); padding: 25px; box-shadow: var(--shadow); }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
+        td { padding: 15px; border-bottom: 1px solid #f1f4f9; font-size: 0.95rem; vertical-align: middle; }
+        .amount-in { color: var(--success-color); font-weight: 700; }
+        .amount-out { color: var(--danger-color); font-weight: 700; }
+        .category-tag { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: #f4f7fe; color: var(--text-main); }
+
+        /* Stats Cards */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-box { background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow); display: flex; align-items: center; gap: 15px; }
+        .stat-icon { width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; }
+
+        /* Footer */
+        .footer { margin-top: 40px; padding: 20px 0; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; display: flex; justify-content: space-between; }
+
+        .scroll-top { position: fixed; bottom: 30px; right: 30px; width: 45px; height: 45px; background: white; border: 2px solid var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary-color); cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-item active" onclick="openTab(event, 'dashboard')" title="Tổng quan">
+        <i data-lucide="layout-dashboard"></i>
+    </div>
+    <div class="sidebar-item" onclick="openTab(event, 'accounts')" title="Tài khoản ngân hàng">
+        <i data-lucide="landmark"></i>
+    </div>
+    <div class="sidebar-item" onclick="openTab(event, 'history')" title="Lịch sử giao dịch">
+        <i data-lucide="history"></i>
+    </div>
+    <div class="sidebar-item" onclick="openTab(event, 'stats')" title="Thống kê">
+        <i data-lucide="pie-chart"></i>
+    </div>
+    <div class="sidebar-item sidebar-bottom" title="Cài đặt">
+        <i data-lucide="settings"></i>
+    </div>
+</aside>
+
+<div class="main-container">
+    <header class="topbar">
+        <div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">Chào mừng trở lại,</p>
+            <h1 class="page-title">Quản lý Tài chính</h1>
+        </div>
+        <div class="search-bar">
+            <i data-lucide="search" size="18" style="color: var(--text-muted)"></i>
+            <input type="text" placeholder="Tìm kiếm giao dịch, ngân hàng...">
+        </div>
+        <div style="display:flex; gap:15px">
+            <button style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; gap: 8px; align-items: center;">
+                <i data-lucide="plus" size="18"></i> Thêm mới
+            </button>
+        </div>
+    </header>
+
+    <!-- TAB 1: DASHBOARD -->
+    <div id="dashboard" class="tab-content active">
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-icon" style="background: #e7e7ff; color: var(--primary-color);"><i data-lucide="wallet"></i></div>
+                <div><p style="color: var(--text-muted); font-size: 0.8rem;">Tổng số dư</p><h3 style="font-size: 1.4rem;">1,250,000,000đ</h3></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon" style="background: #e6faf5; color: var(--success-color);"><i data-lucide="trending-up"></i></div>
+                <div><p style="color: var(--text-muted); font-size: 0.8rem;">Thu nhập tháng này</p><h3 style="font-size: 1.4rem;">+45,200,000đ</h3></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon" style="background: #fff5f5; color: var(--danger-color);"><i data-lucide="trending-down"></i></div>
+                <div><p style="color: var(--text-muted); font-size: 0.8rem;">Chi tiêu tháng này</p><h3 style="font-size: 1.4rem;">-12,850,000đ</h3></div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 20px;">Tài khoản ưu tiên</h3>
+        <div class="bank-grid">
+            <div class="bank-card card-vcb">
+                <div class="bank-name">Vietcombank <i data-lucide="shield-check" size="20"></i></div>
+                <div class="acc-number">1023 **** **** 8888</div>
+                <div class="balance">850,000,000 đ</div>
+            </div>
+            <div class="bank-card card-tcb">
+                <div class="bank-name">Techcombank <i data-lucide="credit-card" size="20"></i></div>
+                <div class="acc-number">1903 **** **** 9999</div>
+                <div class="balance">320,500,000 đ</div>
+            </div>
+        </div>
+
+        <div class="card-table">
+            <div class="table-header">
+                <h3>Giao dịch gần đây</h3>
+                <button style="background: none; border: none; color: var(--primary-color); font-weight: 600; cursor: pointer;">Xem tất cả</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nội dung</th>
+                        <th>Danh mục</th>
+                        <th>Ngày</th>
+                        <th>Số tiền</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="font-weight: 600;">Nhận lương tháng 12</td>
+                        <td><span class="category-tag">Thu nhập</span></td>
+                        <td>25/12/2024</td>
+                        <td><span class="amount-in">+35,000,000đ</span></td>
+                        <td><i data-lucide="check-circle-2" size="16" style="color: var(--success-color)"></i></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600;">Thanh toán tiền điện</td>
+                        <td><span class="category-tag">Hóa đơn</span></td>
+                        <td>24/12/2024</td>
+                        <td><span class="amount-out">-1,250,000đ</span></td>
+                        <td><i data-lucide="check-circle-2" size="16" style="color: var(--success-color)"></i></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600;">Chuyển tiền ăn tối</td>
+                        <td><span class="category-tag">Ăn uống</span></td>
+                        <td>23/12/2024</td>
+                        <td><span class="amount-out">-450,000đ</span></td>
+                        <td><i data-lucide="clock" size="16" style="color: orange"></i></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 2: ACCOUNTS -->
+    <div id="accounts" class="tab-content">
+        <h3 style="margin-bottom: 20px;">Tất cả tài khoản (3)</h3>
+        <div class="bank-grid">
+            <div class="bank-card card-vcb">
+                <div class="bank-name">Vietcombank</div>
+                <div class="acc-number">1023 **** 8888</div>
+                <div class="balance">850,000,000 đ</div>
+            </div>
+            <div class="bank-card card-tcb">
+                <div class="bank-name">Techcombank</div>
+                <div class="acc-number">1903 **** 9999</div>
+                <div class="balance">320,500,000 đ</div>
+            </div>
+            <div class="bank-card card-mb">
+                <div class="bank-name">MB Bank</div>
+                <div class="acc-number">097 **** 1234</div>
+                <div class="balance">79,500,000 đ</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: HISTORY -->
+    <div id="history" class="tab-content">
+        <div class="card-table">
+            <div class="table-header">
+                <h3>Toàn bộ lịch sử giao dịch</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="date" style="border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 8px;">
+                    <button style="padding: 5px 15px; border-radius: 8px; border: 1px solid var(--border-color); background: white;">Lọc</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nội dung</th>
+                        <th>Ngân hàng</th>
+                        <th>Ngày</th>
+                        <th>Số tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Thanh toán Shopee</td><td>Techcombank</td><td>22/12/2024</td><td><span class="amount-out">-250,000đ</span></td></tr>
+                    <tr><td>Thưởng dự án</td><td>Vietcombank</td><td>20/12/2024</td><td><span class="amount-in">+10,000,000đ</span></td></tr>
+                    <tr><td>Rút tiền mặt</td><td>MB Bank</td><td>18/12/2024</td><td><span class="amount-out">-2,000,000đ</span></td></tr>
+                    <tr><td>Đóng tiền mạng</td><td>Techcombank</td><td>15/12/2024</td><td><span class="amount-out">-350,000đ</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div>© 2025 tvtiendo Finance Management System</div>
+        <div style="display:flex; gap: 20px;">
+            <span>Hỗ trợ</span>
+            <span>Bảo mật</span>
+            <span>v10.0.1</span>
+        </div>
+    </footer>
+</div>
+
+<div class="scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"><i data-lucide="chevron-up"></i></div>
+
+<script>
+    // Khởi tạo Lucide Icons
+    lucide.createIcons();
+
+    // Hàm chuyển Tab
+    function openTab(evt, tabName) {
+        let contents = document.getElementsByClassName("tab-content");
+        for (let content of contents) content.classList.remove("active");
+
+        let items = document.getElementsByClassName("sidebar-item");
+        for (let item of items) item.classList.remove("active");
+
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+        
+        // Cuộn lên đầu trang khi chuyển tab
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+</script>
+</body>
+</html>

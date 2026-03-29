@@ -1,0 +1,314 @@
+
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, Cpu, Shield, Layers, Zap, Smartphone, Server, Code, Info } from 'lucide-react';
+
+const apiKey = "";
+
+const ImageComponent = ({ prompt, alt }) => {
+  const [imageUrl, setImageUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const generateImage = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            instances: [{ prompt: prompt }],
+            parameters: { sampleCount: 1 }
+          })
+        });
+
+        const result = await response.json();
+        if (result.predictions && result.predictions[0].bytesBase64Encoded) {
+          setImageUrl(`data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`);
+        } else {
+          setError(true);
+        }
+      } catch (err) {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    generateImage();
+  }, [prompt]);
+
+  if (loading) {
+    return (
+      <div className="w-full h-64 md:h-96 bg-slate-800 flex flex-col items-center justify-center rounded-xl animate-pulse">
+        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-slate-400 text-sm">Đang khởi tạo hình ảnh AI cho bài thuyết trình...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-64 md:h-96 bg-slate-800 flex items-center justify-center rounded-xl border border-slate-700">
+        <p className="text-slate-500 italic">Không thể tải hình ảnh. [Image: {alt}]</p>
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={imageUrl} 
+      alt={alt} 
+      className="w-full h-auto max-h-[500px] object-cover rounded-xl shadow-2xl border border-slate-700 transition-opacity duration-700 ease-in opacity-100"
+    />
+  );
+};
+
+const App = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [interactiveStep, setInteractiveStep] = useState(null);
+
+  const slides = [
+    {
+      id: "intro",
+      title: "Linux: Từ Những Dòng Mã Đầu Tiên Đến Kỷ Nguyên Mới",
+      subtitle: "Sự ra đời của một huyền thoại (1991)",
+      content: (
+        <div className="flex flex-col md:flex-row gap-8 items-center">
+          <div className="flex-1 space-y-4">
+            <p className="text-lg text-slate-300 leading-relaxed">
+              Năm 1991, <span className="text-blue-400 font-bold">Linus Torvalds</span> đã viết những dòng mã đầu tiên dựa trên cảm hứng từ Minix. 
+              Nhưng bước ngoặt thực sự là <span className="text-green-400 font-bold">Giấy phép GPL</span>.
+            </p>
+            <div className="bg-slate-800/50 p-4 border-l-4 border-blue-500 rounded-r-lg">
+              <p className="italic text-slate-400 text-sm">
+                "Mọi người có thể xem, sửa đổi và đóng góp mã nguồn, giúp hệ thống được tối ưu liên tục bởi cộng đồng."
+              </p>
+            </div>
+          </div>
+          <div className="flex-1 w-full">
+            <ImageComponent 
+              prompt="A vintage computer monitor from 1991 displaying green terminal code with the word LINUX, stylized digital art, high quality, dark background" 
+              alt="Linus Torvalds and the first lines of code"
+            />
+          </div>
+        </div>
+      )
+    },
+    {
+      id: "definition",
+      title: "Linux Là Gì?",
+      subtitle: "Kernel vs. Distribution (Bản phân phối)",
+      content: (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="space-y-6">
+            <div className={`p-6 rounded-xl transition-all border ${interactiveStep === 'kernel' ? 'bg-blue-900/30 border-blue-500' : 'bg-slate-800 border-transparent hover:border-slate-600'}`}
+                 onMouseEnter={() => setInteractiveStep('kernel')}>
+              <h3 className="text-xl font-bold text-blue-400 mb-2 flex items-center gap-2">
+                <Cpu className="w-5 h-5" /> Linux Kernel
+              </h3>
+              <p className="text-slate-300">Là "Bộ não" (Nhân). Điều phối mọi hoạt động giữa phần cứng và phần mềm.</p>
+            </div>
+            <div className={`p-6 rounded-xl transition-all border ${interactiveStep === 'distro' ? 'bg-purple-900/30 border-purple-500' : 'bg-slate-800 border-transparent hover:border-slate-600'}`}
+                 onMouseEnter={() => setInteractiveStep('distro')}>
+              <h3 className="text-xl font-bold text-purple-400 mb-2 flex items-center gap-2">
+                <Layers className="w-5 h-5" /> Linux Distribution
+              </h3>
+              <p className="text-slate-300">Kernel + Công cụ (GNU) + Giao diện (UI) + Ứng dụng. Ví dụ: Ubuntu, CentOS, Kali Linux.</p>
+            </div>
+            <p className="text-sm text-slate-500 italic">Rê chuột vào các khối để xem sự khác biệt.</p>
+          </div>
+          <div className="flex items-center justify-center">
+            <ImageComponent 
+              prompt="A technical infographic showing a glowing central core brain labeled KERNEL connected to various stylized operating system boxes like Ubuntu, Fedora, and Kali Linux, minimalist clean style" 
+              alt="Kernel vs Distribution diagram"
+            />
+          </div>
+        </div>
+      )
+    },
+    {
+      id: "features",
+      title: "Tại sao Linux vĩ đại?",
+      subtitle: "4 Tính năng then chốt tạo nên vị thế",
+      content: (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { icon: <Zap className="text-yellow-400" />, title: "Đa nhiệm", desc: "Nhiều tiến trình chạy cùng lúc không xung đột." },
+            { icon: <Shield className="text-red-400" />, title: "Bảo mật", desc: "Cộng đồng giám sát, vá lỗi ngay lập tức." },
+            { icon: <Smartphone className="text-blue-400" />, title: "Linh hoạt", desc: "Chạy từ đồng hồ thông minh đến siêu máy tính." },
+            { icon: <Code className="text-green-400" />, title: "Tương thích", desc: "Tuân thủ tiêu chuẩn POSIX, dễ dàng chuyển đổi." }
+          ].map((feature, index) => (
+            <div key={index} className="bg-slate-800 p-6 rounded-2xl flex flex-col items-center text-center hover:scale-105 transition-transform border border-slate-700 shadow-lg">
+              <div className="mb-4 p-3 bg-slate-900 rounded-full">{feature.icon}</div>
+              <h4 className="font-bold mb-2 text-white">{feature.title}</h4>
+              <p className="text-xs text-slate-400">{feature.desc}</p>
+            </div>
+          ))}
+        </div>
+      )
+    },
+    {
+      id: "architecture",
+      title: "Kiến trúc Monolithic Kernel",
+      subtitle: "Bí mật đằng sau hiệu suất tối ưu",
+      content: (
+        <div className="flex flex-col space-y-6">
+          <div className="bg-slate-900 p-8 rounded-2xl border border-slate-700 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-20"><Server className="w-20 h-20" /></div>
+            <h3 className="text-2xl font-bold mb-6 text-center text-blue-400">Sơ đồ Nhân đơn khối (Monolithic)</h3>
+            
+            <div className="space-y-4 max-w-2xl mx-auto">
+              <div className="bg-slate-700 p-3 rounded text-center font-bold text-slate-200">User Space (Trình duyệt, Trình soạn thảo...)</div>
+              <div className="bg-blue-600/20 border-2 border-blue-500 p-8 rounded-xl flex flex-col gap-4 relative">
+                <span className="absolute -top-3 left-4 bg-blue-500 text-[10px] px-2 py-0.5 rounded uppercase font-bold">Kernel Space</span>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-blue-900/50 p-4 rounded text-center text-sm border border-blue-400/30 hover:bg-blue-400 hover:text-slate-900 cursor-help transition-colors" title="Virtual File System">Quản lý Tập tin (VFS)</div>
+                  <div className="bg-blue-900/50 p-4 rounded text-center text-sm border border-blue-400/30 hover:bg-blue-400 hover:text-slate-900 cursor-help transition-colors">Quản lý Tiến trình</div>
+                  <div className="bg-blue-900/50 p-4 rounded text-center text-sm border border-blue-400/30 hover:bg-blue-400 hover:text-slate-900 cursor-help transition-colors">Trình điều khiển (Drivers)</div>
+                </div>
+              </div>
+              <div className="bg-slate-800 p-3 rounded text-center font-bold text-slate-400 border border-slate-700">Hardware (CPU, RAM, Disk...)</div>
+            </div>
+          </div>
+          <p className="text-center text-slate-400 text-sm">Tất cả dịch vụ cốt lõi chạy chung trong một khối duy nhất để giảm độ trễ giao tiếp.</p>
+        </div>
+      )
+    },
+    {
+      id: "pros_cons",
+      title: "Ưu và Nhược điểm",
+      subtitle: "Hiệu năng vs. Độ ổn định",
+      content: (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-green-900/20 border border-green-500/30 p-6 rounded-2xl">
+            <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center gap-2"><Zap className="w-5 h-5"/> Ưu điểm: Tốc độ</h3>
+            <ul className="space-y-4 text-slate-300 list-disc pl-5">
+              <li>Giao tiếp trực tiếp giữa các thành phần.</li>
+              <li>Không tốn chi phí <span className="text-white font-mono bg-slate-800 px-1 rounded text-sm">Context Switching</span>.</li>
+              <li>Ổn định dưới tải trọng máy chủ cực lớn.</li>
+            </ul>
+          </div>
+          <div className="bg-red-900/20 border border-red-500/30 p-6 rounded-2xl">
+            <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center gap-2"><Info className="w-5 h-5"/> Nhược điểm: Rủi ro</h3>
+            <ul className="space-y-4 text-slate-300 list-disc pl-5">
+              <li>Lỗi ở một Driver có thể gây <span className="text-white font-mono bg-slate-800 px-1 rounded text-sm">Kernel Panic</span>.</li>
+              <li>Tính độc lập giữa các thành phần kém.</li>
+              <li>Cần sự giám sát và tối ưu hóa liên tục từ cộng đồng.</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: "conclusion",
+      title: "Tương lai của Linux",
+      subtitle: "Hạ tầng của Thế giới & Nền tảng cho Android",
+      content: (
+        <div className="flex flex-col md:flex-row gap-8 items-center">
+          <div className="flex-1 space-y-6">
+            <p className="text-xl text-slate-300 leading-relaxed italic border-l-4 border-blue-500 pl-6">
+              "Linux không chỉ nằm trong các phòng máy chủ. Nó là trái tim của Android - hệ điều hành di động phổ biến nhất hành tinh."
+            </p>
+            <div className="pt-4">
+              <h4 className="text-blue-400 font-bold mb-2">Câu hỏi mở đầu cho phần tiếp theo:</h4>
+              <p className="text-slate-400">
+                Làm thế nào để tinh chỉnh một nhân Linux phức tạp vừa vặn vào một chiếc điện thoại nhỏ bé?
+              </p>
+            </div>
+          </div>
+          <div className="flex-1">
+            <ImageComponent 
+              prompt="A stylized illustration showing the Linux penguin mascot (Tux) holding a small Android robot, futuristic technology theme, glowing blue and green lights, 3d render style" 
+              alt="Linux to Android evolution"
+            />
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const handleNext = useCallback(() => {
+    setCurrentSlide(prev => Math.min(prev + 1, slides.length - 1));
+  }, [slides.length]);
+
+  const handlePrev = useCallback(() => {
+    setCurrentSlide(prev => Math.max(prev - 1, 0));
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'ArrowLeft') handlePrev();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, handlePrev]);
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col overflow-hidden">
+      {/* Header / Progress bar */}
+      <header className="p-4 flex justify-between items-center bg-slate-900 shadow-md">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-bold">L</div>
+          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Linux Presentation</h1>
+        </div>
+        <div className="text-sm font-mono text-slate-500">
+          Slide {currentSlide + 1} / {slides.length}
+        </div>
+      </header>
+
+      {/* Progress Line */}
+      <div className="w-full h-1 bg-slate-800">
+        <div 
+          className="h-full bg-blue-500 transition-all duration-500 ease-out"
+          style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
+        />
+      </div>
+
+      {/* Main Slide Content */}
+      <main className="flex-1 relative flex items-center justify-center p-6 md:p-12 overflow-y-auto">
+        <div key={currentSlide} className="w-full max-w-5xl animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="mb-10 text-center md:text-left">
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-2 leading-tight">
+              {slides[currentSlide].title}
+            </h2>
+            <p className="text-blue-400 text-lg md:text-xl font-medium">
+              {slides[currentSlide].subtitle}
+            </p>
+          </div>
+
+          <div className="slide-content">
+            {slides[currentSlide].content}
+          </div>
+        </div>
+      </main>
+
+      {/* Controls */}
+      <footer className="p-6 flex justify-between items-center bg-slate-900/50 backdrop-blur-sm border-t border-slate-800">
+        <div className="hidden md:block text-xs text-slate-500 uppercase tracking-widest font-bold">
+          Sử dụng phím mũi tên để chuyển slide
+        </div>
+        <div className="flex gap-4 mx-auto md:mx-0">
+          <button 
+            onClick={handlePrev}
+            disabled={currentSlide === 0}
+            className="p-3 rounded-full bg-slate-800 hover:bg-slate-700 disabled:opacity-30 transition-colors shadow-lg group"
+          >
+            <ChevronLeft className="w-6 h-6 group-active:scale-90 transition-transform" />
+          </button>
+          <button 
+            onClick={handleNext}
+            disabled={currentSlide === slides.length - 1}
+            className="p-3 rounded-full bg-blue-600 hover:bg-blue-500 disabled:opacity-30 transition-colors shadow-lg group"
+          >
+            <ChevronRight className="w-6 h-6 group-active:scale-90 transition-transform" />
+          </button>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default App;

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSG202: The Evolution of OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --bg-dark: #020617;
+            --card-bg: rgba(15, 23, 42, 0.8);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Slide Transition Logic */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            transform: scale(0.9) translateY(40px);
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: scale(1.1) translateY(-40px);
+            opacity: 0;
+        }
+
+        /* Aesthetics */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.08) 1px, transparent 0);
+            background-size: 40px 40px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow {
+            position: fixed;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(50px);
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 3rem;
+            padding: 4rem;
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+            max-width: 1200px;
+            width: 100%;
+            position: relative;
+        }
+
+        .slide-title {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin-bottom: 2.5rem;
+            color: #ffffff;
+            border-left: 12px solid var(--primary);
+            padding-left: 2rem;
+            line-height: 1;
+        }
+
+        .step-pill {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.25), transparent);
+            border-left: 5px solid var(--primary);
+            color: #60a5fa;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            display: inline-block;
+            letter-spacing: 0.1em;
+        }
+
+        /* Timeline Items */
+        .timeline-item {
+            position: relative;
+            padding-left: 3rem;
+            border-left: 2px dashed rgba(59, 130, 246, 0.3);
+            padding-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -11px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        /* Controls */
+        .controls {
+            position: fixed;
+            bottom: 4rem;
+            right: 4rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 4.5rem;
+            height: 4.5rem;
+            border-radius: 1.5rem;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #94a3b8;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 20px 40px -10px var(--primary-glow);
+        }
+
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            z-index: 100;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #60a5fa, #3b82f6);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .distro-tag {
+            padding: 0.6rem 1.5rem;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .distro-tag:hover {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="glow" style="top: -250px; left: -250px;"></div>
+    <div class="glow" style="bottom: -250px; right: -250px;"></div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Slide 1: Main Title -->
+    <div class="slide active">
+        <div class="text-center">
+             <div class="flex justify-center gap-12 mb-12">
+                <i data-lucide="terminal" class="w-20 h-20 text-blue-500 filter drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"></i>
+                <i data-lucide="cpu" class="w-20 h-20 text-purple-500 filter drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]"></i>
+                <i data-lucide="smartphone" class="w-20 h-20 text-emerald-500 filter drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]"></i>
+            </div>
+            <h1 class="text-8xl font-black mb-6 tracking-tighter leading-none text-white">UNIX • LINUX • ANDROID</h1>
+            <p class="text-3xl text-blue-400 font-light tracking-widest mb-16 uppercase">The DNA of Modern Computing</p>
+            <div class="flex justify-center gap-6">
+                <span class="distro-tag text-blue-400">OSG202 Module</span>
+                <span class="distro-tag text-slate-400">Evolution Part 1 & 2</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Overview -->
+    <div class="slide">
+        <div class="glass-card">
+            <span class="step-pill">Part 1: The Context</span>
+            <h2 class="slide-title">Changing the World</h2>
+            <div class="grid grid-cols-2 gap-16 items-center">
+                <div class="space-y-8">
+                    <p class="text-3xl leading-snug font-light text-slate-200">
+                        The evolution of OS has reshaped history, from <span class="text-blue-400 font-semibold">room-sized mainframes</span> to the <span class="text-emerald-400 font-semibold">devices in our pockets</span>.
+                    </p>
+                    <div class="p-8 bg-white/5 rounded-3xl border border-white/10 italic text-slate-400 text-xl">
+                        "Almost every modern device traces its core lineage back to the UNIX philosophy."
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="p-6 bg-blue-500/10 border border-blue-500/30 rounded-2xl flex items-center gap-6">
+                        <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">1</div>
+                        <span class="text-xl font-bold">UNIX (The Roots)</span>
+                    </div>
+                    <div class="p-6 bg-purple-500/10 border border-purple-500/30 rounded-2xl flex items-center gap-6">
+                        <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold">2</div>
+                        <span class="text-xl font-bold">LINUX (The Freedom)</span>
+                    </div>
+                    <div class="p-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center gap-6">
+                        <div class="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold">3</div>
+                        <span class="text-xl font-bold">ANDROID (The Mobility)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Roadmap -->
+    <div class="slide">
+        <div class="glass-card">
+            <span class="step-pill">Part 2: The Timeline</span>
+            <h2 class="slide-title">Evolutionary Roadmap</h2>
+            <div class="space-y-12 py-6">
+                <div class="timeline-item">
+                    <h3 class="text-4xl font-black text-white">1969: UNIX</h3>
+                    <p class="text-xl text-slate-400">Born at Bell Labs. Created by Ken Thompson & Dennis Ritchie. The foundation of modern multitasking.</p>
+                </div>
+                <div class="timeline-item">
+                    <h3 class="text-4xl font-black text-blue-400">1991: LINUX</h3>
+                    <p class="text-xl text-slate-400">The Open Source Revolution. Linus Torvalds made power accessible to everyone, for free.</p>
+                </div>
+                <div class="timeline-item" style="border-left-color: transparent;">
+                    <h3 class="text-4xl font-black text-emerald-400">2008: ANDROID</h3>
+                    <p class="text-xl text-slate-400">The Mobile Era. Bringing the power of the Linux kernel to billions of smartphones.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Breakthroughs -->
+    <div class="slide">
+        <div class="glass-card">
+            <span class="step-pill">Why UNIX was Great</span>
+            <h2 class="slide-title">Technological Breakthroughs</h2>
+            <div class="grid grid-cols-2 gap-10">
+                <div class="p-10 bg-white/5 border border-white/10 rounded-[3rem] hover:border-blue-500/50 transition-all group">
+                    <div class="w-20 h-20 bg-blue-600/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                        <span class="text-4xl font-black text-blue-400">C</span>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-4">Portability via C</h3>
+                    <p class="text-slate-400 text-lg">By rewriting UNIX in the C language, it became the first OS that could easily be ported to different hardware types.</p>
+                </div>
+                <div class="p-10 bg-white/5 border border-white/10 rounded-[3rem] hover:border-purple-500/50 transition-all group">
+                    <div class="w-20 h-20 bg-purple-600/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                        <i data-lucide="folder" class="w-10 h-10 text-purple-400"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-4">Everything is a File</h3>
+                    <p class="text-slate-400 text-lg">A brilliant abstraction where hardware, memory, and networking are treated as simple files for consistent management.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Architecture -->
+    <div class="slide">
+        <div class="glass-card">
+            <span class="step-pill">The Onion Model</span>
+            <h2 class="slide-title">UNIX Architecture</h2>
+            <div class="grid grid-cols-2 gap-20 items-center">
+                <div class="relative w-full aspect-square flex items-center justify-center">
+                    <div class="absolute w-full h-full border-2 border-slate-800 rounded-full flex items-center justify-center">
+                        <span class="absolute top-4 text-xs font-black text-slate-600">USER SPACE</span>
+                        <div class="w-3/4 h-3/4 border-2 border-blue-500/30 rounded-full flex items-center justify-center bg-blue-500/5">
+                            <span class="absolute top-12 text-xs font-black text-blue-400">SHELL</span>
+                            <div class="w-1/2 h-1/2 bg-blue-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(59,130,246,0.4)]">
+                                <span class="text-2xl font-black text-white">KERNEL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="flex gap-6 items-start">
+                        <div class="mt-1 p-2 bg-blue-500 rounded-lg"><i data-lucide="brain" class="w-6 h-6 text-white"></i></div>
+                        <div>
+                            <h4 class="text-2xl font-bold">1. Kernel</h4>
+                            <p class="text-slate-400">The Brain. Directly interacts with hardware (CPU, Memory).</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6 items-start">
+                        <div class="mt-1 p-2 bg-purple-500 rounded-lg"><i data-lucide="command" class="w-6 h-6 text-white"></i></div>
+                        <div>
+                            <h4 class="text-2xl font-bold">2. Shell</h4>
+                            <p class="text-slate-400">The Bridge. Interprets user commands for the Kernel.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-6 items-start">
+                        <div class="mt-1 p-2 bg-slate-700 rounded-lg"><i data-lucide="users" class="w-6 h-6 text-white"></i></div>
+                        <div>
+                            <h4 class="text-2xl font-bold">3. User Space</h4>
+                            <p class="text-slate-400">Where apps and tools like compilers & editors live.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Conclusion -->
+    <div class="slide">
+        <div class="glass-card text-center py-20">
+            <h2 class="text-6xl font-black mb-8">The Legacy Continues</h2>
+            <p class="text-2xl text-slate-400 max-w-2xl mx-auto mb-16 leading-relaxed">
+                UNIX created the blueprint. Linux opened it to the world. Android put it in everyone's pocket.
+            </p>
+            <div class="inline-block p-10 bg-blue-600/10 border border-blue-500/30 rounded-[3rem]">
+                <p class="text-blue-400 font-bold mb-2">Next Chapter:</p>
+                <h3 class="text-5xl font-black text-white uppercase tracking-tighter">The Linux Revolution</h3>
+            </div>
+            <div class="mt-12 text-slate-600 font-bold tracking-widest text-sm uppercase">End of Part 1 & 2</div>
+        </div>
+    </div>
+
+    <!-- Navigation UI -->
+    <div class="controls">
+        <div class="nav-btn" onclick="prevSlide()">
+            <i data-lucide="chevron-left"></i>
+        </div>
+        <div class="nav-btn" onclick="nextSlide()">
+            <i data-lucide="chevron-right"></i>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+
+        function updateProgress() {
+            const progress = (currentSlide / (totalSlides - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active', 'prev');
+                if (i === index) {
+                    slide.classList.add('active');
+                } else if (i < index) {
+                    slide.classList.add('prev');
+                }
+            });
+            currentSlide = index;
+            updateProgress();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) showSlide(currentSlide - 1);
+        }
+
+        // Keyboard & Click Navigation
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowRight', 'ArrowDown', ' ', 'Enter'].includes(e.key)) nextSlide();
+            if (['ArrowLeft', 'ArrowUp'].includes(e.key)) prevSlide();
+        });
+
+        // Click on right/left side of screen
+        document.body.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-btn')) return;
+            (e.clientX > window.innerWidth * 0.5) ? nextSlide() : prevSlide();
+        });
+    </script>
+</body>
+</html>

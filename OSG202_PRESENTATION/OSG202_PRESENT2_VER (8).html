@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux: The Kernel Revolution</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* 1. CORE SETUP */
+        * { box-sizing: border-box; }
+        body {
+            background-color: #020617;
+            display: grid;
+            gap: 40px;
+            grid-template-columns: 1fr;
+            margin: 0;
+            padding: 40px 0;
+            min-height: 100vh;
+            place-items: center;
+        }
+
+        .slide-container {
+            align-items: center;
+            background-color: #0f172a;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 720px;
+            justify-content: center;
+            overflow: hidden;
+            padding: 60px;
+            position: relative;
+            width: 1280px;
+            color: #f8fafc;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        /* Grid Background Effect */
+        .slide-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.1) 1px, transparent 0);
+            background-size: 40px 40px;
+            z-index: 0;
+        }
+
+        /* Decorative Glow */
+        .glow-effect {
+            position: absolute;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .slide-container > * { position: relative; z-index: 1; }
+
+        /* 2. TYPOGRAPHY */
+        h1 { font-size: 80px; font-weight: 800; margin: 0; color: #fff; letter-spacing: -2px; line-height: 1; text-transform: uppercase; }
+        .slide-title { font-size: 48px; font-weight: 700; margin-bottom: 40px; text-align: left; width: 100%; border-left: 8px solid #3b82f6; padding-left: 24px; color: #fff; }
+        h3 { font-size: 32px; color: #60a5fa; margin-bottom: 15px; font-weight: 600; }
+        p, li { font-size: 20px; line-height: 1.6; color: #94a3b8; }
+        .subtitle { font-size: 28px; color: #3b82f6; margin: 24px 0; font-weight: 400; }
+
+        .content-area { display: flex; flex-direction: column; flex-grow: 1; justify-content: center; width: 100%; }
+
+        /* 3. LAYOUTS */
+        .title-layout { text-align: center; }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; width: 100%; align-items: center; }
+        
+        .image-wrapper { border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); height: 400px; box-shadow: 0 15px 30px rgba(0,0,0,0.3); }
+        .image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        .tiled-content { display: flex; gap: 30px; width: 100%; align-items: stretch; }
+        .tile { flex: 1; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(59, 130, 246, 0.2); padding: 35px; border-radius: 24px; text-align: center; }
+        .tile .icon { font-size: 45px; color: #3b82f6; margin-bottom: 25px; }
+        
+        /* Table Style */
+        .table-layout table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .table-layout th { background: #1e293b; color: #3b82f6; padding: 20px; text-align: left; border-bottom: 2px solid #3b82f6; font-size: 22px; }
+        .table-layout td { padding: 18px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 19px; }
+        .table-layout tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+        /* Bleed Image Layout */
+        .bleed-image-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 !important; align-items: start !important; }
+        .bleed-image-layout .content-container { padding: 60px; display: flex; flex-direction: column; justify-content: center; height: 100%; }
+        .bleed-image-layout .image-container { height: 720px; width: 100%; overflow: hidden; }
+        .bleed-image-layout .image-container img { width: 100%; height: 720px; object-fit: cover; }
+
+        .distro-tags { display: flex; gap: 15px; justify-content: center; margin-top: 40px; }
+        .tag { padding: 8px 20px; border-radius: 100px; background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; color: #60a5fa; font-weight: 600; font-size: 16px; }
+
+        ul { list-style: none; padding: 0; }
+        ul li { position: relative; padding-left: 30px; margin-bottom: 15px; }
+        ul li::before { content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; left: 0; color: #3b82f6; }
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Title Slide -->
+<div class="slide-container" id="slide1">
+    <div class="glow-effect" style="top: -10%; left: -10%;"></div>
+    <div class="title-layout">
+        <div style="margin-bottom: 40px;">
+            <i class="fa-brands fa-linux" style="font-size: 120px; color: #3b82f6; filter: drop-shadow(0 0 20px rgba(59,130,246,0.5));"></i>
+        </div>
+        <h1>Linux Kernel</h1>
+        <p class="subtitle">The Core of the Open Source Revolution</p>
+        <div class="distro-tags">
+            <span class="tag">Ubuntu</span>
+            <span class="tag">Arch</span>
+            <span class="tag">Fedora</span>
+            <span class="tag">Debian</span>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 2: History -->
+<div class="slide-container" id="slide2">
+    <h2 class="slide-title">Origin & Philosophy</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <h3>1991: The Spark</h3>
+                <p>Started as a personal project by <strong>Linus Torvalds</strong>, it has evolved into the most important collaborative effort in history.</p>
+                <ul style="margin-top: 25px;">
+                    <li><strong>GPL License:</strong> Guaranteed freedom for users to run, study, and share.</li>
+                    <li><strong>Community-Driven:</strong> Thousands of developers worldwide contribute daily.</li>
+                    <li><strong>Transparency:</strong> Open source means anyone can audit the security.</li>
+                </ul>
+            </div>
+            <div class="image-wrapper">
+                <img src="https://images.unsplash.com/photo-1629654297299-c8506221ca97?q=80&w=1000&auto=format&fit=crop" alt="Linux Penguin Graphic">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: Concept -->
+<div class="slide-container" id="slide3">
+    <h2 class="slide-title">Kernel vs. Distribution</h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-microchip"></i></div>
+                <h3>The Kernel</h3>
+                <p>Think of it as the <strong>Engine</strong>. It manages communication between hardware and software, memory, and processes.</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                <h3>The Distribution</h3>
+                <p>Think of it as the <strong>Complete Vehicle</strong>. It includes the Kernel + Shell + GUI + Pre-installed Applications.</p>
+            </div>
+        </div>
+        <div style="margin-top: 40px; text-align: center; background: rgba(59,130,246,0.05); padding: 25px; border-radius: 15px; border: 1px dashed #3b82f6;">
+            <p style="color: #fff; margin: 0; font-weight: 600; font-size: 24px;">"One Engine, Infinite Possibilities."</p>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 4: Key Pillars -->
+<div class="slide-container" id="slide4">
+    <h2 class="slide-title">The Four Pillars of Linux</h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-users"></i></div>
+                <h4 style="color:#fff; font-size:20px; margin-bottom: 10px;">Multi-User</h4>
+                <p style="font-size:16px;">Securely handles multiple users and processes simultaneously.</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-shield-virus"></i></div>
+                <h4 style="color:#fff; font-size:20px; margin-bottom: 10px;">Robust Security</h4>
+                <p style="font-size:16px;">Permission-based model with instant community patches.</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-laptop-code"></i></div>
+                <h4 style="color:#fff; font-size:20px; margin-bottom: 10px;">Portability</h4>
+                <p style="font-size:16px;">Runs on everything from IoT devices to the world's fastest supercomputers.</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-check-double"></i></div>
+                <h4 style="color:#fff; font-size:20px; margin-bottom: 10px;">POSIX Standards</h4>
+                <p style="font-size:16px;">Ensures compatibility across different Unix-like systems.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 5: Architecture -->
+<div class="slide-container bleed-image-layout" id="slide5">
+    <div class="content-container">
+        <h2 class="slide-title">Monolithic Architecture</h2>
+        <div class="content-area">
+            <p style="font-style: italic; color: #3b82f6; margin-bottom: 20px;">"All essential services run directly in the same address space."</p>
+            <ul style="font-size: 18px;">
+                <li><strong>Extreme Performance:</strong> Faster communication between kernel subsystems.</li>
+                <li><strong>Unified Management:</strong> Process scheduling, memory, and drivers are centralized.</li>
+                <li><strong>Efficiency:</strong> Less overhead compared to microkernel designs.</li>
+            </ul>
+        </div>
+    </div>
+    <div class="image-container">
+        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc51?q=80&w=1000&auto=format&fit=crop" alt="Server Infrastructure">
+    </div>
+</div>
+
+<!-- Slide 6: Comparison -->
+<div class="slide-container" id="slide6">
+    <h2 class="slide-title">Pros & Cons Analysis</h2>
+    <div class="content-area">
+        <div class="table-layout">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Advantages</th>
+                        <th>Disadvantages</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Performance</strong></td>
+                        <td>Very fast due to direct execution</td>
+                        <td>Requires highly stable source code</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Resources</strong></td>
+                        <td>Highly efficient system utilization</td>
+                        <td>Larger static memory footprint</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stability</strong></td>
+                        <td>Extremely reliable under heavy load</td>
+                        <td>A single faulty driver can crash the system (Panic)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="margin-top: 30px; font-size: 16px; color: #475569;">*Note: Modern Linux uses Loadable Kernel Modules (LKM) to mitigate these risks.</p>
+    </div>
+</div>
+
+<!-- Slide 7: Conclusion -->
+<div class="slide-container" id="slide7">
+    <div class="glow-effect" style="bottom: -10%; right: -10%;"></div>
+    <div class="title-layout">
+        <h2 style="font-size: 60px; font-weight: 800; color: #fff; margin-bottom: 20px;">Conclusion</h2>
+        <p class="subtitle">Powering the Future of Computing</p>
+        <div style="max-width: 800px; margin: 40px auto; padding: 40px; border-radius: 30px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2);">
+            <p style="color: #94a3b8; font-size: 22px;">From the servers hosting the internet to the Android phone in your pocket, Linux remains the bedrock of modern technology. Its openness ensures it will continue to innovate for decades to come.</p>
+        </div>
+        <div style="font-size: 18px; color: #475569; margin-top: 50px;">
+            Thank you for your attention!
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

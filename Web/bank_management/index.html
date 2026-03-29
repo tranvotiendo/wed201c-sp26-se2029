@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Tài chính - tvtiendo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-item active" onclick="openTab(event, 'dashboard')" title="Tổng quan">
+        <i data-lucide="layout-dashboard"></i>
+    </div>
+    <div class="sidebar-item" onclick="openTab(event, 'accounts')" title="Tài khoản ngân hàng">
+        <i data-lucide="landmark"></i>
+    </div>
+    <div class="sidebar-item" onclick="openTab(event, 'history')" title="Lịch sử giao dịch">
+        <i data-lucide="history"></i>
+    </div>
+    <div class="sidebar-item" onclick="openTab(event, 'stats')" title="Thống kê">
+        <i data-lucide="pie-chart"></i>
+    </div>
+    <div class="sidebar-item sidebar-bottom" title="Cài đặt">
+        <i data-lucide="settings"></i>
+    </div>
+</aside>
+
+<div class="main-container">
+    <header class="topbar">
+        <div>
+            <p style="color: var(--text-muted); font-size: 0.8rem; font-weight: 600;">Chào mừng trở lại,</p>
+            <h1 class="page-title">Quản lý Tài chính</h1>
+        </div>
+        <div class="search-bar">
+            <i data-lucide="search" size="18" style="color: var(--text-muted)"></i>
+            <input type="text" placeholder="Tìm kiếm giao dịch, ngân hàng...">
+        </div>
+        <div style="display:flex; gap:15px">
+            <button onclick="addNewTransaction()" style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; gap: 8px; align-items: center;">
+                <i data-lucide="plus" size="18"></i> Thêm mới
+            </button>
+        </div>
+        
+    </header>
+
+    <!-- TAB 1: DASHBOARD -->
+    <div id="dashboard" class="tab-content active">
+        <div class="stats-row" id="stats-summary">
+            <!-- Dữ liệu thống kê nạp từ JS -->
+        </div>
+
+        <h3 style="margin-bottom: 20px;">Tài khoản ưu tiên</h3>
+        <div class="bank-grid" id="featured-accounts">
+            <!-- Dữ liệu ngân hàng nạp từ JS -->
+        </div>
+
+        <div class="card-table">
+            <div class="table-header">
+                <h3>Giao dịch gần đây</h3>
+                <button onclick="openTab(null, 'history')" style="background: none; border: none; color: var(--primary-color); font-weight: 600; cursor: pointer;">Xem tất cả</button>
+            </div>
+            <table id="recent-transactions-table">
+                <thead>
+                    <tr>
+                        <th>Nội dung</th>
+                        <th>Danh mục</th>
+                        <th>Ngày</th>
+                        <th>Số tiền</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu giao dịch nạp từ JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 2: ACCOUNTS -->
+    <div id="accounts" class="tab-content">
+        <h3 style="margin-bottom: 20px;">Tất cả tài khoản</h3>
+        <div class="bank-grid" id="all-accounts-list">
+            <!-- Dữ liệu nạp từ JS -->
+        </div>
+    </div>
+
+    <!-- TAB 3: HISTORY -->
+    <div id="history" class="tab-content">
+        <div class="card-table">
+            <div class="table-header">
+                <h3>Toàn bộ lịch sử giao dịch</h3>
+            </div>
+            <table id="full-history-table">
+                <thead>
+                    <tr>
+                        <th>Nội dung</th>
+                        <th>Ngân hàng</th>
+                        <th>Ngày</th>
+                        <th>Số tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dữ liệu nạp từ JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div>© 2025 tvtiendo Finance Management System</div>
+        <div style="display:flex; gap: 20px;">
+            <span>Hỗ trợ</span>
+            <span>Bảo mật</span>
+            <span>v10.0.1</span>
+        </div>
+    </footer>
+</div>
+
+<div class="scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"><i data-lucide="chevron-up"></i></div>
+
+<script src="script.js"></script>
+</body>
+</html>

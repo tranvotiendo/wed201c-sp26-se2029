@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Background Master Guide</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #0ea5e9;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar --- */
+        aside {
+            width: 280px;
+            background: #fff;
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            display: none; /* Hiện trên desktop */
+        }
+
+        @media (min-width: 1024px) { aside { display: block; } }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        nav ul { list-style: none; }
+        nav li { margin-bottom: 0.5rem; }
+        nav a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            display: block;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            transition: all 0.3s;
+        }
+        nav a:hover {
+            background: #f1f5f9;
+            color: var(--primary);
+        }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            margin-left: 0;
+            padding: 2rem;
+            max-width: 1200px;
+        }
+
+        @media (min-width: 1024px) { main { margin-left: 280px; } }
+
+        header {
+            margin-bottom: 3rem;
+            text-align: left;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* --- Property Cards --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: transform 0.3s, border-color 0.3s;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .badge {
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .card-desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            white-space: pre-line;
+        }
+
+        .value-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #94a3b8;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .code-block span { color: #94a3b8; }
+
+        /* --- Visual Demo (Small box in card) --- */
+        .demo-box {
+            height: 60px;
+            border-radius: 6px;
+            margin-top: 1rem;
+            background: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+                        linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+                        linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #cbd5e1;
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="logo">
+        <i data-lucide="layers"></i> CSS Docs
+    </div>
+    <nav>
+        <ul>
+            <li><a href="#background">background</a></li>
+            <li><a href="#color">background-color</a></li>
+            <li><a href="#image">background-image</a></li>
+            <li><a href="#size">background-size</a></li>
+            <li><a href="#repeat">background-repeat</a></li>
+            <li><a href="#position">background-position</a></li>
+            <li><a href="#attachment">background-attachment</a></li>
+            <li><a href="#clip">background-clip</a></li>
+            <li><a href="#origin">background-origin</a></li>
+        </ul>
+    </nav>
+</aside>
+
+<main>
+    <header>
+        <h1>Background Master</h1>
+        <p>Hướng dẫn toàn diện về các thuộc tính nền trong CSS cho Developer.</p>
+    </header>
+
+    <div class="grid">
+        <!-- background -->
+        <article class="card" id="background">
+            <div class="card-header">
+                <h2 class="card-title">background</h2>
+                <span class="badge">Shorthand</span>
+            </div>
+            <p class="card-desc">Cách viết gộp tất cả thuộc tính con vào một dòng duy nhất. Giúp mã nguồn gọn gàng hơn.</p>
+            <span class="value-label">Cú pháp mẫu</span>
+            <div class="code-block">
+                background: red url("img.jpg") no-repeat center / cover;
+            </div>
+        </article>
+
+        <!-- background-color -->
+        <article class="card" id="color">
+            <div class="card-header">
+                <h2 class="card-title">background-color</h2>
+            </div>
+            <p class="card-desc">Thiết lập màu nền. Hiển thị dưới lớp ảnh nếu ảnh có vùng trong suốt.</p>
+            <span class="value-label">Giá trị</span>
+            <div class="code-block">
+                hex, rgb(), rgba(), hsl(), currentColor...
+            </div>
+            <div class="demo-box" style="background-color: var(--primary); color: white; font-size: 10px;">Preview Color</div>
+        </article>
+
+        <!-- background-image -->
+        <article class="card" id="image">
+            <div class="card-header">
+                <h2 class="card-title">background-image</h2>
+            </div>
+            <p class="card-desc">Chèn một hoặc nhiều ảnh/gradient. Xếp chồng theo thứ tự khai báo (cái trước nằm trên).</p>
+            <span class="value-label">Ví dụ</span>
+            <div class="code-block">
+                url("bg.png"), <br>linear-gradient(to right, #000, #fff)
+            </div>
+        </article>
+
+        <!-- background-size -->
+        <article class="card" id="size">
+            <div class="card-header">
+                <h2 class="card-title">background-size</h2>
+            </div>
+            <p class="card-desc">Kiểm soát kích thước hiển thị của ảnh nền.
+                • <b>cover:</b> Phủ kín (có thể mất góc)
+                • <b>contain:</b> Thấy toàn bộ ảnh</p>
+            <span class="value-label">Giá trị</span>
+            <div class="code-block">
+                auto | cover | contain | 100% 50%
+            </div>
+        </article>
+
+        <!-- background-repeat -->
+        <article class="card" id="repeat">
+            <div class="card-header">
+                <h2 class="card-title">background-repeat</h2>
+            </div>
+            <p class="card-desc">Quy định việc lặp lại ảnh khi kích thước ảnh nhỏ hơn phần tử.</p>
+            <span class="value-label">Giá trị</span>
+            <div class="code-block">
+                repeat | no-repeat | repeat-x | space | round
+            </div>
+        </article>
+
+        <!-- background-position -->
+        <article class="card" id="position">
+            <div class="card-header">
+                <h2 class="card-title">background-position</h2>
+            </div>
+            <p class="card-desc">Xác định vị trí bắt đầu của ảnh nền.</p>
+            <span class="value-label">Ví dụ</span>
+            <div class="code-block">
+                center | top left | 50% 50% | right 20px bottom 10px
+            </div>
+        </article>
+
+        <!-- background-attachment -->
+        <article class="card" id="attachment">
+            <div class="card-header">
+                <h2 class="card-title">background-attachment</h2>
+            </div>
+            <p class="card-desc">Hiệu ứng cuộn:
+                • <b>fixed:</b> Cố định theo màn hình
+                • <b>scroll:</b> Cuộn theo khối
+                • <b>local:</b> Cuộn theo nội dung bên trong</p>
+            <span class="value-label">Giá trị</span>
+            <div class="code-block">
+                scroll | fixed | local
+            </div>
+        </article>
+
+        <!-- background-clip -->
+        <article class="card" id="clip">
+            <div class="card-header">
+                <h2 class="card-title">background-clip</h2>
+            </div>
+            <p class="card-desc">Quy định vùng mà background được phép hiển thị (lan ra đến Border, Padding hay chỉ Content).</p>
+            <span class="value-label">Giá trị</span>
+            <div class="code-block">
+                border-box | padding-box | content-box | text
+            </div>
+        </article>
+
+        <!-- background-origin -->
+        <article class="card" id="origin">
+            <div class="card-header">
+                <h2 class="card-title">background-origin</h2>
+            </div>
+            <p class="card-desc">Xác định điểm gốc tọa độ (0,0) để đặt background-position.</p>
+            <span class="value-label">Giá trị</span>
+            <div class="code-block">
+                padding-box | border-box | content-box
+            </div>
+        </article>
+    </div>
+
+    <footer>
+        <p>© 2023 - CSS Properties Cheat Sheet - Made for Professionals</p>
+    </footer>
+</main>
+
+<script>
+    // Khởi tạo các icon từ thư viện Lucide
+    lucide.createIcons();
+</script>
+
+</body>
+</html>
