@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux: The Kernel Revolution - Presentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --bg-dark: #020617;
+            --card-bg: rgba(15, 23, 42, 0.85);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Slide Core Logic */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0.95) translateY(20px);
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1) translateY(0);
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: scale(1.05) translateY(-20px);
+            opacity: 0;
+        }
+
+        /* Tech Background */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.05) 1px, transparent 0);
+            background-size: 50px 50px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow {
+            position: fixed;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Components */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 2.5rem;
+            padding: 3.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            max-width: 1200px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 2rem;
+            color: #ffffff;
+            border-left: 10px solid var(--primary);
+            padding-left: 2rem;
+            line-height: 1.1;
+        }
+
+        .step-pill {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2), transparent);
+            border-left: 4px solid var(--primary);
+            color: #60a5fa;
+            padding: 0.6rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        /* Navigation */
+        .controls {
+            position: fixed;
+            bottom: 3rem;
+            right: 3rem;
+            display: flex;
+            gap: 1.5rem;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 1.2rem;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #94a3b8;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 15px 30px -5px var(--primary-glow);
+        }
+
+        .progress-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            z-index: 100;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #60a5fa);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .keyboard-hint {
+            position: fixed;
+            bottom: 3.5rem;
+            left: 4rem;
+            font-size: 0.8rem;
+            color: #475569;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+        }
+
+        /* Custom UI for Architecture */
+        .kernel-box {
+            border: 2px dashed #3b82f6;
+            background: rgba(59, 130, 246, 0.05);
+            padding: 2rem;
+            border-radius: 2rem;
+            text-align: center;
+        }
+
+        .distro-tag {
+            padding: 0.5rem 1.2rem;
+            border-radius: 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-grid"></div>
+    <div class="glow" style="top: -200px; right: -200px;"></div>
+    <div class="glow" style="bottom: -200px; left: -200px;"></div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- Slide 1: Title Section -->
+    <div class="slide active">
+        <div class="text-center">
+            <div
+                class="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-[0_0_50px_rgba(59,130,246,0.5)] overflow-hidden">
+                <img src="https://cdn.iconscout.com/icon/free/png-256/free-linux-logo-icon-download-in-svg-png-gif-file-formats--brand-company-brands-pack-logos-icons-2284951.png?f=webp&w=256"
+                    alt="avatar" class="w-full h-full object-cover" />
+            </div>
+            <i data-lucide="linux" class="w-14 h-14 text-white"></i>
+        </div>
+        <h1 class="text-8xl font-black mb-6 tracking-tighter leading-none">LINUX KERNEL</h1>
+        <p class="text-3xl text-blue-400 font-light tracking-wide mb-16">The Birth of an Open Source Giant</p>
+        <div class="flex justify-center gap-6">
+            <span class="distro-tag text-orange-400 border-orange-400/30">Ubuntu</span>
+            <span class="distro-tag text-blue-400 border-blue-400/30">CentOS</span>
+            <span class="distro-tag text-red-400 border-red-400/30">Kali Linux</span>
+        </div>
+    </div>
+    </div>
+
+    <!-- Slide 2: Definition & Origin -->
+    <div class="slide">
+        <div class="glass-card">
+            <span class="step-pill">1991: The Birth</span>
+            <h2 class="slide-title">History & Origin</h2>
+            <div class="grid grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <p class="text-2xl leading-relaxed text-slate-300">
+                        In 1991, <strong>Linus Torvalds</strong> wrote the first lines of the Linux kernel, inspired by
+                        <strong>Minix</strong>.
+                    </p>
+                    <div class="bg-blue-600/10 border border-blue-500/30 p-8 rounded-3xl">
+                        <h4 class="text-blue-400 font-bold mb-3 flex items-center gap-2">
+                            <i data-lucide="scroll-text"></i> GPL License
+                        </h4>
+                        <p class="text-lg">The <strong>General Public License</strong> changed everything. It allows
+                            anyone to view, modify, and contribute, enabling continuous global optimization.</p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="absolute -inset-4 bg-blue-500/20 blur-2xl rounded-full"></div>
+                    <div class="relative bg-slate-900 border border-white/10 p-10 rounded-[3rem] text-center">
+                        <i data-lucide="users" class="w-20 h-20 text-blue-500 mx-auto mb-6"></i>
+                        <h3 class="text-3xl font-bold mb-4">Community Driven</h3>
+                        <p class="text-slate-400">Not just a software, but a collective achievement of thousands of
+                            developers worldwide.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Kernel vs Distribution -->
+    <div class="slide">
+        <div class="glass-card">
+            <span class="step-pill">Concept Definition</span>
+            <h2 class="slide-title">Kernel vs. Distribution</h2>
+            <div class="grid grid-cols-2 gap-8">
+                <div class="feature-card border-blue-500/30 bg-blue-500/5">
+                    <h3 class="text-3xl font-bold text-blue-400 mb-4 flex items-center gap-3">
+                        <i data-lucide="brain"></i> The Kernel
+                    </h3>
+                    <p class="text-xl text-slate-300">The "Brain". It is NOT a complete OS, but the core engine
+                        coordinating hardware and software interaction.</p>
+                </div>
+                <div class="feature-card border-purple-500/30 bg-purple-500/5">
+                    <h3 class="text-3xl font-bold text-purple-400 mb-4 flex items-center gap-3">
+                        <i data-lucide="package"></i> Distribution (Distro)
+                    </h3>
+                    <p class="text-xl text-slate-300">The "Body". Combines the <strong>Kernel</strong> + <strong>GNU
+                            Tools</strong> + <strong>UI</strong> + <strong>App Repositories</strong>.</p>
+                </div>
+            </div>
+            <div class="mt-12 p-8 kernel-box">
+                <p class="text-2xl font-bold text-slate-400">One "Brain" (Linux Kernel) → Hundreds of "Personalities"
+                    (Distros)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Key Features -->
+    <div class="slide">
+        <div class="glass-card">
+            <span class="step-pill">Why it's Great</span>
+            <h2 class="slide-title">The 4 Pillars of Linux</h2>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="feature-card">
+                    <i data-lucide="layers" class="text-blue-500 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">Multi-tasking & Multi-user</h4>
+                    <p class="text-slate-400 text-sm">Multiple processes and users running simultaneously without
+                        conflict.</p>
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="shield-check" class="text-emerald-500 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">High Security</h4>
+                    <p class="text-slate-400 text-sm">Continuous community monitoring ensures vulnerabilities are
+                        patched almost instantly.</p>
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="monitor-smartphone" class="text-purple-500 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">Ultimate Flexibility</h4>
+                    <p class="text-slate-400 text-sm">Runs on everything: from smartwatches to the world's most powerful
+                        supercomputers.</p>
+                </div>
+                <div class="feature-card">
+                    <i data-lucide="puzzle" class="text-amber-500 mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">POSIX Compatibility</h4>
+                    <p class="text-slate-400 text-sm">Strict adherence to standards makes transitioning UNIX apps to
+                        Linux seamless.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Monolithic Architecture -->
+    <div class="slide">
+        <div class="glass-card">
+            <span class="step-pill">Architecture Deep Dive</span>
+            <h2 class="slide-title">Monolithic Kernel</h2>
+            <div class="grid grid-cols-2 gap-12">
+                <div class="space-y-4">
+                    <p class="text-xl text-slate-400 italic mb-6">"All core services operate in a single Kernel Space."
+                    </p>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                            <i data-lucide="folder-tree" class="text-blue-400"></i> File Management (VFS)
+                        </div>
+                        <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                            <i data-lucide="activity" class="text-blue-400"></i> Process & Memory Management
+                        </div>
+                        <div class="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                            <i data-lucide="cpu" class="text-blue-400"></i> Device Drivers
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="bg-blue-600/5 border-2 border-blue-500/20 rounded-[3rem] p-8 flex flex-col justify-center text-center">
+                    <h4 class="text-3xl font-bold text-white mb-4">Performance King</h4>
+                    <p class="text-lg text-slate-300">Direct communication between components without the overhead of
+                        <strong>Context Switching</strong> or complex inter-layer messaging.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Pros & Cons -->
+    <div class="slide">
+        <div class="glass-card">
+            <span class="step-pill">Analysis</span>
+            <h2 class="slide-title">Pros vs. Cons</h2>
+            <div class="grid grid-cols-2 gap-12">
+                <div class="space-y-6">
+                    <h3 class="text-emerald-400 text-2xl font-bold flex items-center gap-2">
+                        <i data-lucide="trending-up"></i> Advantages
+                    </h3>
+                    <ul class="space-y-4 text-lg text-slate-300">
+                        <li class="flex gap-3"><i data-lucide="check" class="text-emerald-500 mt-1"></i> Optimized for
+                            extreme speed</li>
+                        <li class="flex gap-3"><i data-lucide="check" class="text-emerald-500 mt-1"></i> Efficient
+                            resource handling</li>
+                        <li class="flex gap-3"><i data-lucide="check" class="text-emerald-500 mt-1"></i> Stable under
+                            massive server loads</li>
+                    </ul>
+                </div>
+                <div class="space-y-6">
+                    <h3 class="text-rose-400 text-2xl font-bold flex items-center gap-2">
+                        <i data-lucide="alert-circle"></i> Disadvantages
+                    </h3>
+                    <div class="p-6 bg-rose-500/10 border border-rose-500/30 rounded-2xl">
+                        <h4 class="font-bold text-rose-400 mb-2">Kernel Panic Risk</h4>
+                        <p class="text-slate-400">Since everything is bundled, a single driver failure can crash the
+                            entire system.</p>
+                    </div>
+                    <p class="text-slate-500 text-sm italic">Note: Open source community constantly mitigates this
+                        through rigorous module testing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Transition to Android -->
+    <div class="slide">
+        <div class="glass-card text-center py-16">
+            <span class="step-pill">The Future</span>
+            <h2 class="slide-title" style="border:none; padding:0;">Conclusion & Beyond</h2>
+            <p class="text-3xl font-light text-slate-300 max-w-3xl mx-auto leading-relaxed mb-12">
+                Linux is the "King" of modern infrastructure, from data centers to supercomputers.
+            </p>
+            <div class="bg-blue-600/10 border border-blue-500/30 p-10 rounded-[3rem] inline-block max-w-2xl">
+                <p class="text-2xl font-bold text-blue-400 mb-4">Next Chapter:</p>
+                <h3 class="text-4xl font-black text-white">FROM SERVER TO MOBILE: ANDROID</h3>
+                <p class="mt-6 text-slate-400">How did they shrink this giant to fit inside your pocket?</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation UI -->
+    <div class="keyboard-hint">ARROWS / SPACE TO NAVIGATE</div>
+
+    <div class="controls">
+        <div class="nav-btn" onclick="prevSlide()">
+            <i data-lucide="arrow-left"></i>
+        </div>
+        <div class="nav-btn" onclick="nextSlide()">
+            <i data-lucide="arrow-right"></i>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressBar = document.getElementById('progressBar');
+
+        function updateProgress() {
+            const progress = (currentSlide / (totalSlides - 1)) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active', 'prev');
+                if (i === index) {
+                    slide.classList.add('active');
+                } else if (i < index) {
+                    slide.classList.add('prev');
+                }
+            });
+            currentSlide = index;
+            updateProgress();
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) showSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) showSlide(currentSlide - 1);
+        }
+
+        // Interactivity
+        document.body.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-btn')) return;
+            (e.clientX > window.innerWidth * 0.4) ? nextSlide() : prevSlide();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowRight', 'ArrowDown', ' ', 'Enter'].includes(e.key)) nextSlide();
+            if (['ArrowLeft', 'ArrowUp'].includes(e.key)) prevSlide();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linux: The Power of Open Source</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Thiết lập cơ bản cho toàn bộ trang */
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f8fafc;
+            overflow: hidden;
+            height: 100vh;
+            color: #1e293b;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Hiệu ứng Glassmorphism cho các thẻ */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        }
+
+        /* Điểm nhấn cho các thuật ngữ quan trọng */
+        .term-highlight {
+            @apply border-b-2 border-blue-400 text-blue-700 cursor-help font-semibold transition-all px-1;
+        }
+        .term-highlight:hover {
+            @apply bg-blue-100/50 text-blue-900 border-blue-600 rounded;
+        }
+
+        /* Thanh tiến trình ở trên cùng */
+        .progress-bar {
+            height: 6px;
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Hiệu ứng xuất hiện mượt mà cho nội dung */
+        @keyframes revealUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: revealUp 0.7s ease-out forwards; }
+        
+        /* Cấu trúc vùng nội dung để không bị thanh điều hướng che khuất */
+        .slide-content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+            max-height: 100%;
+            padding-bottom: 20px; /* Khoảng cách an toàn phía dưới nội dung */
+        }
+
+        /* Giới hạn kích thước ảnh để không phá vỡ layout */
+        .slide-image {
+            max-height: 320px;
+            object-fit: cover;
+            width: 100%;
+            border-radius: 2.5rem;
+            shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Thanh tiêu đề cố định -->
+    <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-200/50">
+        <div class="max-w-7xl mx-auto px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                    <i data-lucide="terminal" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg tracking-tight">OS Technology</h1>
+                    <p class="text-[9px] uppercase tracking-widest text-blue-600 font-black">History & Architecture</p>
+                </div>
+            </div>
+            <div id="slide-info" class="text-xs font-bold text-slate-400 bg-slate-100 px-4 py-2 rounded-full border border-slate-200">Slide 1 / 8</div>
+        </div>
+        <div class="w-full bg-slate-100 h-1">
+            <div id="progress" class="progress-bar bg-blue-600 w-0 shadow-[0_0_10px_rgba(37,99,235,0.4)]"></div>
+        </div>
+    </header>
+
+    <!-- Vùng trình chiếu chính -->
+    <main id="presentation" class="flex-1 w-full px-8 pt-24 pb-32 flex items-center justify-center overflow-hidden">
+        <!-- Nội dung slide sẽ được đưa vào đây bởi JavaScript -->
+    </main>
+
+    <!-- Chú thích khi rê chuột vào thuật ngữ -->
+    <div id="global-tooltip" class="fixed hidden pointer-events-none z-[100] max-w-sm p-5 bg-white rounded-3xl shadow-2xl border border-blue-50 animate-in fade-in zoom-in duration-200">
+        <div class="flex gap-3">
+            <div class="text-blue-500 pt-1"><i data-lucide="info" class="w-4 h-4"></i></div>
+            <p id="tooltip-content" class="text-sm text-slate-600 leading-relaxed font-medium"></p>
+        </div>
+    </div>
+
+    <!-- Thanh điều hướng dưới cùng -->
+    <div class="fixed bottom-8 left-0 w-full flex justify-center items-center gap-6 z-50">
+        <button onclick="prevSlide()" class="p-3.5 rounded-2xl bg-white shadow-xl border border-slate-100 hover:bg-slate-50 transition-all group active:scale-90">
+            <i data-lucide="arrow-left" class="w-6 h-6 text-slate-400 group-hover:text-blue-600"></i>
+        </button>
+        
+        <div class="px-6 py-2.5 bg-white/80 backdrop-blur-md border border-white shadow-xl rounded-2xl flex items-center gap-4">
+            <div class="flex gap-1.5">
+                <div id="dot-indicator" class="w-2 h-2 rounded-full bg-blue-600 transition-all duration-300"></div>
+            </div>
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Keyboard Arrows to Navigate</span>
+        </div>
+
+        <button onclick="nextSlide()" class="p-3.5 rounded-2xl bg-blue-600 shadow-xl hover:bg-blue-700 transition-all group active:scale-90">
+            <i data-lucide="arrow-right" class="w-6 h-6 text-white"></i>
+        </button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+
+        // Định nghĩa các thuật ngữ cho Tooltip
+        const definitions = {
+            "kernel": "The 'Brain' of the OS. It manages the communication between software and hardware components.",
+            "gpl": "General Public License. A game-changer that allows anyone to view, modify, and contribute to the source code.",
+            "minix": "A small Unix-like OS that inspired Linus Torvalds to create the Linux kernel in 1991.",
+            "distro": "A complete operating system built by combining the Linux kernel with GNU tools, a UI, and apps.",
+            "monolithic": "A single-piece architecture where all core services (VFS, drivers, etc.) run together in the Kernel Space.",
+            "panic": "A critical system error where the kernel stops all execution to prevent data corruption.",
+            "posix": "Standards that ensure compatibility between Linux and other Unix systems, making software porting easy.",
+            "switching": "The process of a CPU moving from one task to another. Reducing this improves system speed."
+        };
+
+        const slides = [
+            {
+                title: "The Birth of Linux",
+                subtitle: "A Turning Point in History (1991)",
+                content: `
+                    <div class="grid lg:grid-cols-2 gap-12 items-center slide-content-wrapper">
+                        <div class="space-y-6 reveal">
+                            <p class="text-2xl text-slate-600 leading-relaxed font-light">
+                                In 1991, Linus Torvalds wrote the first lines of code inspired by <span class="term-highlight" data-def="minix">Minix</span>.
+                            </p>
+                            <div class="p-6 glass-card rounded-[2.5rem] border-l-8 border-l-blue-600 relative overflow-hidden group">
+                                <h4 class="text-blue-600 font-black uppercase text-[10px] mb-2 tracking-widest">The Secret Sauce</h4>
+                                <p class="text-lg font-semibold leading-relaxed text-slate-800">
+                                    The <span class="term-highlight" data-def="gpl">GPL License</span> allowed the world to contribute, leading to constant community-driven optimization.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="reveal delay-200">
+                            <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?q=80&w=1000" class="slide-image" alt="Code on screen">
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "What is Linux?",
+                subtitle: "Understanding the Core Concept",
+                content: `
+                    <div class="flex flex-col justify-center slide-content-wrapper reveal">
+                        <div class="max-w-3xl mx-auto text-center space-y-6">
+                            <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto text-blue-600">
+                                <i data-lucide="cpu" class="w-8 h-8"></i>
+                            </div>
+                            <p class="text-2xl text-slate-600 leading-relaxed font-light">
+                                Linux is NOT a full operating system initially. It is a <span class="term-highlight" data-def="kernel">Kernel</span> — the brain coordinating hardware and software.
+                            </p>
+                            <div class="grid md:grid-cols-2 gap-6 mt-4">
+                                <div class="p-5 bg-white border border-slate-100 rounded-3xl shadow-sm">
+                                    <h4 class="font-bold text-blue-600 mb-1 text-sm">Passive Entity</h4>
+                                    <p class="text-xs text-slate-400">The Program (Static Code)</p>
+                                </div>
+                                <div class="p-5 bg-blue-600 rounded-3xl shadow-xl text-white">
+                                    <h4 class="font-bold mb-1 text-sm">Active Entity</h4>
+                                    <p class="text-xs opacity-80">The Process (Execution)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Linux Distributions",
+                subtitle: "Distros: The Complete Packages",
+                content: `
+                    <div class="grid lg:grid-cols-2 gap-10 items-center slide-content-wrapper">
+                        <div class="reveal space-y-5">
+                            <h3 class="text-3xl font-bold text-slate-800 leading-tight">Combining forces for a <span class="text-blue-600">complete OS</span></h3>
+                            <p class="text-slate-500 text-sm leading-relaxed">To create a <span class="term-highlight" data-def="distro">Distro</span>, developers combine the kernel with tools and apps.</p>
+                            <ul class="space-y-3">
+                                <li class="flex items-center gap-3 font-semibold text-slate-700 text-sm"><i data-lucide="check-circle-2" class="text-emerald-500 w-4 h-4"></i> System Tools (GNU)</li>
+                                <li class="flex items-center gap-3 font-semibold text-slate-700 text-sm"><i data-lucide="check-circle-2" class="text-emerald-500 w-4 h-4"></i> User Interface (GNOME/KDE)</li>
+                                <li class="flex items-center gap-3 font-semibold text-slate-700 text-sm"><i data-lucide="check-circle-2" class="text-emerald-500 w-4 h-4"></i> Application Repository</li>
+                            </ul>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 reveal delay-200">
+                            <div class="p-5 bg-white rounded-[2rem] border border-slate-100 text-center shadow-sm">
+                                <h4 class="font-black text-blue-500 text-sm">Ubuntu</h4>
+                                <p class="text-[9px] uppercase font-bold text-slate-300">Consumer</p>
+                            </div>
+                            <div class="p-5 bg-slate-900 rounded-[2rem] text-center shadow-xl">
+                                <h4 class="font-black text-purple-400 text-sm">RHEL</h4>
+                                <p class="text-[9px] uppercase font-bold text-slate-500">Business</p>
+                            </div>
+                            <div class="p-5 bg-blue-600 rounded-[2rem] text-center shadow-xl col-span-2">
+                                <h4 class="font-black text-white text-sm">Kali Linux</h4>
+                                <p class="text-[9px] uppercase font-bold text-white/50">Cybersecurity</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "4 Key Features",
+                subtitle: "Why Linux conquered the world",
+                content: `
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 slide-content-wrapper reveal">
+                        <div class="p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-lg transition-all group">
+                            <i data-lucide="layers" class="text-blue-500 mb-3 w-7 h-7"></i>
+                            <h4 class="font-bold mb-1 text-sm">Multitasking</h4>
+                            <p class="text-[10px] text-slate-400 leading-relaxed">Handles multiple users and processes without conflict.</p>
+                        </div>
+                        <div class="p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-lg transition-all">
+                            <i data-lucide="shield-check" class="text-red-500 mb-3 w-7 h-7"></i>
+                            <h4 class="font-bold mb-1 text-sm">Security</h4>
+                            <p class="text-[10px] text-slate-400 leading-relaxed">Global community audit and instant vulnerability patching.</p>
+                        </div>
+                        <div class="p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-lg transition-all">
+                            <i data-lucide="maximize" class="text-emerald-500 mb-3 w-7 h-7"></i>
+                            <h4 class="font-bold mb-1 text-sm">Flexibility</h4>
+                            <p class="text-[10px] text-slate-400 leading-relaxed">Scaling from IoT devices to massive supercomputers.</p>
+                        </div>
+                        <div class="p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-lg transition-all">
+                            <i data-lucide="git-branch" class="text-purple-500 mb-3 w-7 h-7"></i>
+                            <h4 class="font-bold mb-1 text-sm">POSIX</h4>
+                            <p class="text-[10px] text-slate-400 leading-relaxed">Standard interface for high software portability across UNIX systems.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Monolithic Architecture",
+                subtitle: "High Efficiency Design",
+                content: `
+                    <div class="grid lg:grid-cols-2 gap-10 items-center slide-content-wrapper">
+                        <div class="reveal bg-white p-6 rounded-[2.5rem] shadow-lg border border-slate-100">
+                             <div class="space-y-3">
+                                <div class="p-3 bg-slate-50 rounded-xl text-center text-[9px] font-bold text-slate-400 uppercase tracking-widest">User Space</div>
+                                <div class="p-8 bg-blue-600 rounded-[2rem] text-white shadow-xl relative">
+                                    <p class="absolute top-2 left-4 text-[8px] font-black uppercase opacity-40">Kernel Space</p>
+                                    <div class="grid grid-cols-3 gap-2 mt-2">
+                                        <div class="p-2 bg-white/10 rounded-lg text-center text-[9px] font-bold border border-white/10">VFS</div>
+                                        <div class="p-2 bg-white/10 rounded-lg text-center text-[9px] font-bold border border-white/10">Memory</div>
+                                        <div class="p-2 bg-white/10 rounded-lg text-center text-[9px] font-bold border border-white/10">Drivers</div>
+                                    </div>
+                                </div>
+                                <div class="p-3 bg-slate-900 rounded-xl text-center text-[9px] font-bold text-slate-500 uppercase tracking-widest">Hardware</div>
+                             </div>
+                        </div>
+                        <div class="reveal space-y-4">
+                            <h3 class="text-2xl font-extrabold text-slate-800">The Power of <span class="text-blue-600">Unified Execution</span></h3>
+                            <p class="text-sm text-slate-500 leading-relaxed">
+                                In a <span class="term-highlight" data-def="monolithic">Monolithic Kernel</span>, services share the same space, allowing them to work together instantly.
+                            </p>
+                            <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                                <p class="text-blue-700 text-xs font-semibold italic">Ideal for high-throughput server workloads.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "Efficiency vs. Risk",
+                subtitle: "Advantages and Trade-offs",
+                content: `
+                    <div class="grid md:grid-cols-2 gap-6 slide-content-wrapper reveal">
+                        <div class="p-8 bg-white rounded-[2.5rem] border-l-4 border-l-emerald-500 shadow-sm">
+                            <h4 class="text-xl font-black text-emerald-600 mb-4 uppercase tracking-tight">Advantages</h4>
+                            <p class="text-slate-600 mb-4 text-xs leading-relaxed">Fastest possible communication between components. No overhead for <span class="term-highlight" data-def="switching">Context Switching</span>.</p>
+                            <div class="flex items-center gap-2 text-emerald-500 font-bold text-[10px]"><i data-lucide="check" class="w-3 h-3"></i> Top-tier Performance</div>
+                        </div>
+                        <div class="p-8 bg-white rounded-[2.5rem] border-l-4 border-l-rose-500 shadow-sm">
+                            <h4 class="text-xl font-black text-rose-600 mb-4 uppercase tracking-tight">Disadvantages</h4>
+                            <p class="text-slate-600 mb-4 text-xs leading-relaxed">Shared memory space means a single component failure can cause a <span class="term-highlight" data-def="panic">Kernel Panic</span>.</p>
+                            <div class="flex items-center gap-2 text-rose-500 font-bold text-[10px]"><i data-lucide="alert-triangle" class="w-3 h-3"></i> System Stability Risks</div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "King of Infrastructure",
+                subtitle: "The Backbone of the Web",
+                content: `
+                    <div class="flex flex-col justify-center slide-content-wrapper reveal">
+                        <div class="max-w-4xl mx-auto glass-card p-10 rounded-[3.5rem] text-center space-y-6">
+                            <h3 class="text-3xl font-black text-slate-900 leading-tight">Monolithic Performance + <br><span class="text-blue-600">Open Source Community</span></h3>
+                            <p class="text-lg text-slate-500 font-light">This unique combination makes Linux the standard for clouds, AI, and mission-critical systems worldwide.</p>
+                            <div class="h-1 w-12 bg-blue-600 rounded-full mx-auto"></div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "The Mobile Future",
+                subtitle: "Linux in Your Pocket",
+                content: `
+                    <div class="grid lg:grid-cols-2 gap-10 items-center slide-content-wrapper reveal">
+                        <div class="space-y-6">
+                            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center animate-bounce shadow-lg">
+                                <i data-lucide="smartphone" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-4xl font-black text-slate-900 leading-tight">Is Linux in <span class="text-emerald-500">Android?</span></h3>
+                            <p class="text-lg text-slate-500 leading-relaxed font-medium">
+                                Yes! Android uses a modified Linux kernel to power billions of mobile devices globally.
+                            </p>
+                            <p class="text-slate-400 font-black uppercase text-[9px] tracking-widest italic">Wait, how did they modify the kernel for mobile?</p>
+                        </div>
+                        <div class="relative">
+                            <img src="https://images.unsplash.com/photo-1601784551446-20c9e07cdbab?q=80&w=1000" class="slide-image" alt="Mobile phone">
+                        </div>
+                    </div>
+                `
+            }
+        ];
+
+        // Hàm cập nhật nội dung Slide
+        function renderSlide() {
+            const slide = slides[currentSlide];
+            const presentation = document.getElementById('presentation');
+            
+            // Xóa nội dung cũ và chèn nội dung mới với hiệu ứng reveal
+            presentation.innerHTML = `
+                <div class="w-full max-w-6xl h-full flex flex-col">
+                    <div class="mb-6 text-center lg:text-left reveal">
+                        <h2 class="text-4xl lg:text-6xl font-black text-slate-900 tracking-tighter mb-1">${slide.title}</h2>
+                        <div class="flex items-center gap-3 justify-center lg:justify-start">
+                             <div class="h-1 w-12 bg-blue-600 rounded-full"></div>
+                             <p class="text-blue-600 font-black text-xs uppercase tracking-[0.2em]">${slide.subtitle}</p>
+                        </div>
+                    </div>
+                    ${slide.content}
+                </div>
+            `;
+
+            // Cập nhật thông tin slide và thanh tiến trình
+            document.getElementById('slide-info').innerText = `Slide ${currentSlide + 1} / ${slides.length}`;
+            document.getElementById('progress').style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+            
+            // Khởi tạo lại các icon và tooltip
+            lucide.createIcons();
+            setupTooltips();
+        }
+
+        // Thiết lập sự kiện cho các thuật ngữ
+        function setupTooltips() {
+            const terms = document.querySelectorAll('.term-highlight');
+            const tooltip = document.getElementById('global-tooltip');
+            const content = document.getElementById('tooltip-content');
+
+            terms.forEach(term => {
+                term.addEventListener('mouseenter', (e) => {
+                    const key = term.getAttribute('data-def');
+                    content.innerText = definitions[key] || "No detail provided.";
+                    tooltip.classList.remove('hidden');
+                    
+                    const rect = term.getBoundingClientRect();
+                    tooltip.style.left = `${rect.left}px`;
+                    tooltip.style.top = `${rect.bottom + 10}px`;
+                });
+
+                term.addEventListener('mouseleave', () => {
+                    tooltip.classList.add('hidden');
+                });
+            });
+        }
+
+        // Chuyển Slide
+        function nextSlide() { if (currentSlide < slides.length - 1) { currentSlide++; renderSlide(); } }
+        function prevSlide() { if (currentSlide > 0) { currentSlide--; renderSlide(); } }
+
+        // Lắng nghe sự kiện bàn phím
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        // Chạy slide đầu tiên khi tải trang
+        window.onload = renderSlide;
+    </script>
+</body>
+</html>
