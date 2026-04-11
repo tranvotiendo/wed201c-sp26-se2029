@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Học và Luyện tập: Kiểm Tra Tính Độc Lập Tuyến Tính trong \(\mathbb{R}^4\)</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #f0f4f8;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --border-color: rgba(209, 213, 219, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --font-main: 'Inter', sans-serif;
+            --solution-bg: #f8f9fa;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            min-height: 100vh;
+            width: 100vw;
+            background-color: var(--primary-bg);
+            background-image: radial-gradient(circle at top left, #a1c4fd, #c2e9fb);
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 12px;
+            box-sizing: border-box;
+            gap: 12px;
+        }
+
+        .panel {
+            flex: 1;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 10px 35px 0 var(--shadow-color);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .panel-left { flex-basis: 58%; }
+        .panel-right { flex-basis: 42%; }
+
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 0;
+        }
+        
+        h2 { font-size: 1.6em; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; margin-bottom: 24px; }
+        h3 { font-size: 1.3em; margin-bottom: 18px; }
+        h4 { font-size: 1.15em; color: var(--accent-color); margin-bottom: 10px; }
+
+        .content-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .content-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: 600;
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            background-color: transparent;
+            color: var(--accent-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .content-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .content-btn:hover:not(.active) {
+            background-color: var(--accent-hover);
+            color: white;
+        }
+
+        .content-section { 
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .content-header { 
+            width: 100%;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px;
+        }
+
+        .slider-container, .video-container { 
+            width: 100%;
+            aspect-ratio: 16/9;
+            overflow: hidden; 
+            position: relative; 
+            background-color: #1f2937; 
+            border-radius: 16px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .slides-wrapper { 
+            display: flex; 
+            height: 100%; 
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+
+        .slide { 
+            flex: 0 0 100%; 
+            width: 100%; 
+            height: 100%; 
+            box-sizing: border-box; 
+            padding: 20px 30px;
+            color: #e5e7eb; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            text-align: center; 
+            opacity: 0; 
+            transform: translateX(20px); 
+            transition: opacity 0.6s ease, transform 0.6s ease;
+            overflow-y: auto;
+        }
+
+        .slide.active-slide { opacity: 1; transform: translateX(0); }
+        
+        .slide .slide-title { 
+            font-size: 1.5em;
+            font-weight: 700; 
+            color: #d1d5db; 
+            border-bottom: 1px solid #4b5563; 
+            margin-bottom: 15px; 
+            padding-bottom: 10px; 
+        }
+        
+        .slide p, .slide ul { 
+            text-align: left; 
+            max-width: 95%; 
+            font-size: 1em;
+            margin: 10px 0;
+        }
+        
+        .slide .info-block { 
+            background-color: rgba(255, 255, 255, 0.05); 
+            padding: 12px 15px;
+            border-radius: 8px; 
+            margin-top: 12px; 
+            border-left: 4px solid var(--accent-color); 
+            text-align: left; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+
+        .slide .result-block { 
+            background-color: rgba(34, 197, 94, 0.1); 
+            border-left: 4px solid var(--success-color); 
+            color: #a7f3d0; 
+        }
+
+        .slider-nav { 
+            position: absolute; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 100%; 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 0 15px; 
+            box-sizing: border-box; 
+            opacity: 0; 
+            transition: opacity 0.3s ease; 
+        }
+
+        .slider-container:hover .slider-nav { opacity: 1; }
+        
+        .slider-nav button { 
+            background-color: rgba(0, 0, 0, 0.4); 
+            color: white; 
+            border: none; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-size: 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: background-color 0.3s, transform 0.3s; 
+        }
+
+        .slider-nav button:hover { 
+            background-color: rgba(0, 0, 0, 0.7); 
+            transform: scale(1.1); 
+        }
+
+        .video-container iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .video-container {
+            position: relative;
+        }
+
+        .hidden { display: none !important; }
+
+        .lecture-container { 
+            flex-grow: 0; 
+            flex-shrink: 1; 
+            overflow-y: auto; 
+            margin-top: 20px; 
+            padding-top: 20px; 
+            border-top: 1px solid var(--border-color); 
+            max-height: 400px;
+        }
+        .lecture-content ol { padding-left: 25px; }
+
+        .audio-section { margin-bottom: 20px; }
+        .audio-section iframe { border-radius: 12px; box-shadow: 0 2px 10px var(--shadow-color); }
+        .audio-section a { font-size: 12px; color: var(--text-secondary); text-decoration: none; transition: color 0.3s; }
+        .audio-section a:hover { color: var(--accent-hover); }
+
+        .quiz-wrapper { 
+            flex-grow: 1; 
+            flex-shrink: 1; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-y: auto; 
+            border-top: 1px solid var(--border-color); 
+            margin-top: 20px; 
+            padding-top: 20px; 
+            min-height: 200px; 
+            max-height: 400px;
+        }
+        .quiz-progress { width: 100%; background-color: #e5e7eb; border-radius: 10px; height: 10px; margin-bottom: 10px; overflow: hidden; }
+        .progress-bar { width: 0; height: 100%; background-color: var(--accent-color); border-radius: 10px; transition: width 0.5s ease-out; }
+        .progress-text { text-align: right; font-size: 0.9em; font-weight: 500; color: var(--text-secondary); margin-bottom: 20px; }
+        .question { margin-bottom: 15px; font-size: 1.1em; font-weight: 500; }
+        .option { display: flex; align-items: center; margin: 10px 0; padding: 12px 15px; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .option:hover { border-color: var(--accent-color); background-color: #eff6ff; }
+        .option.selected { border-color: var(--accent-color); background-color: #dbeafe; }
+        .option.correct { background-color: #dcfce7; border-color: var(--success-color); color: #15803d; font-weight: 600; }
+        .option.incorrect { background-color: #fee2e2; border-color: var(--error-color); color: #b91c1c; }
+        .option input { display: none; }
+        .option label { flex-grow: 1; pointer-events: none; }
+
+        .solution-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+        .solution-box.visible { opacity: 1; transform: translateY(0); }
+        
+        .solution-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .solution-header h5 {
+            margin: 0;
+            font-size: 1.1em;
+            color: var(--text-primary);
+            border-bottom: none; 
+            padding-bottom: 0;
+ | border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .solution-audio {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
+            width: 45%;
+            max-width: 280px;
+            flex-shrink: 0;
+        }
+        
+        .solution-audio p {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin: 0 0 5px 0;
+        }
+
+        .solution-audio iframe {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            width: 100%;
+        }
+
+        .solution-audio a {
+            display: block;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-top: 5px;
+            opacity: 0.8;
+            transition: color 0.3s, opacity 0.3s;
+        }
+
+        .solution-audio a:hover {
+            color: var(--accent-hover);
+            opacity: 1;
+        }
+
+        .solution-box .method-title { font-weight: 600; color: var(--accent-color); margin-top: 15px; }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 90%;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            box-sizing: border-box;
+        }
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--solution-bg);
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: color 0.3s;
+        }
+        .close-modal:hover {
+            color: var(--accent-hover);
+        }
+        .modal.hidden {
+            display: none;
+        }
+        .modal-question {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .quiz-footer { margin-top: 25px; text-align: center; }
+        .quiz-footer button { 
+            padding: 12px 25px; 
+            font-size: 1em; 
+            font-weight: 600; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            color: white; 
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08); 
+            margin: 0 5px;
+        }
+        .quiz-footer button:disabled { 
+            background-color: #9ca3af; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+        }
+        #submitAnswerBtn { background-color: #10b981; }
+        #submitAnswerBtn:not(:disabled):hover { background-color: #059669; transform: translateY(-2px); }
+        #viewSolutionBtn { background-color: #8b5cf6; }
+        #viewSolutionBtn:not(:disabled):hover { background-color: #7c3aed; transform: translateY(-2px); }
+        #nextQuestionBtn { background-color: var(--accent-color); }
+        #nextQuestionBtn:not(:disabled):hover { background-color: var(--accent-hover); transform: translateY(-2px); }
+        #resetQuizBtn { background-color: #6b7280; }
+        #resetQuizBtn:not(:disabled):hover { background-color: #4b5563; transform: translateY(-2px); }
+        #quizResult { font-weight: 700; font-size: 1.25em; margin-bottom: 15px; }
+
+        @media (max-width: 1200px) {
+            .main-container { 
+                flex-direction: column; 
+                min-height: auto; 
+                overflow-y: auto; 
+            }
+            .panel { 
+                flex-basis: auto; 
+                height: auto; 
+                backdrop-filter: none; 
+                background: #fff; 
+            }
+            .panel-left { margin-right: 0; margin-bottom: 12px; }
+            .lecture-container { max-height: 300px; }
+            .quiz-wrapper { max-height: 300px; }
+            .modal-content { max-width: 95%; }
+        }
+        
+        @media (max-width: 900px) {
+            .slider-container, .video-container { max-width: 100%; }
+            .modal-content { max-width: 95%; }
+        }
+        
+        @media (max-width: 768px) {
+            body { font-size: 14px; }
+            .main-container, .panel { padding: 10px; }
+            h2 { font-size: 1.4em; } 
+            h3 { font-size: 1.1em; }
+            .slider-container, .video-container { aspect-ratio: 4/3; }
+            .slide { padding: 12px 16px; }
+            .slide .slide-title { font-size: 1.2em; }
+            .modal-content { max-height: 85vh; padding: 12px; }
+            .quiz-footer button { padding: 10px 20px; font-size: 0.9em; }
+            .solution-header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 10px;
+            }
+            .solution-audio { 
+                width: 100%;
+                max-width: none;
+                align-items: flex-start;
+            }
+            .content-btn { padding: 8px 12px; font-size: 0.85em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="panel panel-left">
+            <div class="content-section">
+                <div class="content-wrapper">
+                    <div class="content-selector">
+                        <button class="content-btn active" onclick="showContent('slides')">Slide</button>
+                        <button class="content-btn" onclick="showContent('video')">Bài giảng video</button>
+                    </div>
+                    <div class="content-header">
+                        <h2 id="contentTitle">Slide</h2>
+                        <span class="toggle-content" onclick="toggleContentVisibility()">[Ẩn]</span>
+                    </div>
+                    <div id="slidesComponent" class="slider-container">
+                        <div class="slides-wrapper"></div>
+                        <div class="slider-nav">
+                            <button class="prev-btn" onclick="prevSlide()">❮</button>
+                            <button class="next-btn" onclick="nextSlide()">❯</button>
+                        </div>
+                    </div>
+                    <div id="videoComponent" class="video-container hidden">
+                        <div style="position:relative; width:100%; height:0px; padding-bottom:56.250%">
+                            <iframe allow="fullscreen" allowfullscreen height="100%" src="https://www.youtube.com/embed/-VJ-ZqUDgyM" width="100%" style="border:none; width:100%; height:100%; position:absolute; left:0px; top:0px; overflow:hidden;"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lecture-container">
+                <h2>Bài giảng Chi tiết</h2>
+                <div class="lecture-content">
+                    <h3>Đề Bài</h3>
+                    <p>Xác định tập con nào sau đây là độc lập tuyến tính trong \(\mathbb{R}^4\):</p>
+                    <ul>
+                        <li>(i) \(\left\{
+                            \begin{bmatrix} 1 \\ 2 \\ 3 \\ 4 \end{bmatrix},
+                            \begin{bmatrix} 2 \\ 0 \\ 1 \\ -1 \end{bmatrix},
+                            \begin{bmatrix} 1 \\ -1 \\ 0 \\ 3 \end{bmatrix}
+                        \right\}\)</li>
+                        <li>(ii) \(\left\{
+                            \begin{bmatrix} 2 \\ 0 \\ 1 \\ -1 \end{bmatrix},
+                            \begin{bmatrix} 1 \\ 2 \\ -1 \\ 1 \end{bmatrix},
+                            \begin{bmatrix} 3 \\ 2 \\ 0 \\ 0 \end{bmatrix}
+                        \right\}\)</li>
+                    </ul>
+
+                    <h3>Giải</h3>
+                    <p>Ta tạo ma trận \(3 \times 4\) từ ba vector trong mỗi tập con, rồi sử dụng phép khử Gauss để đưa về ma trận bậc thang. Nếu hạng của ma trận bằng 3 (số vector), thì các vector độc lập tuyến tính.</p>
+
+                    <h4>Tập con (i)</h4>
+                    <p>Ma trận ban đầu:</p>
+                    <p>\[
+                        A = \begin{bmatrix}
+                            1 & 2 & 3 & 4 \\
+                            2 & 0 & 1 & -1 \\
+                            1 & -1 & 0 & 3
+                        \end{bmatrix}
+                    \]</p>
+                    <p><strong>Bước 1:</strong> \(R_2 \leftarrow R_2 - 2R_1\), \(R_3 \leftarrow R_3 - R_1\)</p>
+                    <p>\[
+                        \begin{bmatrix}
+                            1 & 2 & 3 & 4 \\
+                            0 & -4 & -5 & -9 \\
+                            0 & -3 & -3 & -1
+                        \end{bmatrix}
+                    \]</p>
+                    <p><strong>Bước 2:</strong> \(R_3 \leftarrow R_3 - \frac{3}{4}R_2\)</p>
+                    <p>\[
+                        R_3 = [0, -3 + 3, -3 + \frac{15}{4}, -1 + \frac{27}{4}] = [0, 0, \frac{3}{4}, \frac{23}{4}]
+                    \]</p>
+                    <p>\[
+                        \begin{bmatrix}
+                            1 & 2 & 3 & 4 \\
+                            0 & -4 & -5 & -9 \\
+                            0 & 0 & \frac{3}{4} & \frac{23}{4}
+                        \end{bmatrix}
+                    \]</p>
+                    <p><strong>Bước 3:</strong> Đưa về dạng bậc thang hàng:</p>
+                    <p>\[
+                        R_2 \leftarrow \frac{1}{-4}R_2 = [0, 1, \frac{5}{4}, \frac{9}{4}]
+                    \]</p>
+                    <p>\[
+                        R_3 \leftarrow \frac{4}{3}R_3 = [0, 0, 1, \frac{92}{12}] = [0, 0, 1, \frac{23}{3}]
+                    \]</p>
+                    <p>\[
+                        R_1 \leftarrow R_1 - 2R_2 = [1, 0, 3 - 2 \cdot \frac{5}{4}, 4 - 2 \cdot \frac{9}{4}] = [1, 0, \frac{1}{2}, \frac{1}{2}]
+                    \]</p>
+                    <p><strong>Ma trận bậc thang cuối cùng:</strong></p>
+                    <p>\[
+                        \begin{bmatrix}
+                            1 & 0 & \frac{1}{2} & \frac{1}{2} \\
+                            0 & 1 & \frac{5}{4} & \frac{9}{4} \\
+                            0 & 0 & 1 & \frac{23}{3}
+                        \end{bmatrix}
+                    \]</p>
+                    <p>⟹ Có 3 hàng bậc thang ≠ 0 → hạng = 3 → <strong>độc lập tuyến tính</strong>.</p>
+
+                    <h4>Tập con (ii)</h4>
+                    <p>Ma trận ban đầu:</p>
+                    <p>\[
+                        B = \begin{bmatrix}
+                            2 & 0 & 1 & -1 \\
+                            1 & 2 & -1 & 1 \\
+                            3 & 2 & 0 & 0
+                        \end{bmatrix}
+                    \]</p>
+                    <p><strong>Bước 1:</strong> \(R_2 \leftarrow R_2 - \frac{1}{2}R_1\), \(R_3 \leftarrow R_3 - \frac{3}{2}R_1\)</p>
+                    <p>\[
+                        R_2 = [0, 2, -\frac{3}{2}, \frac{3}{2}], \quad R_3 = [0, 2, -\frac{3}{2}, \frac{3}{2}]
+                    \]</p>
+                    <p>\[
+                        \begin{bmatrix}
+                            2 & 0 & 1 & -1 \\
+                            0 & 2 & -\frac{3}{2} & \frac{3}{2} \\
+                            0 & 2 & -\frac{3}{2} & \frac{3}{2}
+                        \end{bmatrix}
+                    \]</p>
+                    <p><strong>Bước 2:</strong> \(R_3 \leftarrow R_3 - R_2 = [0, 0, 0, 0]\)</p>
+                    <p><strong>Ma trận bậc thang cuối cùng:</strong></p>
+                    <p>\[
+                        \begin{bmatrix}
+                            2 & 0 & 1 & -1 \\
+                            0 & 2 & -\frac{3}{2} & \frac{3}{2} \\
+                            0 & 0 & 0 & 0
+                        \end{bmatrix}
+                    \]</p>
+                    <p>⟹ Hạng = 2 < 3 → <strong>phụ thuộc tuyến tính</strong>.</p>
+
+                    <h3>Đáp Án</h3>
+                    <ul>
+                        <li>Tập con (i) là <strong>độc lập tuyến tính</strong>.</li>
+                        <li>Tập con (ii) là <strong>phụ thuộc tuyến tính</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel panel-right">
+            <div class="audio-section">
+                <h3>Âm thanh giảng bài</h3>
+                <div>
+                    <iframe width="300" height="60" src="https://vocaroo.com/embed/1l17RUr5UFJG?autoplay=0" frameborder="0" allow="autoplay"></iframe>
+                    <br>
+                    <a href="https://voca.ro/1l17RUr5UFJG" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                </div>
+            </div>
+            <div class="quiz-wrapper">
+                <h3>Bài tập Củng cố</h3>
+                <div class="quiz-progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+                
+                <div id="quizContainer"></div>
+                <div id="solutionContainer"></div>
+                
+                <div class="quiz-footer">
+                    <div id="quizResult"></div>
+                    <button id="submitAnswerBtn" onclick="submitAnswer()" style="display: none;">Nộp Đáp Án</button>
+                    <button id="viewSolutionBtn" onclick="showSolution()" style="display: none;">Xem Lời Giải</button>
+                    <button id="nextQuestionBtn" onclick="nextQuestion()" style="display: none;">Câu tiếp theo</button>
+                    <button id="resetQuizBtn" onclick="resetQuiz()" style="display: none;">Làm lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="solutionModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSolutionModal()">×</span>
+            <div id="modalSolutionContent"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slideData = [
+                {
+                    title: 'Đề Bài',
+                    content: 'Xác định tập con nào sau đây là độc lập tuyến tính trong \\(\\mathbb{R}^4\\):<ul><li>(i) \\(\\left\\{ \\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\\\ 4 \\end{bmatrix}, \\begin{bmatrix} 2 \\\\ 0 \\\\ 1 \\\\ -1 \\end{bmatrix}, \\begin{bmatrix} 1 \\\\ -1 \\\\ 0 \\\\ 3 \\end{bmatrix} \\right\\}\\)</li><li>(ii) \\(\\left\\{ \\begin{bmatrix} 2 \\\\ 0 \\\\ 1 \\\\ -1 \\end{bmatrix}, \\begin{bmatrix} 1 \\\\ 2 \\\\ -1 \\\\ 1 \\end{bmatrix}, \\begin{bmatrix} 3 \\\\ 2 \\\\ 0 \\\\ 0 \\end{bmatrix} \\right\\}\\)</li></ul>'
+                },
+                {
+                    title: 'Phương Pháp Giải',
+                    content: '<ul><li>Tạo ma trận \\(3 \\times 4\\) từ ba vector trong mỗi tập con.</li><li>Dùng phép khử Gauss đưa về ma trận bậc thang.</li><li>Nếu hạng = 3 (số vector) \\(\\Rightarrow\\) độc lập tuyến tính.</li></ul>'
+                },
+                {
+                    title: 'Tập con (i)',
+                    content: 'Ma trận ban đầu:<br>\\[ A = \\begin{bmatrix} 1 & 2 & 3 & 4 \\\\ 2 & 0 & 1 & -1 \\\\ 1 & -1 & 0 & 3 \\end{bmatrix} \\]<br><strong>Bước 1:</strong> \\(R_2 \\leftarrow R_2 - 2R_1\\), \\(R_3 \\leftarrow R_3 - R_1\\)<br>\\[ \\begin{bmatrix} 1 & 2 & 3 & 4 \\\\ 0 & -4 & -5 & -9 \\\\ 0 & -3 & -3 & -1 \\end{bmatrix} \\]'
+                },
+                {
+                    title: 'Tập con (i) (tiếp tục)',
+                    content: '<strong>Bước 2:</strong> \\(R_3 \\leftarrow R_3 - \\frac{3}{4}R_2\\)<br>\\[ \\begin{bmatrix} 1 & 2 & 3 & 4 \\\\ 0 & -4 & -5 & -9 \\\\ 0 & 0 & \\frac{3}{4} & \\frac{23}{4} \\end{bmatrix} \\]<br><strong>Bước 3:</strong> Đưa về ma trận bậc thang:<br>\\[ \\begin{bmatrix} 1 & 0 & \\frac{1}{2} & \\frac{1}{2} \\\\ 0 & 1 & \\frac{5}{4} & \\frac{9}{4} \\\\ 0 & 0 & 1 & \\frac{23}{3} \\end{bmatrix} \\]<br>\\(\\Rightarrow\\) Hạng = 3 \\(\\Rightarrow\\) <strong>độc lập tuyến tính</strong>.'
+                },
+                {
+                    title: 'Tập con (ii)',
+                    content: 'Ma trận ban đầu:<br>\\[ B = \\begin{bmatrix} 2 & 0 & 1 & -1 \\\\ 1 & 2 & -1 & 1 \\\\ 3 & 2 & 0 & 0 \\end{bmatrix} \\]<br><strong>Bước 1:</strong> \\(R_2 \\leftarrow R_2 - \\frac{1}{2}R_1\\), \\(R_3 \\leftarrow R_3 - \\frac{3}{2}R_1\\)<br>\\[ R_2 = \\left[0, 2, -\\frac{3}{2}, \\frac{3}{2} \\right], \\quad R_3 = \\left[0, 2, -\\frac{3}{2}, \\frac{3}{2} \\right] \\]<br>\\[ R_3 \\leftarrow R_3 - R_2 = [0, 0, 0, 0] \\]'
+                },
+                {
+                    title: 'Tập con (ii) (tiếp tục)',
+                    content: 'Ma trận bậc thang cuối cùng:<br>\\[ \\begin{bmatrix} 2 & 0 & 1 & -1 \\\\ 0 & 2 & -\\frac{3}{2} & \\frac{3}{2} \\\\ 0 & 0 & 0 & 0 \\end{bmatrix} \\]<br>\\(\\Rightarrow\\) Hạng = 2 < 3 \\(\\Rightarrow\\) <strong>phụ thuộc tuyến tính</strong>.'
+                },
+                {
+                    title: 'Kết Luận',
+                    content: '<ul><li>Tập con (i): <strong>độc lập tuyến tính</strong>.</li><li>Tập con (ii): <strong>phụ thuộc tuyến tính</strong>.</li></ul>'
+                }
+            ];
+            
+            const slidesWrapper = document.querySelector('.slides-wrapper');
+            slidesWrapper.innerHTML = slideData.map((s, index) => `
+                <div class="slide ${index === 0 ? 'active-slide' : ''}" data-index="${index}">
+                    <div class="slide-title">${s.title}</div>
+                    <div class="slide-content">${s.content}</div>
+                </div>
+            `).join('');
+
+            window.slides = document.querySelectorAll('.slide');
+            window.currentSlideIndex = 0;
+            window.currentContent = 'slides';
+
+            window.quizData = [
+                {
+                    question: 'Xét tập các vector trong \\(\\mathbb{R}^3\\): \\[\\left\\{\\begin{bmatrix} 1 \\\\ 0 \\\\ 1 \\end{bmatrix}, \\begin{bmatrix} 2 \\\\ 1 \\\\ 1 \\end{bmatrix}, \\begin{bmatrix} 3 \\\\ 1 \\\\ 2 \\end{bmatrix}\\right\\}\\] Tập vector trên có độc lập tuyến tính không?',
+                    options: ['Có, vì hạng = 3', 'Không, vì có vector phụ thuộc', 'Không, vì hạng = 2', 'Có, vì có 3 vector trong \\(\\mathbb{R}^3\\)'],
+                    answer: 2,
+                    solution: `
+                        <div class="solution-header">
+                            <h5>Lời giải chi tiết</h5>
+                            <div class="solution-audio">
+                                <p>Ấn vào để nghe thuyết minh lời giải bên dưới:</p>
+                                <iframe width="300" height="60" src="https://vocaroo.com/embed/1596cBCERCtO?autoplay=0" frameborder="0" allow="autoplay"></iframe>
+                                <br><a href="https://voca.ro/1596cBCERCtO" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                            </div>
+                        </div>
+                        <p>Lập ma trận:<br>
+                        \\[ A = \\begin{bmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 1 \\\\ 1 & 1 & 2 \\end{bmatrix} \\]<br>
+                        Khử Gauss:<br>
+                        \\[ R_3 \\leftarrow R_3 - R_1 = \\begin{bmatrix} 0 & -1 & -1 \\end{bmatrix} \\]<br>
+                        \\[ R_3 \\leftarrow R_3 + R_2 = \\begin{bmatrix} 0 & 0 & 0 \\end{bmatrix} \\]<br>
+                        \\[ \\Rightarrow A_{\\text{bậc thang}} = \\begin{bmatrix} 1 & 2 & 3 \\\\ 0 & 1 & 1 \\\\ 0 & 0 & 0 \\end{bmatrix} \\]<br>
+                        \\(\\Rightarrow \\text{Hạng} = 2 < 3 \\Rightarrow \\text{phụ thuộc tuyến tính}.\\)<br>
+                        Đáp án đúng: \\(\\boxed{\\text{Không, vì hạng = 2}}\\).</p>`
+                },
+                {
+                    question: 'Trong \\(\\mathbb{R}^4\\), xét tập: \\[\\left\\{\\begin{bmatrix} 1 \\\\ 1 \\\\ 0 \\\\ 0 \\end{bmatrix}, \\begin{bmatrix} 0 \\\\ 1 \\\\ 1 \\\\ 0 \\end{bmatrix}, \\begin{bmatrix} 0 \\\\ 0 \\\\ 1 \\\\ 1 \\end{bmatrix}\\right\\}\\] Tập vector trên có độc lập tuyến tính không?',
+                    options: ['Có, vì số vector < số chiều', 'Có, vì hạng = 3', 'Không, vì hạng = 2', 'Không, vì trùng vector'],
+                    answer: 1,
+                    solution: `
+                        <div class="solution-header">
+                            <h5>Lời giải chi tiết</h5>
+                            <div class="solution-audio">
+                                <p>Ấn vào để nghe thuyết minh lời giải bên dưới:</p>
+                                <iframe width="300" height="60" src="https://vocaroo.com/embed/18RwDjKLBTiP?autoplay=0" frameborder="0" frameborder="0" allow="autoplay"></iframe>
+                                <br><a href="https://voca.ro/18RwDjKLBTiP" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                            </div>
+                        </div>
+                        <p>Lập ma trận:<br>
+                        \\[ A = \\begin{bmatrix} 1 & 0 & 0 \\\\ 1 & 1 & 0 \\\\ 0 & 1 & 1 \\\\ 0 & 0 & 1 \\end{bmatrix} \\]<br>
+                        Đây đã là dạng bậc thang hàng (mỗi cột có phần tử dẫn đầu là 1 và các phần tử bên dưới bằng 0).<br>
+                        \\(\\text{Hạng} = 3 = \\text{số vector} \\Rightarrow \\text{độc lập tuyến tính}.\\)<br>
+                        Đáp án đúng: \\(\\boxed{\\text{Có, vì hạng = 3}}\\).</p>`
+                },
+                {
+                    question: 'Trong \\(\\mathbb{R}^3\\), xét tập: \\[\\left\\{\\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\end{bmatrix}, \\begin{bmatrix} 2 \\\\ 4 \\\\ 6 \\end{bmatrix}, \\begin{bmatrix} 3 \\\\ 6 \\\\ 9 \\end{bmatrix}\\right\\}\\] Tập vector trên có độc lập tuyến tính không?',
+                    options: ['Có, vì số hàng = số vector', 'Không, vì các vector là bội của nhau', 'Có, vì hạng = 3', 'Không, vì hạng = 2'],
+                    answer: 1,
+                    solution: `
+                        <div class="solution-header">
+                            <h5>Lời giải chi tiết</h5>
+                            <div class="solution-audio">
+                                <p>Ấn vào để nghe thuyết minh lời giải bên dưới:</p>
+                                <iframe width="300" height="60" src="https://vocaroo.com/embed/101CWyE9xH5M?autoplay=0" frameborder="0" allow="autoplay"></iframe>
+                                <br><a href="https://voca.ro/101CWyE9xH5M" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                            </div>
+                        </div>
+                        <p>Nhận xét: Các vector là bội của nhau<br>
+                        \\[ \\begin{bmatrix} 2 \\\\ 4 \\\\ 6 \\end{bmatrix} = 2 \\cdot \\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\end{bmatrix}, \\quad \\begin{bmatrix} 3 \\\\ 6 \\\\ 9 \\end{bmatrix} = 3 \\cdot \\begin{bmatrix} 1 \\\\ 2 \\\\ 3 \\end{bmatrix} \\]<br>
+                        Vì vậy, tập này phụ thuộc tuyến tính mà không cần khử Gauss.<br>
+                        Để xác nhận, lập ma trận:<br>
+                        \\[ A = \\begin{bmatrix} 1 & 2 & 3 \\\\ 2 & 4 & 6 \\\\ 3 & 6 & 9 \\end{bmatrix} \\]<br>
+                        Khử Gauss:<br>
+                        \\[ R_2 \\leftarrow R_2 - 2R_1 = \\begin{bmatrix} 0 & 0 & 0 \\end{bmatrix} \\]<br>
+                        \\[ R_3 \\leftarrow R_3 - 3R_1 = \\begin{bmatrix} 0 & 0 & 0 \\end{bmatrix} \\]<br>
+                        \\[ \\Rightarrow A_{\\text{bậc thang}} = \\begin{bmatrix} 1 & 2 & 3 \\\\ 0 & 0 & 0 \\\\ 0 & 0 & 0 \\end{bmatrix} \\]<br>
+                        \\(\\Rightarrow \\text{Hạng} = 1 < 3 \\Rightarrow \\text{phụ thuộc tuyến tính}.\\)<br>
+                        Đáp án đúng: \\(\\boxed{\\text{Không, vì các vector là bội của nhau}}\\).</p>`
+                }
+            ];
+            
+            window.currentQuestion = 0;
+            window.score = 0;
+            window.quizAnswered = false;
+            window.selectedAnswer = null;
+
+            loadQuestion();
+            renderMath();
+        });
+
+        function renderMath() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch(err => {
+                    console.error('MathJax rendering failed:', err);
+                });
+            } else {
+                console.warn('MathJax is not loaded. Please check the script inclusion or network connectivity.');
+            }
+        }
+
+        window.showContent = function(type) {
+            const slidesComponent = document.getElementById('slidesComponent');
+            const videoComponent = document.getElementById('videoComponent');
+            const contentTitle = document.getElementById('contentTitle');
+            const buttons = document.querySelectorAll('.content-btn');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if (type === 'slides') {
+                slidesComponent.classList.remove('hidden');
+                videoComponent.classList.add('hidden');
+                contentTitle.textContent = 'Slide';
+                document.querySelector('button[onclick="showContent(\'slides\')"]').classList.add('active');
+                currentContent = 'slides';
+            } else {
+                slidesComponent.classList.add('hidden');
+                videoComponent.classList.remove('hidden');
+                contentTitle.textContent = 'Bài giảng Video';
+                document.querySelector('button[onclick="showContent(\'video\')"]').classList.add('active');
+                currentContent = 'video';
+            }
+
+            const toggleContent = document.querySelector('.toggle-content');
+            toggleContent.textContent = '[Ẩn]';
+            slidesComponent.classList.remove('hidden');
+            videoComponent.classList.remove('hidden');
+            if (type === 'slides') {
+                videoComponent.classList.add('hidden');
+            } else {
+                slidesComponent.classList.add('hidden');
+            }
+        }
+
+        window.toggleContentVisibility = function() {
+            const slidesComponent = document.getElementById('slidesComponent');
+            const videoComponent = document.getElementById('videoComponent');
+            const toggleContent = document.querySelector('.toggle-content');
+            const isHidden = currentContent === 'slides' ? slidesComponent.classList.contains('hidden') : videoComponent.classList.contains('hidden');
+
+            if (isHidden) {
+                if (currentContent === 'slides') {
+                    slidesComponent.classList.remove('hidden');
+                } else {
+                    videoComponent.classList.remove('hidden');
+                }
+                toggleContent.textContent = '[Ẩn]';
+            } else {
+                if (currentContent === 'slides') {
+                    slidesComponent.classList.add('hidden');
+                } else {
+                    videoComponent.classList.add('hidden');
+                }
+                toggleContent.textContent = '[Hiện]';
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active-slide', i === index));
+            document.querySelector('.slides-wrapper').style.transform = `translateX(${-index * 100}%)`;
+            currentSlideIndex = index;
+        }
+        window.nextSlide = () => showSlide((currentSlideIndex + 1) % slides.length);
+        window.prevSlide = () => showSlide((currentSlideIndex - 1 + slides.length) % slides.length);
+
+        function loadQuestion() {
+            quizAnswered = false;
+            selectedAnswer = null;
+            const q = quizData[currentQuestion];
+            const quizContainer = document.getElementById('quizContainer');
+            
+            const optionsHTML = q.options.map((opt, i) => `
+                <div class="option" onclick="selectAnswer(${i}, this)">
+                    <input type="radio" name="answer" value="${i}" id="opt${i}">
+                    <label for="opt${i}">(${String.fromCharCode(65 + i)}) ${opt}</label>
+                </div>
+            `).join('');
+            
+            quizContainer.innerHTML = `
+                <div class='question'>Câu ${currentQuestion + 1}: ${q.question}</div>
+                <div class="options-container">${optionsHTML}</div>
+            `;
+            document.getElementById('solutionContainer').innerHTML = '';
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+            document.getElementById('submitAnswerBtn').style.display = 'none';
+            document.getElementById('viewSolutionBtn').style.display = 'none';
+            document.getElementById('nextQuestionBtn').style.display = 'none';
+            document.getElementById('quizResult').textContent = '';
+            
+            updateProgress();
+            renderMath();
+        }
+
+        window.selectAnswer = function(index, element) {
+            if (quizAnswered) return;
+            const options = document.querySelectorAll('.option');
+            
+            if (selectedAnswer === index) {
+                options.forEach(opt => opt.classList.remove('selected'));
+                selectedAnswer = null;
+                document.getElementById('submitAnswerBtn').style.display = 'none';
+            } else {
+                options.forEach(opt => opt.classList.remove('selected'));
+                element.classList.add('selected');
+                selectedAnswer = index;
+                document.getElementById('submitAnswerBtn').style.display = 'inline-block';
+            }
+        }
+
+        window.submitAnswer = function() {
+            if (!quizAnswered && selectedAnswer !== null) {
+                quizAnswered = true;
+                const correctAnswerIndex = quizData[currentQuestion].answer;
+                const options = document.querySelectorAll('.option');
+                
+                if (selectedAnswer === correctAnswerIndex) {
+                    score++;
+                    options[selectedAnswer].classList.add('correct');
+                } else {
+                    options[selectedAnswer].classList.add('incorrect');
+                    if (correctAnswerIndex !== null) {
+                        options[correctAnswerIndex].classList.add('correct');
+                    }
+                }
+                
+                options.forEach(opt => opt.style.pointerEvents = 'none');
+                document.getElementById('submitAnswerBtn').style.display = 'none';
+                document.getElementById('viewSolutionBtn').style.display = 'inline-block';
+                document.getElementById('nextQuestionBtn').style.display = 'inline-block';
+            }
+        }
+        
+        window.showSolution = function() {
+            const solutionContainer = document.getElementById('modalSolutionContent');
+            const q = quizData[currentQuestion];
+            const solutionHTML = `
+                <div class="modal-question">Câu ${currentQuestion + 1}: ${q.question}</div>
+                <div class="solution-box">${q.solution}</div>
+            `;
+            solutionContainer.innerHTML = solutionHTML;
+            document.getElementById('solutionModal').classList.remove('hidden');
+            
+            if (window.MathJax && window.MathJax.typesetClear && window.MathJax.typesetPromise) {
+                window.MathJax.typesetClear(['#modalSolutionContent']);
+                setTimeout(() => {
+                    window.MathJax.typesetPromise(['#modalSolutionContent']).catch(err => {
+                        console.error('MathJax rendering failed in modal:', err);
+                    });
+                }, 50);
+            } else {
+                console.warn('MathJax is not loaded. Please check the script inclusion or network connectivity.');
+            }
+            
+            setTimeout(() => {
+                const solutionBox = solutionContainer.querySelector('.solution-box');
+                if (solutionBox) {
+                    solutionBox.classList.add('visible');
+                }
+            }, 10);
+        }
+
+        window.closeSolutionModal = function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `Câu ${currentQuestion + 1} / ${quizData.length}`;
+        }
+        
+        window.nextQuestion = function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                showFinalResult();
+            }
+        }
+
+        function showFinalResult() {
+            document.getElementById('quizContainer').innerHTML = '';
+            document.getElementById('solutionContainer').innerHTML = '';
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+
+            const quizResult = document.getElementById('quizResult');
+            const resultText = `Bạn đã hoàn thành! Kết quả: ${score} / ${quizData.length} câu đúng.`;
+            const resultColor = score / quizData.length >= 0.8 ? 'var(--success-color)' : (score / quizData.length >= 0.5 ? '#f59e0b' : 'var(--error-color)');
+            
+            quizResult.innerHTML = `<span style="color: ${resultColor}">${resultText}</span>`;
+            
+            document.getElementById('nextQuestionBtn').style.display = 'none';
+            document.getElementById('viewSolutionBtn').style.display = 'none';
+            document.getElementById('submitAnswerBtn').style.display = 'none';
+            document.getElementById('resetQuizBtn').style.display = 'inline-block';
+            document.getElementById('progressBar').style.width = '100%';
+        }
+
+        window.resetQuiz = function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+            currentQuestion = 0;
+            score = 0;
+            loadQuestion();
+            document.getElementById('resetQuizBtn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

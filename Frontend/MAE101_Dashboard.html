@@ -1,0 +1,1082 @@
+
+<!DOCTYPE html>
+<html lang="vi" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathBoard - Bài Giảng Tương Tác</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Lexend (thay thế Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // Cấu hình Tailwind để sử dụng font Lexend
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Lexend', 'sans-serif'],
+                    },
+                },
+            },
+            darkMode: 'class', // Kích hoạt chế độ dark mode bằng class
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        .view {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .topic-card {
+            background-color: white;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: all 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+        .topic-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+        }
+        .topic-card .icon-bg {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .topic-card .title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1rem;
+        }
+        .detail-item {
+            position: relative;
+            transition: all 0.3s ease-in-out;
+        }
+        .slot-card:hover, .topic-card:hover, .detail-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        /* Điều chỉnh dropdown trong chế độ tối (không cần nữa, nhưng giữ để consistency) */
+        .status-select {
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+        .dark .status-select {
+            background-color: #4b5563;
+            color: #f9fafb;
+            border-color: #6b7280;
+        }
+        .status-select:hover {
+            background-color: #e5e7eb;
+        }
+        .dark .status-select:hover {
+            background-color: #6b7280;
+        }
+        .status-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .dark .status-select:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+    <!-- Nút chuyển đổi Sáng/Tối -->
+    <div class="fixed top-4 left-4 z-50">
+        <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
+        <div id="slot-selection" class="view">
+            <header class="text-center mb-10">
+                <h1 class="text-3xl sm:text-4xl font-bold text-indigo-600 dark:text-indigo-400">MathBoard</h1>
+                <p class="text-md text-gray-600 dark:text-gray-400">Bài Giảng Tương Tác Toán Học</p>
+            </header>
+            <div id="slot-container" class="space-y-6"></div>
+        </div>
+        <div id="subtopic-view" class="view hidden">
+            <button class="back-button mb-6 inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Quay lại trang chính
+            </button>
+            <h2 id="subtopic-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8"></h2>
+            <div id="subtopic-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </div>
+        <div id="detail-view" class="view hidden">
+            <button class="back-button mb-6 inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Quay lại danh sách chủ đề
+            </button>
+            <h2 id="detail-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6"></h2>
+            <div id="detail-container" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- LOGIC CHUYỂN ĐỔI SÁNG/TỐI ---
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        const themeToggleButton = document.getElementById('theme-toggle');
+
+        // Hàm áp dụng theme
+        const applyTheme = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggleLightIcon.classList.remove('hidden');
+                themeToggleDarkIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleDarkIcon.classList.remove('hidden');
+                themeToggleLightIcon.classList.add('hidden');
+            }
+        };
+
+        // Kiểm tra theme đã lưu hoặc theme hệ thống khi tải trang
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme(systemPrefersDark ? 'dark' : 'light');
+        }
+
+        // Sự kiện click nút chuyển đổi
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        // --- LOGIC ỨNG DỤNG ---
+        const slotSelectionView = document.getElementById('slot-selection');
+        const subtopicView = document.getElementById('subtopic-view');
+        const detailView = document.getElementById('detail-view');
+        const slotContainer = document.getElementById('slot-container');
+        const subtopicTitle = document.getElementById('subtopic-title');
+        const subtopicContainer = document.getElementById('subtopic-container');
+        const detailTitle = document.getElementById('detail-title');
+        const detailContainer = document.getElementById('detail-container');
+
+        function showLoading(container) {
+            container.innerHTML = `
+                <div class="flex justify-center items-center p-10">
+                    <div class="w-8 h-8 border-4 border-t-indigo-500 dark:border-t-indigo-400 border-gray-200 dark:border-gray-600 rounded-full animate-spin"></div>
+                </div>
+            `;
+        }
+
+        function showView(viewToShow) {
+            [slotSelectionView, subtopicView, detailView].forEach(v => v.classList.add('hidden'));
+            viewToShow.classList.remove('hidden');
+        }
+
+            async function fetchSlots() {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return [
+            {
+                id: 1,
+                title: "Slot 1: Hàm Số, Giới Hạn và Liên Tục",
+                description: "Khám phá các khái niệm cơ bản và nâng cao về hàm số."
+            },
+            {
+                id: 2,
+                title: "Slot 2: Đạo hàm",
+                description: "Tìm hiểu về khái niệm, công thức và ứng dụng của đạo hàm."
+            },
+            {
+                id: 3,
+                title: "Slot 3: Ứng Dụng Đạo hàm, Xấp xỉ tuyến tính",
+                description: "Khám phá các ứng dụng và khái niệm liên quan đến đạo hàm và xấp xỉ tuyến tính."
+            },
+            {
+                id: 4,
+                title: "Slot 4: Trung Bình Lagrange, Tiệm cận",
+                description: "Nghiên cứu định lý trung bình, trung bình tích phân và cực trị."
+            },
+            {
+                id: 5,
+                title: "Slot 5: Phương pháp Newton, NH",
+                description: "Khám phá phương pháp Newton, nguyên hàm và xấp xỉ tích phân."
+            },
+            {
+                id: 6,
+                title: "Slot 6: Tích phân xác định",
+                description: "Nghiên cứu nguyên hàm, tích phân xác định và ứng dụng trong vật lý."
+            },
+            {
+                id: 7,
+                title: "Slot 7: Tích phân suy rộng",
+                description: "Nghiên cứu tích phân suy rộng, so sánh tích phân và ôn tập giải tích."
+            },
+            {
+                id: 8,
+                title: "Slot 8: Hệ phương trình tuyến tính",
+                description: "Tìm hiểu các khái niệm cơ bản và nâng cao về hệ phương trình tuyến tính."
+            },
+            {
+                id: 9,
+                title: "Slot 9: Biến đổi Gauss",
+                description: "Nghiên cứu phép biến đổi Gauss và ứng dụng trong giải hệ phương trình tuyến tính."
+            },
+            {
+                id: 10,
+                title: "Slot 10: Nhân ma trận",
+                description: "Khám phá các phương pháp nhân ma trận và ứng dụng liên quan."
+            },
+            {
+                id: 11,
+                title: "Slot 11: Ma trận nghịch đảo và ma trận biến đổi tuyến tính",
+                description: "Tìm hiểu về ma trận nghịch đảo, phép biến đổi tuyến tính và ứng dụng."
+            },
+            {
+                id: 12,
+                title: "Slot 12: Tính chất định thức",
+                description: "Tìm hiểu các khái niệm cơ bản, tính chất và ứng dụng của định thức."
+            },
+            {
+                id: 13,
+                title: "Slot 13: Giá trị riêng, vector riêng",
+                description: "Tìm hiểu về giá trị riêng, vector riêng và ứng dụng trong đại số tuyến tính."
+            },
+            {
+                id: 14,
+                title: "Slot 14: Ôn tập, véc tơ",
+                description: "Tìm hiểu về không gian véc tơ, hệ cơ sở, tổ hợp tuyến tính và các tính chất liên quan."
+            },
+            {
+                id: 15,
+                title: "Slot 15: Phép chiếu",
+                description: "Tìm hiểu về đường thẳng trong không gian, phép chiếu vuông góc, phép phản xạ và kết hợp các phép biến hình."
+            },
+            {
+                id: 16,
+                title: "Slot 16: Tích có hướng",
+                description: "Tìm hiểu về tích có hướng (cross product) và chuẩn (norm) của véc tơ."
+            },
+            {
+                id: 17,
+                title: "Slot 17: Không gian con của Rn",
+                description: "Tìm hiểu về không gian con của Rn, tính chất, cơ sở và số chiều."
+            },
+            {
+                id: 18,
+                title: "Slot 18: Hệ sinh Span",
+                description: "Tìm hiểu về hệ sinh, span, độc lập tuyến tính và cơ sở trong không gian véc tơ."
+            },
+            {
+                id: 19,
+                title: "Slot 19: Tích vô hướng và các khái niệm liên quan",
+                description: "Tìm hiểu về tích vô hướng, véc tơ định hướng, hệ trực giao và các khái niệm liên quan."
+            },
+            {
+                id: 20,
+                title: "Slot 20: Ranks - Hạng của ma trận",
+                description: "Tìm hiểu về hạng của ma trận, tính chất, ý nghĩa và các bài tập áp dụng."
+            }
+        ];
+    }
+
+        async function fetchSubtopics(slotId) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+            if (slotId == 1) {
+                return [
+                    { id: "subtopic-tong-quan", title: "Tổng quan về hàm số", icon: "📐" },
+                    { id: "subtopic-mien-dac-diem", title: "Miền và đặc điểm hàm số", icon: "📏" },
+                    { id: "subtopic-gioi-han", title: "Giới hạn của hàm số", icon: "∞" },
+                    { id: "subtopic-lientuc", title: "Hàm liên tục", icon: "🔗" },
+                    { id: "subtopic-dich-chuyen", title: "Dịch chuyển đồ thị", icon: "📈" },
+                    { id: "subtopic-bai-tap-ung-dung", title: "Bài tập và ứng dụng", icon: "✍️" }
+                ];
+            } else if (slotId == 2) {
+                return [
+                    { id: "subtopic-kien-thuc-tong-quan", title: "Kiến thức tổng quan về đạo hàm", icon: "📚" },
+                    { id: "subtopic-cong-thuc-dinh-nghia", title: "Công thức và định nghĩa cơ bản", icon: "🔢" },
+                    { id: "subtopic-dao-ham-hop", title: "Đạo hàm của hàm hợp – Chain Rule", icon: "🔗" },
+                    { id: "subtopic-dao-ham-an", title: "Đạo hàm của hàm ẩn – Implicit Differentiation", icon: "🔍" },
+                    { id: "subtopic-dao-ham-tich-phan", title: "Đạo hàm của một tích phân xác định", icon: "∫" },
+                    { id: "subtopic-ung-dung-bieu-dien", title: "Ứng dụng – Biểu diễn – Tổng hợp", icon: "📈" }
+                ];
+            } else if (slotId == 3) {
+                return [
+                    { id: "subtopic-phuong-trinh-tiep-tuyen", title: "Phương trình tiếp tuyến", icon: "📏" },
+                    { id: "subtopic-related-rates", title: "Related Rates và Rate of Change", icon: "⏱️" },
+                    { id: "subtopic-chua-bai-tap-related-rate", title: "Chữa bài tập Related Rate", icon: "✅" },
+                    { id: "subtopic-xap-xi-tuyen-tinh", title: "Xấp xỉ tuyến tính – Linear Approximation", icon: "📈" },
+                    { id: "subtopic-khai-niem-slope", title: "Khái niệm liên quan đến slope", icon: "📐" }
+                ];
+            } else if (slotId == 4) {
+                return [
+                    { id: "subtopic-dinh-ly-trung-binh", title: "Định lý trung bình (Lagrange & Rolle)", icon: "📊" },
+                    { id: "subtopic-trung-binh-tich-phan", title: "Trung bình tích phân & so sánh các định lý", icon: "∫" },
+                    { id: "subtopic-trung-binh-lagrange-tiem-can", title: "Trung bình Lagrange và tiệm cận", icon: "📈" },
+                    { id: "subtopic-cuc-tri-hinh-dang", title: "Cực trị & hình dạng đồ thị", icon: "📉" }
+                ];
+            } else if (slotId == 5) {
+                return [
+                    { id: "subtopic-phuong-phap-newton", title: "Phương pháp Newton", icon: "🔧" },
+                    { id: "subtopic-nguyen-ham-tich-phan", title: "Nguyên hàm và tích phân cơ bản", icon: "∫" },
+                    { id: "subtopic-xap-xi-tich-phan", title: "Xấp xỉ tích phân", icon: "📉" },
+                    { id: "subtopic-cong-thuc-simpson", title: "Công thức Simpson (Simpson Rule)", icon: "📊" },
+                    { id: "subtopic-phuong-phap-diem-dau-cuoi", title: "Các phương pháp điểm đầu/cuối", icon: "📏" }
+                ];
+            } else if (slotId == 6) {
+                return [
+                    { id: "subtopic-nguyen-ham-bat-dinh", title: "Nguyên hàm Tích phân bất định và bài tập", icon: "∫" },
+                    { id: "subtopic-tich-phan-xac-dinh-ly-thuyet", title: "Tích phân xác định Lý thuyết và ứng dụng", icon: "📊" },
+                    { id: "subtopic-dao-ham-tich-phan-tham-so", title: "Đạo hàm của tích phân có tham số", icon: "🔢" },
+                    { id: "subtopic-ung-dung-chuyen-dong", title: "Ứng dụng chuyển động Vật lý", icon: "⏱️" }
+                ];
+            } else if (slotId == 7) {
+                return [
+                    { id: "subtopic-tich-phan-suy-rong", title: "Tích phân suy rộng", icon: "∞" },
+                    { id: "subtopic-so-sanh-tich-phan", title: "So sánh tích phân", icon: "📊" },
+                    { id: "subtopic-on-tap-giai-tich", title: "Ôn tập giải tích tổng hợp", icon: "📚" }
+                ];
+            } else if (slotId == 8) {
+                return [
+                    { id: "subtopic-gioi-thieu-dai-so", title: "Giới thiệu và khái quát Đại số tuyến tính", icon: "📚" },
+                    { id: "subtopic-vec-to", title: "Véc tơ và tính độc lập tuyến tính", icon: "➡️" },
+                    { id: "subtopic-nhan-ma-tran", title: "Phép nhân ma trận", icon: "✖️" },
+                    { id: "subtopic-ma-tran-dac-biet", title: "Các loại ma trận đặc biệt và hạng của ma trận", icon: "🔢" },
+                    { id: "subtopic-tinh-dinh-thuc", title: "Tính định thức và các tính chất liên quan", icon: "📐" },
+                    { id: "subtopic-ma-tran-nghich-dao", title: "Ma trận nghịch đảo và phép biến đổi Gauss", icon: "🔄" },
+                    { id: "subtopic-minor-cofactor", title: "Minor, Cofactor và Adjugate", icon: "📊" },
+                    { id: "subtopic-giai-he-phuong-trinh", title: "Giải hệ phương trình tuyến tính", icon: "✅" },
+                    { id: "subtopic-ung-dung-he-phuong-trinh", title: "Ứng dụng của hệ phương trình tuyến tính", icon: "💡" }
+                ];
+            } else if (slotId == 9) {
+                return [
+                    { id: "subtopic-bien-doi-gauss", title: "Phép biến đổi Gauss và giải hệ phương trình tuyến tính", icon: "🔧" },
+                    { id: "subtopic-bieu-dien-nghiem", title: "Biểu diễn nghiệm và biện luận hệ phương trình", icon: "📝" },
+                    { id: "subtopic-ma-tran-chuyen-vi", title: "Ma trận chuyển vị", icon: "🔄" }
+                ];
+            } else if (slotId == 10) {
+                return [
+                    { id: "subtopic-nhan-hai-ma-tran", title: "Nhân 2 ma trận", icon: "✖️" },
+                    { id: "subtopic-phuong-trinh-ma-tran", title: "Phương trình ma trận", icon: "📐" },
+                    { id: "subtopic-anh-xa-tuyen-tinh", title: "Ảnh của một véc tơ qua ánh xạ tuyến tính", icon: "➡️" }
+                ];
+            } else if (slotId == 11) {
+                return [
+                    { id: "subtopic-kien-thuc-nen-tang", title: "Kiến thức nền tảng về ma trận nghịch đảo", icon: "📚" },
+                    { id: "subtopic-bai-tap-ung-dung-ma-tran-nghich-dao", title: "Bài tập và ứng dụng của ma trận nghịch đảo", icon: "✍️" },
+                    { id: "subtopic-phuong-trinh-vec-to", title: "Phương trình và véc tơ trong không gian", icon: "🔢" },
+                    { id: "subtopic-bien-doi-tuyen-tinh", title: "Biến đổi tuyến tính và ánh xạ", icon: "➡️" }
+                ];
+            } else if (slotId == 12) {
+                return [
+                    { id: "subtopic-kien-thuc-co-ban-det", title: "Kiến thức cơ bản về định thức", icon: "📚" },
+                    { id: "subtopic-bai-tap-ung-dung-det", title: "Bài tập và ứng dụng của định thức", icon: "✍️" },
+                    { id: "subtopic-det-lien-he-ma-tran", title: "Định thức và liên hệ với các ma trận khác", icon: "🔗" },
+                    { id: "subtopic-det-he-phuong-trinh", title: "Định thức và hệ phương trình, phép nhân", icon: "✅" },
+                    { id: "subtopic-tong-hop-cong-thuc", title: "Tổng hợp công thức và tính chất định thức", icon: "📝" }
+                ];
+            } else if (slotId == 13) {
+                return [
+                    { id: "subtopic-he-phuong-trinh-cramer", title: "Hệ phương trình Cramer", icon: "✅" },
+                    { id: "subtopic-gia-tri-rieng-nen-tang", title: "Giá trị riêng và véc tơ riêng – kiến thức nền tảng", icon: "📚" },
+                    { id: "subtopic-tim-kiem-tra-vec-to-rieng", title: "Tìm, kiểm tra, và bài tập về véc tơ riêng", icon: "✍️" },
+                    { id: "subtopic-y-nghia-hinh-hoc", title: "Ý nghĩa hình học và minh hoạ qua lập trình", icon: "📊" },
+                    { id: "subtopic-cheo-hoa-ma-tran", title: "Chéo hoá ma trận", icon: "🔄" }
+                ];
+            } else if (slotId == 14) {
+                return [
+                    { id: "subtopic-tong-quan-on-tap", title: "Tổng quan và hệ thống nội dung ôn tập", icon: "📚" },
+                    { id: "subtopic-khai-niem-khong-gian-vec-to", title: "Khái niệm cơ bản về không gian véc tơ", icon: "➡️" },
+                    { id: "subtopic-he-co-so-to-hop", title: "Hệ cơ sở và tổ hợp tuyến tính", icon: "🔢" },
+                    { id: "subtopic-tinh-chat-vec-to", title: "Tính chất và đặc điểm của véc tơ", icon: "📝" }
+                ];
+            } else if (slotId == 15) {
+                return [
+                    { id: "subtopic-duong-thang-khong-gian", title: "Đường thẳng trong không gian", icon: "📏" },
+                    { id: "subtopic-phep-chieu-tich-vo-huong", title: "Phép chiếu vuông góc và tích vô hướng", icon: "🔢" },
+                    { id: "subtopic-phep-phan-xa", title: "Phép phản xạ (Reflection)", icon: "🔄" },
+                    { id: "subtopic-ket-hop-bien-hinh", title: "Kết hợp các phép biến hình", icon: "➡️" }
+                ];
+            } else if (slotId == 16) {
+                return [
+                    { id: "subtopic-tich-co-huong", title: "Tích có hướng (Cross Product)", icon: "✖️" },
+                    { id: "subtopic-chuan-vec-to", title: "Chuẩn (Norm) của véc tơ", icon: "📏" }
+                ];
+            } else if (slotId == 17) {
+                return [
+                    { id: "subtopic-kien-thuc-nen-ve-khong-gian", title: "Kiến thức nền về không gian véc tơ", icon: "📚" },
+                    { id: "subtopic-tinh-chat-co-so", title: "Tính chất & khái niệm cơ sở", icon: "🔢" },
+                    { id: "subtopic-bai-tap-minh-hoa", title: "Bài tập & minh hoạ về không gian véc tơ con", icon: "✍️" },
+                    { id: "subtopic-co-so-so-chieu", title: "Cơ sở & số chiều (Basis and Dimension)", icon: "📐" }
+                ];
+            } else if (slotId == 18) {
+                return [
+                    { id: "subtopic-doc-lap-tuyen-tinh", title: "Độc lập tuyến tính và phụ thuộc tuyến tính", icon: "🔗" },
+                    { id: "subtopic-he-sinh-span", title: "Hệ sinh, Span và tổ hợp tuyến tính", icon: "📚" },
+                    { id: "subtopic-so-sanh-he-sinh-co-so", title: "So sánh hệ sinh và hệ cơ sở", icon: "⚖️" },
+                    { id: "subtopic-co-so-chieu-khong-gian", title: "Cơ sở và chiều trong không gian véc tơ", icon: "📐" }
+                ];
+            } else if (slotId == 19) {
+                return [
+                    { id: "subtopic-tich-vo-huong-ung-dung", title: "Tích vô hướng và ứng dụng", icon: "🔢" },
+                    { id: "subtopic-vec-to-dinh-huong-truc-giao", title: "Véc tơ định hướng và trực giao", icon: "➡️" },
+                    { id: "subtopic-khai-niem-co-ban-khac", title: "Khái niệm cơ bản khác", icon: "📚" }
+                ];
+            } else if (slotId == 20) {
+                return [
+                    { id: "subtopic-tong-quan-hang-ma-tran", title: "Tổng quan về hạng của ma trận", icon: "📚" },
+                    { id: "subtopic-tinh-chat-y-nghia-hang", title: "Tính chất và ý nghĩa của hạng", icon: "🔢" },
+                    { id: "subtopic-khai-niem-lien-quan", title: "Các khái niệm liên quan", icon: "🔗" },
+                    { id: "subtopic-bai-tap-ap-dung", title: "Bài tập áp dụng", icon: "✍️" }
+                ];
+            }
+            
+            return [];
+        }
+
+                async function fetchDetails(subtopicId) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const details = {
+                "subtopic-tong-quan": [
+                    { id: "detail-tong-quan-can-on", text: "Cần ôn lại những kiến thức gì ở lớp dưới", link: "https://www.tiktok.com/@maitheduy1709/video/7330146200961731858?is_from_webapp=1&web_id=7284508482387363330", icon: "📚" },
+                    { id: "detail-tong-quan-ham-so-la-gi", text: "Hàm số là gì", link: "https://www.tiktok.com/@maitheduy1709/video/7321188867061697810?is_from_webapp=1&web_id=7281221797452793345", icon: "📝" },
+                    { id: "detail-tong-quan-bai-dau-tien", text: "Bài đầu tiên về Hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7365749553372417296?_r=1&_d=secCgYIASAHKAESPgo82AY2PFAK4DWDq5B9%2BkcQo9j4bHMeSuO6aOWCsejy6tfEqJMVa1ETjFvO8HHthQGbNKKIZ73iTILdwA2%2FGgA%3D&u_code=e34am86cj4me10&share_item_id=7365749553372417296×tamp=1714976076&utm_campaign=client_share&utm_source=short_fallback&share_app_id=1233", icon: "🎬" },
+                    { id: "detail-tong-quan-cac-kieu-bieu-dien", text: "Các kiểu biểu diễn hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7231033243028507910?is_from_webapp=1&web_id=7284508482387363330", icon: "📊" },
+                    { id: "detail-tong-quan-dinh-nghia-hop-1", text: "Định nghĩa hàm hợp 1", link: "https://www.tiktok.com/@maitheduy1709/video/7322388384641600786?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "🔍" },
+                    { id: "detail-tong-quan-dinh-nghia-hop-2", text: "Định nghĩa hàm hợp 2", link: "https://www.tiktok.com/@maitheduy1709/video/7321193501910109447?is_from_webapp=1&web_id=7281221797452793345", icon: "🔍" },
+                    { id: "detail-tong-quan-nhan-dien-do-thi", text: "Nhận diện đồ thị của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7284291689454374151?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📉" },
+                    { id: "detail-tong-quan-ham-chan-le", text: "Hàm chẵn, hàm lẻ", link: "https://www.tiktok.com/@maitheduy1709/video/7321196367639072018?is_from_webapp=1&web_id=7281221797452793345", icon: "⚖️" },
+                    { id: "detail-tong-quan-review-ham-chan-le", text: "Review hàm chẵn, hàm lẻ", link: "https://www.tiktok.com/@maitheduy1709/video/7207964231218515226?is_from_webapp=1&web_id=7284508482387363330", icon: "🔄" }
+                ],
+                "subtopic-mien-dac-diem": [
+                    { id: "detail-mien-xac-dinh", text: "Miền xác định của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7330178965681900808?is_from_webapp=1&web_id=7284508482387363330", icon: "📏" },
+                    { id: "detail-mien-chua-bai-tap-domain-range", text: "Chữa bài tập Domain và Range", link: "https://www.tiktok.com/@maitheduy1709/video/7282646514894163218?is_from_webapp=1&web_id=7284508482387363330", icon: "✅" }
+                ],
+                "subtopic-gioi-han": [
+                    { id: "detail-gioi-han-cach-tinh", text: "Cách tính giới hạn của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7298186922088746258?is_from_webapp=1&web_id=7281221797452793345", icon: "➗" },
+                    { id: "detail-gioi-han-nhan-manh-nguyen-tac", text: "Nhấn mạnh nguyên tắc tính giới hạn của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7368333913212636433?is_from_webapp=1&sender_device=pc&web_id=7354991857157752327", icon: "📌" },
+                    { id: "detail-gioi-han-tinh-dua-vao-do-thi", text: "Tính giới hạn dựa vào đồ thị", link: "https://www.tiktok.com/@maitheduy1709/video/7366876373517913360?_r=1&_d=secCgYIASAHKAESPgo8YnPRkMqpFulrrrdUkKXGKt5iDcQV1JXdy67LtWqN7PF29mo6CnZKbOOo0G7ZHneC0Mp%2BUuhI68YaB0UdGgA%3D&u_code=e34am86cj4me10&share_item_id=7366876373517913360×tamp=1715236434&utm_campaign=client_share&utm_source=short_fallback&share_app_id=1233", icon: "📉" },
+                    { id: "detail-gioi-han-nguyen-tac", text: "Nguyên tắc khi tính giới hạn của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7325426228603718919?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📏" },
+                    { id: "detail-gioi-han-7-dang-vo-dinh", text: "7 dạng vô định", link: "https://www.tiktok.com/@maitheduy1709/video/7197059121378610459?is_from_webapp=1&web_id=7284508482387363330", icon: "❓" },
+                    { id: "detail-gioi-han-meo-vat", text: "Mẹo vặt khi tính giới hạn", link: "https://www.tiktok.com/@maitheduy1709/video/7296045595163151634?is_from_webapp=1&web_id=7284508482387363330", icon: "💡" },
+                    { id: "detail-gioi-han-dau-gia-tri-tuyet-doi", text: "Tính giới hạn có chứa dấu giá trị tuyệt đối", link: "https://www.tiktok.com/@maitheduy1709/video/7326119768048684295?is_from_webapp=1&web_id=7284508482387363330", icon: "📏" },
+                    { id: "detail-gioi-han-bai-tap-dau-gia-tri-tuyet-doi", text: "Bài tập Tính giới hạn có chứa dấu giá trị tuyệt đối", link: "https://www.tiktok.com/@maitheduy1709/video/7325102752672107794?is_from_webapp=1&web_id=7284508482387363330", icon: "✍️" },
+                    { id: "detail-gioi-han-dang-1-mu-vo-cung", text: "Giới hạn dạng 1 mũ vô cùng", link: "https://www.tiktok.com/@maitheduy1709/video/7326781296426978568?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "∞" },
+                    { id: "detail-gioi-han-dang-vo-cung-tru-vo-cung", text: "Giới hạn dạng vô cùng trừ vô cùng", link: "https://www.tiktok.com/@maitheduy7/video/7325825939118492946?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "∞" },
+                    { id: "detail-gioi-han-pp-lhopital", text: "Tính giới hạn bằng pp L’Hôpital", link: "https://www.tiktok.com/@maitheduy1709/video/7325602846160719122?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "🔢" },
+                    { id: "detail-gioi-han-pp-lo-pi-tan", text: "Tính giới hạn bằng phương pháp Lô pi tan", link: "https://www.tiktok.com/@maitheduy1709/video/7296123795738217735?is_from_webapp=1&web_id=7284508482387363330", icon: "🔢" },
+                    { id: "detail-gioi-han-dinh-ly-kep", text: "Định lý giới hạn kẹp", link: "https://www.tiktok.com/@maitheduy1709/video/7321284410454658312?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📐" },
+                    { id: "detail-gioi-han-cach-nhin-do-thi", text: "Tính giới hạn bằng cách nhìn đồ thị", link: "https://www.tiktok.com/@maitheduy1709/video/7284581020903460104?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📉" },
+                    { id: "detail-gioi-han-lai-dang-vo-cung-tru-vo-cung", text: "Lại tính giới hạn dạng vô cùng trừ vô cùng", link: "https://www.tiktok.com/@maitheduy1709/video/7199785515841785114?is_from_webapp=1&web_id=7284508482387363330", icon: "∞" }
+                ],
+                "subtopic-lientuc": [
+                    { id: "detail-lientuc-ham-lientuc", text: "Hàm số liên tục", link: "https://www.tiktok.com/@maitheduy1709/video/7323436800230346004?is_from_webapp=1&web_id=7284508482387363330", icon: "🔗" },
+                    { id: "detail-lientuc-bai-tap-tim-tham-so", text: "Bài tập Tìm tham số để Hàm số liên tục", link: "https://www.tiktok.com/@maitheduy7/video/7325459023006911762?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "✍️" },
+                    { id: "detail-lientuc-tai-mot-diem", text: "Hàm số liên tục tại một điểm", link: "https://www.tiktok.com/@maitheduy1709/video/7299016700639317266?is_from_webapp=1&sender_device=pc&web_id=7281221797452793345", icon: "📍" },
+                    { id: "detail-lientuc-tim-tham-so", text: "Tìm tham số để hàm số liên tục", link: "https://www.tiktok.com/@maitheduy1709/video/7321279347778669832?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "🔍" },
+                    { id: "detail-lientuc-bai-tap-toan-truc-so", text: "Bài tập Tìm tham số để hàm số liên tục trên toàn trục số", link: "https://www.tiktok.com/@maitheduy1709/video/7325459023006911762?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "✍️" },
+                    { id: "detail-lientuc-dieu-kien-pieceswise", text: "Tìm điều kiện của tham số để hàm dạng Pieceswise liên tục", link: "https://www.tiktok.com/@maitheduy1709/video/7284308941234883847?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "🔗" },
+                    { id: "detail-lientuc-tim-diem-gian-doan", text: "Tìm điểm gián đoạn", link: "https://www.tiktok.com/@maitheduy1709/video/7321660898337230087?is_from_webapp=1&web_id=7284508482387363330", icon: "⚠️" },
+                    { id: "detail-lientuc-ham-duoi-dang-bang", text: "Hàm số cho dưới dạng bảng", link: "https://www.tiktok.com/@maitheduy1709/video/7321648898068466962?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📋" }
+                ],
+                "subtopic-dich-chuyen": [
+                    { id: "detail-dich-chuyen-dich-chuyen", text: "Dịch chuyển đồ thị", link: "https://www.tiktok.com/@maitheduy7/video/7325809154839284999?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📈" },
+                    { id: "detail-dich-chuyen-bai-tap", text: "Bài tập về dịch chuyển đồ thị", link: "https://www.tiktok.com/@maitheduy1709/video/7282664227372895496?is_from_webapp=1&web_id=7284508482387363330", icon: "✍️" }
+                ],
+                "subtopic-bai-tap-ung-dung": [
+                    { id: "detail-bai-tap-dinh-nghia-hop", text: "Bài tập về định nghĩa Hàm số hợp", link: "https://www.tiktok.com/@maitheduy1709/video/7325810939847068936?is_from_webapp=1&web_id=7284508482387363330", icon: "✍️" },
+                    { id: "detail-bai-tap-chuong-1", text: "Bài tập chương 1", link: "https://www.tiktok.com/@maitheduy1709/video/7282964933409590529?is_from_webapp=1&web_id=7284508482387363330", icon: "📚" }
+                ],
+                "subtopic-kien-thuc-tong-quan": [
+                    { id: "detail-kien-thuc-da-hoc", text: "Đạo hàm học rồi mà", link: "https://www.tiktok.com/@maitheduy1709/video/7365857740004150544", icon: "📚" },
+                    { id: "detail-dao-ham-toc-do", text: "Đạo hàm là tốc độ hoặc slope", link: "https://www.tiktok.com/@maitheduy1709/video/7308593544963329287", icon: "⏱️" },
+                    { id: "detail-y-nghia-hinh-hoc", text: "Ý nghĩa hình học của Đạo hàm", link: "https://www.tiktok.com/@maitheduy1709/video/7321578806584691976", icon: "📐" },
+                    { id: "detail-slope-dinh-nghia", text: "Tính slope tại 1 điểm, đạo hàm của hàm ẩn", link: "https://www.tiktok.com/@maitheduy1709/video/7284235992628727048", icon: "📏" },
+                    { id: "detail-sai-so", text: "Sai số", link: "https://www.tiktok.com/@maitheduy1709/video/7238425407379229958", icon: "⚠️" }
+                ],
+                "subtopic-cong-thuc-dinh-nghia": [
+                    { id: "detail-cong-thuc-can-ban", text: "Công thức đạo hàm căn bản cho thi final", link: "https://www.tiktok.com/@maitheduy1709/video/7366843734383774992", icon: "📝" },
+                    { id: "detail-cong-thuc-can-nho", text: "Các công thức đạo hàm cần nhớ", link: "https://www.tiktok.com/@maitheduy1709/video/7281452748510481671", icon: "🔢" },
+                    { id: "detail-dinh-nghia-dao-ham", text: "Tính đạo hàm bằng định nghĩa", link: "https://www.tiktok.com/@maitheduy1709/video/7283350786019429634", icon: "🔍" },
+                    { id: "detail-luy-thua", text: "Đạo hàm của hàm luỹ thừa", link: "https://www.tiktok.com/@maitheduy1709/video/7321294739536383250", icon: "ⁿ" }
+                ],
+                "subtopic-dao-ham-hop": [
+                    { id: "detail-chain-rule", text: "The Chain rule", link: "https://www.tiktok.com/@maitheduy1709/video/7321289785438440722", icon: "🔗" },
+                    { id: "detail-dao-ham-hop-1", text: "Đạo hàm của hàm hợp", link: "https://www.tiktok.com/@maitheduy1709/video/7366851818875391249", icon: "🔗" },
+                    { id: "detail-dao-ham-hop-2", text: "Đạo hàm của hàm hợp", link: "https://www.tiktok.com/@maitheduy7/video/7326067275184770311", icon: "🔗" },
+                    { id: "detail-bai-tap-hop-1", text: "Bài tập Đạo hàm của hàm hợp 1", link: "https://www.tiktok.com/@maitheduy1709/video/7325438367020125447", icon: "✍️" },
+                    { id: "detail-bai-tap-hop-2", text: "Bài tập Đạo hàm của hàm hợp 2", link: "https://www.tiktok.com/@maitheduy7/video/7325252173795165458", icon: "✍️" },
+                    { id: "detail-bang-chain-rule", text: "Hàm số dạng bảng the Chain rule", link: "https://www.tiktok.com/@maitheduy1709/video/7321648898068466962", icon: "📋" }
+                ],
+                "subtopic-dao-ham-an": [
+                    { id: "detail-dao-ham-an-1", text: "Đạo hàm của hàm ẩn", link: "https://www.tiktok.com/@maitheduy1709/video/7367597261926173969", icon: "🔍" },
+                    { id: "detail-dao-ham-an-2", text: "Đạo hàm của hàm ẩn (bấm tiếp vào đây nếu còn lăn tăn)", link: "https://www.tiktok.com/@maitheduy1709/video/7368325920131779857", icon: "🔍" },
+                    { id: "detail-dao-ham-an-3", text: "Đạo hàm của hàm ẩn", link: "https://www.tiktok.com/@maitheduy1709/video/7320845128870972680", icon: "🔍" },
+                    { id: "detail-bai-tap-an", text: "Bài tập đạo hàm của hàm ẩn", link: "https://www.tiktok.com/@maitheduy1709/video/7325975633966746898", icon: "✍️" }
+                ],
+                "subtopic-dao-ham-tich-phan": [
+                    { id: "detail-tich-phan-1", text: "Đạo hàm của một tích phân xác định", link: "https://www.tiktok.com/@maitheduy1709/video/7213670236929789211", icon: "∫" },
+                    { id: "detail-tich-phan-can-tham-so", text: "Đạo hàm của một tích phân xác định có cận là tham số", link: "https://www.tiktok.com/@maitheduy1709/video/7324317142592015634", icon: "∫" },
+                    { id: "detail-bai-tap-tich-phan-1", text: "Bài tập về Đạo hàm của một tích phân xác định", link: "https://www.tiktok.com/@maitheduy1709/video/7324352524276862215", icon: "✍️" },
+                    { id: "detail-thuc-hanh-tich-phan", text: "Thực hành tính đạo hàm của một tích phân xác định", link: "https://www.tiktok.com/@maitheduy1709/video/7327873696859802887", icon: "✍️" },
+                    { id: "detail-bai-tap-tich-phan-2", text: "Bài tập về Đạo hàm của một tích phân xác định", link: "https://www.tiktok.com/@maitheduy1709/video/7325424307750948103", icon: "✍️" },
+                    { id: "detail-chua-bai-tap-kep", text: "Chữa bài tập về định lý kẹp và Đạo hàm của một tích phân xác định", link: "https://www.tiktok.com/@maitheduy1709/video/7325781545158020370", icon: "✅" },
+                    { id: "detail-tong-hop-tich-phan", text: "Đạo hàm của hàm hợp, đạo hàm của hàm ẩn, đạo hàm của một tích phân xác định", link: "https://www.tiktok.com/@maitheduy1709/video/7296617125735632135", icon: "📚" }
+                ],
+                "subtopic-ung-dung-bieu-dien": [
+                    { id: "detail-ung-dung-bieu-dien", text: "Đạo hàm, biểu diễn hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7321621786615991570", icon: "📈" }
+                ],
+                "subtopic-phuong-trinh-tiep-tuyen": [
+                    { id: "detail-tiep-tuyen-1", text: "Phương trình tiếp tuyến", link: "https://www.tiktok.com/@maitheduy1709/video/7367551516783152400", icon: "📏" },
+                    { id: "detail-tiep-tuyen-2", text: "Hãy thuộc Phương trình tiếp tuyến", link: "https://www.tiktok.com/@maitheduy1709/video/7369134539379084545", icon: "📝" },
+                    { id: "detail-tiep-tuyen-ham-an", text: "Phương trình tiếp tuyến và hàm ẩn", link: "https://www.tiktok.com/@maitheduy1709/video/7370961358168329473", icon: "🔍" },
+                    { id: "detail-tiep-tuyen-tangent", text: "Phương trình tiếp tuyến tangent line", link: "https://www.tiktok.com/@maitheduy1709/video/7321271636647218440", icon: "📏" },
+                    { id: "detail-tiep-tuyen-3", text: "Phương trình tiếp tuyến", link: "https://www.tiktok.com/@maitheduy1709/video/7325106154395274503", icon: "📏" },
+                    { id: "detail-tiep-tuyen-diem", text: "Phương trình tiếp tuyến đi qua 1 điểm trên đồ thị", link: "https://www.tiktok.com/@maitheduy1709/video/7296786471686622482", icon: "📍" }
+                ],
+                "subtopic-related-rates": [
+                    { id: "detail-related-rate-1", text: "Related Rate và Rate of change", link: "https://www.tiktok.com/@maitheduy1709/video/7369081593698307344", icon: "⏱️" },
+                    { id: "detail-related-rate-la-gi", text: "Related Rate là gì ?", link: "https://www.tiktok.com/@maitheduy1709/video/7369152686811303185", icon: "❓" },
+                    { id: "detail-related-rate-2", text: "Related Rate", link: "https://www.tiktok.com/@maitheduy1709/video/7321634186874391815", icon: "⏱️" },
+                    { id: "detail-related-rate-rot-nuoc", text: "Related Rate và bài toán rót nước", link: "https://www.tiktok.com/@maitheduy1709/video/7372078022909889809", icon: "💧" },
+                    { id: "detail-rate-of-change", text: "Rate of Change", link: "https://www.tiktok.com/@maitheduy1709/video/7325828604053441810", icon: "📈" },
+                    { id: "detail-dao-ham-rate", text: "Đạo hàm là Rate of change", link: "https://www.tiktok.com/@maitheduy1709/video/7321201356772084999", icon: "🔢" }
+                ],
+                "subtopic-chua-bai-tap-related-rate": [
+                    { id: "detail-chua-related-rate-1", text: "chữa bài tập về Related rate1", link: "https://www.tiktok.com/@maitheduy1709/video/7369111573618593025", icon: "✅" },
+                    { id: "detail-chua-related-rate-2", text: "chữa bài tập về Related Rate2", link: "https://www.tiktok.com/@maitheduy1709/video/7369117049903156496", icon: "✅" },
+                    { id: "detail-chua-related-rate-3", text: "chữa bài tập về Related Rate3", link: "https://www.tiktok.com/@maitheduy1709/video/7369429262618660097", icon: "✅" }
+                ],
+                "subtopic-xap-xi-tuyen-tinh": [
+                    { id: "detail-xap-xi-1", text: "Xấp xỉ tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7321299266633256200", icon: "📈" },
+                    { id: "detail-linear-approx", text: "Linear approximation", link: "https://www.tiktok.com/@maitheduy1709/video/7199886317679922458", icon: "📈" }
+                ],
+                "subtopic-khai-niem-slope": [
+                    { id: "detail-tim-slope", text: "Tìm slope", link: "https://www.tiktok.com/@maitheduy1709/video/7321209139470945554", icon: "📐" }
+                ],
+                "subtopic-dinh-ly-trung-binh": [
+                    { id: "detail-bai-tap-lagrange-1", text: "Bài tập về định lý trung bình Lagrange", link: "https://www.tiktok.com/@maitheduy1709/video/7322381520650423560", icon: "✍️" },
+                    { id: "detail-lagrange", text: "Định lý trung bình Lagrange", link: "https://www.tiktok.com/@maitheduy1709/video/7298168075986291976", icon: "📊" },
+                    { id: "detail-rolle-lagrange", text: "Định lý trung bình Rolle là trường hợp đặc biệt của định lý trung bình Lagrange", link: "https://www.tiktok.com/@maitheduy1709/video/7325993728433278226", icon: "📊" },
+                    { id: "detail-nhac-lai-giai-tich", text: "Nhắc lại mấy kiến thức quan trọng của giải tích", link: "https://www.tiktok.com/@maitheduy1709/video/7368367739326582032", icon: "📚" },
+                    { id: "detail-bai-tap-lagrange-2", text: "Bài tập về trung bình Lagrange", link: "https://www.tiktok.com/@maitheduy1709/video/7324349357271043335", icon: "✍️" }
+                ],
+                "subtopic-trung-binh-tich-phan": [
+                    { id: "detail-trung-binh-ham-so", text: "Trung bình của hàm số hay trung bình tích phân", link: "https://www.tiktok.com/@maitheduy1709/video/7368385604440050961", icon: "∫" },
+                    { id: "detail-phan-biet-dinh-ly", text: "Phân biệt 2 định lý trung bình, Trung bình của hàm số trên 1 đoạn và trung bình Lagrange", link: "https://www.tiktok.com/@maitheduy1709/video/7370271896924998929", icon: "📊" },
+                    { id: "detail-trung-binh-tich-phan-la-gi", text: "Trung bình tích phân là gì", link: "https://www.tiktok.com/@maitheduy1709/video/7327510927773895943", icon: "∫" },
+                    { id: "detail-bai-tap-tich-phan", text: "Bài tập về Trung bình tích phân", link: "https://www.tiktok.com/@maitheduy1709/video/7325987485400468744", icon: "✍️" },
+                    { id: "detail-van-toc-trung-binh", text: "Trung bình tích phân trong tình huống tính vận tốc trung bình", link: "https://www.tiktok.com/@maitheduy1709/video/7329442743808199944", icon: "⏱️" },
+                    { id: "detail-lagrange-tich-phan", text: "Trung bình Lagrange và trung bình tích phân", link: "https://www.tiktok.com/@maitheduy1709/video/7299257966161661202", icon: "📊" }
+                ],
+                "subtopic-trung-binh-lagrange-tiem-can": [
+                    { id: "detail-bai-tap-lagrange-3", text: "Bài tập về định lý trung bình Lagrange (2)", link: "https://www.tiktok.com/@maitheduy1709/video/7298758045104983304", icon: "✍️" }
+                ],
+                "subtopic-cuc-tri-hinh-dang": [
+                    { id: "detail-cuc-tri-dia-phuong", text: "Cực trị địa phương", link: "https://www.tiktok.com/@maitheduy1709/video/7304555426887126280", icon: "📉" },
+                    { id: "detail-cuc-tri-ham-so", text: "Cực trị của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7325110804926188807", icon: "📉" },
+                    { id: "detail-concave-up-down", text: "Concave up và concave down", link: "https://www.tiktok.com/@maitheduy1709/video/7198277135658650906", icon: "📈" }
+                ],
+                "subtopic-phuong-phap-newton": [
+                    { id: "detail-newton-1", text: "Newton method", link: "https://www.tiktok.com/@maitheduy1709/video/7322302032021294344", icon: "🔧" },
+                    { id: "detail-newton-2", text: "Phương pháp Newton", link: "https://www.tiktok.com/@maitheduy1709/video/7368437686786444560", icon: "🔧" },
+                    { id: "detail-luyen-tap-newton", text: "Luyện tập phương pháp Newton", link: "https://www.tiktok.com/@maitheduy1709/video/7281326893369019666", icon: "✍️" },
+                    { id: "detail-newton-bang-tay", text: "Phương pháp Newton làm bằng tay", link: "https://www.tiktok.com/@maitheduy1709/video/7325063072488361224", icon: "✍️" },
+                    { id: "detail-newton-3", text: "Phương pháp Newton", link: "https://www.tiktok.com/@maitheduy1709/video/7204443404833459483", icon: "🔧" },
+                    { id: "detail-bai-tap-newton", text: "Bài tập Phương pháp Newton", link: "https://www.tiktok.com/@maitheduy1709/video/7198451419429555483", icon: "✍️" },
+                    { id: "detail-cong-thuc-truy-hoi", text: "Giải thích công thức truy hồi của Phương pháp Newton", link: "https://www.tiktok.com/@maitheduy1709/video/7324326212929604872", icon: "🔢" },
+                    { id: "detail-tiep-tuyen-xap-xi", text: "Tìm nghiệm xấp xỉ bằng phương pháp tiếp tuyến", link: "https://www.tiktok.com/@maitheduy1709/video/7325063072488361224", icon: "📏" }
+                ],
+                "subtopic-nguyen-ham-tich-phan": [
+                    { id: "detail-nguyen-ham-cam-vo", text: "Nguyên hàm và đạo hàm như cam và vỏ cam", link: "https://www.tiktok.com/@maitheduy1709/video/7307816360485195026", icon: "🍊" },
+                    { id: "detail-nguyen-ham-van-toc", text: "Nguyên hàm của vận tốc là quãng đường", link: "https://www.tiktok.com/@maitheduy1709/video/7189547399897976091", icon: "⏱️" },
+                    { id: "detail-tich-phan-phan", text: "Công thức tích phân từng phần - bài tập", link: "https://www.tiktok.com/@maitheduy1709/video/7325022809745296648", icon: "✍️" }
+                ],
+                "subtopic-xap-xi-tich-phan": [
+                    { id: "detail-5-phuong-phap", text: "5 phương pháp xấp xỉ tích phân", link: "https://www.tiktok.com/@maitheduy1709/video/7322691263029873941", icon: "📉" },
+                    { id: "detail-ten-5-phuong-phap", text: "Tên gọi của 5 phương pháp xấp xỉ tích phân", link: "https://www.tiktok.com/@maitheduy1709/video/7325025105220848914", icon: "📝" },
+                    { id: "detail-right-endpoint", text: "Xấp xỉ tích phân bằng Right EndPoint", link: "https://www.tiktok.com/@maitheduy1709/video/7322731634103471381", icon: "📏" },
+                    { id: "detail-left-endpoint", text: "Xấp xỉ tích phân bằng Left EndPoints", link: "https://www.tiktok.com/@maitheduy1709/video/7325997522608999688", icon: "📏" },
+                    { id: "detail-trapizoidal-rule", text: "Xấp xỉ tích phân bằng phương pháp hình thang Trapizoidal rule", link: "https://www.tiktok.com/@maitheduy1709/video/7322733272193125652", icon: "📊" },
+                    { id: "detail-xap-xi-dien-tich", text: "Xấp xỉ diện tích", link: "https://www.tiktok.com/@maitheduy1709/video/7281305492805225746", icon: "📉" }
+                ],
+                "subtopic-cong-thuc-simpson": [
+                    { id: "detail-simpson-1", text: "Công thức Simpson", link: "https://www.tiktok.com/@maitheduy1709/video/7189842965651557659", icon: "📊" },
+                    { id: "detail-simpson-rule", text: "Simpson Rule", link: "https://www.tiktok.com/@maitheduy1709/video/7325982217623112968", icon: "📊" },
+                    { id: "detail-simpson-bai-tap", text: "Công thức Simpson bài tập", link: "https://www.tiktok.com/@maitheduy1709/video/7326824148532055304", icon: "✍️" },
+                    { id: "detail-simpson-ly-do", text: "Tại sao phải xấp xỉ tích phân, Công thức Simpson", link: "https://www.tiktok.com/@maitheduy1709/video/7370923419795328273", icon: "📚" },
+                    { id: "detail-simpson-dac-biet", text: "Simpson Rule chính xác cho đa thức bậc 3 trở xuống", link: "https://www.tiktok.com/@maitheduy1709/video/7324341454212582674", icon: "📊" }
+                ],
+                "subtopic-phuong-phap-diem-dau-cuoi": [
+                    { id: "detail-right-end-points", text: "Phương pháp Right End Points", link: "https://www.tiktok.com/@maitheduy1709/video/7190905920057052443", icon: "📏" },
+                    { id: "detail-left-end-points", text: "Phương pháp Left End Points", link: "https://www.tiktok.com/@maitheduy1709/video/7191039940480797978", icon: "📏" },
+                    { id: "detail-middle-end-points", text: "Phương pháp Midle End Points", link: "https://www.tiktok.com/@maitheduy1709/video/7191297136611429658", icon: "📏" },
+                    { id: "detail-xap-xi-lecture", text: "Xấp xỉ tích phân lecture", link: "https://www.tiktok.com/@maitheduy1709/video/7323466760487750933", icon: "📉" },
+                    { id: "detail-simpson-2", text: "Simpson Rule", link: "https://www.tiktok.com/@maitheduy1709/video/7323470553568873749", icon: "📊" }
+                ],
+                "subtopic-nguyen-ham-bat-dinh": [
+                    { id: "detail-nguyen-ham-bat-dinh", text: "Nguyên hàm và tích phân bất định", link: "https://www.tiktok.com/@maitheduy1709/video/7299689358095944978", icon: "∫" },
+                    { id: "detail-tinh-nguyen-ham", text: "Tính Nguyên hàm", link: "https://www.tiktok.com/@maitheduy1709/video/7324357137688300818", icon: "🔢" },
+                    { id: "detail-bai-tap-nguyen-ham", text: "Bài tập về Nguyên hàm", link: "https://www.tiktok.com/@maitheduy1709/video/7325422891607002386", icon: "✍️" }
+                ],
+                "subtopic-tich-phan-xac-dinh-ly-thuyet": [
+                    { id: "detail-tong-lien-tuc-roi-rac", text: "Tổng liên tục và tổng rời rạc", link: "https://www.tiktok.com/@maitheduy1709/video/7305254704118828296", icon: "📊" },
+                    { id: "detail-dinh-ly-trung-binh-tich-phan", text: "Định lý trung bình tích phân hay trung bình của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7306775425647250706", icon: "∫" },
+                    { id: "detail-trung-binh-ham", text: "Trung bình hàm", link: "https://www.tiktok.com/@maitheduy1709/video/7305646024838647048", icon: "📈" },
+                    { id: "detail-trung-binh-doan", text: "Trung bình của hàm số trên một đoạn", link: "https://www.tiktok.com/@maitheduy1709/video/7325418554180898056", icon: "📊" },
+                    { id: "detail-bai-tap-trung-binh-tich-phan", text: "Bài tập về trung bình tích phân", link: "https://www.tiktok.com/@maitheduy1709/video/7299329216116542728", icon: "✍️" },
+                    { id: "detail-ban-chat-dinh-ly", text: "Bản chất của hai định lý trung bình", link: "https://www.tiktok.com/@maitheduy1709/video/7299257966161661202", icon: "📚" }
+                ],
+                "subtopic-dao-ham-tich-phan-tham-so": [
+                    { id: "detail-dao-ham-tich-phan-tham-so", text: "Đạo hàm của tích phân xác định có cận là tham số", link: "https://www.tiktok.com/@maitheduy1709/video/7371732224414125329", icon: "🔢" },
+                    { id: "detail-chung-minh-cong-thuc", text: "Chứng minh công thức đạo hàm của tích phân xác định có cận là tham số", link: "https://www.tiktok.com/@maitheduy1709/video/7371757157605215504", icon: "📝" }
+                ],
+                "subtopic-ung-dung-chuyen-dong": [
+                    { id: "detail-khoang-cach-ly-do-1", text: "Khoảng cách và ly độ 1", link: "https://www.tiktok.com/@maitheduy1709/video/7371757157605215504", icon: "⏱️" },
+                    { id: "detail-khoang-cach-ly-do-2", text: "Khoảng cách và ly độ 2", link: "https://www.tiktok.com/@maitheduy1709/video/7370232631675473169", icon: "⏱️" }
+                ],
+                "subtopic-tich-phan-suy-rong": [
+                    { id: "detail-hai-loai-suy-rong", text: "Hai loại tích phân suy rộng, cận ra vô tận và hàm dưới dấu tích phân ra vô tận", link: "https://www.tiktok.com/@maitheduy1709/video/7197087514816040219", icon: "∞" },
+                    { id: "detail-loai-1", text: "Tích phân suy rộng loại 1", link: "https://www.tiktok.com/@maitheduy1709/video/7370994198151056656", icon: "∫" },
+                    { id: "detail-loai-1-phan-ky", text: "Tích phân suy rộng loại 1 trường hợp phân kỳ", link: "https://www.tiktok.com/@maitheduy1709/video/7371001557472627969", icon: "⚠️" },
+                    { id: "detail-loai-2", text: "Tích phân suy rộng loại 2", link: "https://www.tiktok.com/@maitheduy1709/video/7368416393139703057", icon: "∫" },
+                    { id: "detail-ung-dung-so-sanh", text: "Tích phân suy rộng sẽ dùng trong so sánh tích phân", link: "https://www.tiktok.com/@maitheduy1709/video/7371701406652255489", icon: "📊" }
+                ],
+                "subtopic-so-sanh-tich-phan": [
+                    { id: "detail-so-sanh-tich-phan", text: "So sánh tích phân", link: "https://www.tiktok.com/@maitheduy1709/video/7299078148996566279", icon: "📊" }
+                ],
+                "subtopic-on-tap-giai-tich": [
+                    { id: "detail-review-giai-tich", text: "Review phần giải tích", link: "https://www.tiktok.com/@maitheduy1709/video/7296006241740934407", icon: "📚" },
+                    { id: "detail-on-tap-part-1", text: "Nội dung ôn tập Part 1", link: "https://www.tiktok.com/@maitheduy1709/video/7301275397763632402", icon: "📝" },
+                    { id: "detail-on-tap-giai-tich-1", text: "Nội dung ôn tập Giải tích", link: "https://www.tiktok.com/@maitheduy1709/video/7205097386916547867", icon: "📚" },
+                    { id: "detail-on-tap-giai-tich-2", text: "Nội dung ôn tập Giải tích 2", link: "https://www.tiktok.com/@maitheduy1709/video/7326856661526646023", icon: "📚" },
+                    { id: "detail-on-tap-giai-tich-3", text: "Nội dung ôn tập Giải tích 3", link: "https://www.tiktok.com/@maitheduy1709/video/7326814901672873224", icon: "📚" }
+                ],
+                "subtopic-gioi-thieu-dai-so": [
+                    { id: "detail-noi-dung-dai-so", text: "Những nội dung siêu quan trọng trong phần Đại số tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7326082100703005960", icon: "📚" },
+                    { id: "detail-mo-dau-ma-tran", text: "Mở đầu về ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7285983534387334418", icon: "🔢" },
+                    { id: "detail-thuat-ngu-ma-tran", text: "Một số thuật ngữ và ký hiệu liên quan tới ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7291577044293520658", icon: "📝" }
+                ],
+                "subtopic-vec-to": [
+                    { id: "detail-vec-to-la-gi", text: "Véc tơ là gì", link: "https://www.tiktok.com/@maitheduy1709/video/7329376650129329426", icon: "➡️" },
+                    { id: "detail-doc-lap-tuyen-tinh", text: "Độc lập tuyến tính và phụ thuộc tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7327898645670448391", icon: "🔗" },
+                    { id: "detail-kiem-tra-doc-lap-1", text: "Kiểm tra một hệ véc tơ là độc lập tuyến tính hay phụ thuộc tuyến tính 1", link: "https://www.tiktok.com/@maitheduy1709/video/7376979155948195090", icon: "✅" },
+                    { id: "detail-kiem-tra-doc-lap-2", text: "Kiểm tra một hệ véc tơ là độc lập tuyến tính hay phụ thuộc tuyến tính 2", link: "https://www.tiktok.com/@maitheduy1709/video/7328673976509582600", icon: "✅" }
+                ],
+                "subtopic-nhan-ma-tran": [
+                    { id: "detail-nhan-hai-ma-tran", text: "Nhân 2 ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7323423966608035093", icon: "✖️" },
+                    { id: "detail-cach-nhan-ma-tran", text: "Cách nhân 2 ma trận với nhau", link: "https://www.tiktok.com/@maitheduy1709/video/7286767415684386066", icon: "🔢" },
+                    { id: "detail-thuc-hanh-nhan-ma-tran", text: "Thực hành nhân 2 ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7326111234124713234", icon: "✍️" }
+                ],
+                "subtopic-ma-tran-dac-biet": [
+                    { id: "detail-ma-tran-bac-thang", text: "Ma trận bậc thang và ma trận bậc thang rút gọn", link: "https://www.tiktok.com/@maitheduy1709/video/7330167848721009928", icon: "🔢" },
+                    { id: "detail-bai-tap-bac-thang", text: "Bài tập về Ma trận bậc thang và ma trận bậc thang rút gọn", link: "https://www.tiktok.com/@maitheduy1709/video/7328631025284697351", icon: "✍️" },
+                    { id: "detail-so-nghiem-tu-do", text: "Số nghiệm tự do", link: "https://www.tiktok.com/@maitheduy1709/video/7339008342599208199", icon: "🔍" },
+                    { id: "detail-hang-ma-tran", text: "Hạng của ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7328686658407107848", icon: "📊" }
+                ],
+                "subtopic-tinh-dinh-thuc": [
+                    { id: "detail-tinh-dinh-thuc", text: "Tính định thức", link: "https://www.tiktok.com/@maitheduy1709/video/7327959941229137159", icon: "📐" },
+                    { id: "detail-meo-dinh-thuc-3", text: "Mẹo tính định thức cấp 3", link: "https://www.tiktok.com/@maitheduy1709/video/7196847927409560859", icon: "💡" },
+                    { id: "detail-tinh-chat-dinh-thuc", text: "Các tính chất của định thức", link: "https://www.tiktok.com/@maitheduy1709/video/7327934439181257992", icon: "📝" },
+                    { id: "detail-dinh-thuc-tinh-chat", text: "Tính định thức dựa vào tính chất của định thức", link: "https://www.tiktok.com/@maitheduy1709/video/7326117421117476103", icon: "🔍" }
+                ],
+                "subtopic-ma-tran-nghich-dao": [
+                    { id: "detail-ma-tran-nghich-dao-bang-tay", text: "Tính ma trận nghịch đảo bằng tay", link: "https://www.tiktok.com/@maitheduy1709/video/7285312276880461064", icon: "🔄" },
+                    { id: "detail-thuc-hanh-nghich-dao", text: "Thực hành tính ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7326052506289704210", icon: "✍️" },
+                    { id: "detail-bien-doi-gauss", text: "Phép biến đổi Gauss", link: "https://www.tiktok.com/@maitheduy1709/video/7289358160622603538", icon: "🔧" }
+                ],
+                "subtopic-minor-cofactor": [
+                    { id: "detail-minor-cofactor-adjugate", text: "Minor, Cofactor và Adjugate", link: "https://www.tiktok.com/@maitheduy1709/video/7339002322208574738", icon: "📊" }
+                ],
+                "subtopic-giai-he-phuong-trinh": [
+                    { id: "detail-giai-he-gauss", text: "Giải hệ phương trình tuyến tính bằng phương pháp Gauss", link: "https://www.tiktok.com/@maitheduy1709/video/7325409959687064850", icon: "✅" },
+                    { id: "detail-giai-he-vo-so-nghiem", text: "Giải hệ phương trình tuyến tính có vô số nghiệm bằng phương pháp ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7298924501054622994", icon: "🔍" },
+                    { id: "detail-khu-gauss", text: "Phép khử Gauss trong giải hệ phương trình tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7294561411072642322", icon: "🔧" },
+                    { id: "detail-duy-nhat-nghiem", text: "Khi nào hệ phương trình tuyến tính có duy nhất nghiệm", link: "https://www.tiktok.com/@maitheduy1709/video/7293122778612403463", icon: "❓" },
+                    { id: "detail-tham-so-duy-nhat", text: "Tìm tham số để hệ phương trình tuyến tính có duy nhất nghiệm", link: "https://www.tiktok.com/@maitheduy1709/video/7325990381248597256", icon: "🔍" },
+                    { id: "detail-tham-so-vo-so", text: "Tìm tham số để hệ phương trình có vô số nghiệm", link: "https://www.tiktok.com/@maitheduy1709/video/7293032860255128840", icon: "🔍" }
+                ],
+                "subtopic-ung-dung-he-phuong-trinh": [
+                    { id: "detail-can-bang-he-so", text: "Bài toán cân bằng hệ số bằng cách giải hệ phương trình tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7325755186905943314", icon: "💡" }
+                ],
+                "subtopic-bien-doi-gauss": [
+                    { id: "detail-khu-gauss", text: "Phép biến đổi Gauss hay còn gọi là phép khử Gauss", link: "https://www.tiktok.com/@maitheduy1709/video/7289358160622603538", icon: "🔧" },
+                    { id: "detail-gauss-giai-he", text: "Phương pháp Gauss giải hệ phương trình", link: "https://www.tiktok.com/@maitheduy1709/video/7303932143669939474", icon: "✅" },
+                    { id: "detail-giai-he-bang-gauss", text: "Giải hệ phương trình bằng biến đổi Gauss", link: "https://www.tiktok.com/@maitheduy1709/video/7195516272988212506", icon: "✅" },
+                    { id: "detail-dang-bai-tap-gauss", text: "Các dạng bài tập sử dụng phép biến đổi Gauss", link: "https://www.tiktok.com/@maitheduy1709/video/7298022436694527239", icon: "✍️" }
+                ],
+                "subtopic-bieu-dien-nghiem": [
+                    { id: "detail-bieu-dien-nghiem", text: "Biểu diễn nghiệm của hệ phương trình qua tham số", link: "https://www.tiktok.com/@maitheduy1709/video/7298702930654301447", icon: "📝" },
+                    { id: "detail-bien-luan-tham-so", text: "Biện luận theo tham số nghiệm của một hệ phương trình", link: "https://www.tiktok.com/@maitheduy1709/video/7295440990586916114", icon: "🔍" },
+                    { id: "detail-cach-bieu-dien", text: "Cách biểu diễn nghiệm của một hệ phương trình", link: "https://www.tiktok.com/@maitheduy1709/video/7294832430127598856", icon: "📝" }
+                ],
+                "subtopic-ma-tran-chuyen-vi": [
+                    { id: "detail-ma-tran-chuyen-vi", text: "Ma trận chuyển vị", link: "https://www.tiktok.com/@maitheduy1709/video/7294150491695516935", icon: "🔄" },
+                    { id: "detail-bai-tap-chuyen-vi", text: "Bài tập về ma trận chuyển vị", link: "https://www.tiktok.com/@maitheduy1709/video/7294142717662121223", icon: "✍️" }
+                ],
+                "subtopic-nhan-hai-ma-tran": [
+                    { id: "detail-nhan-hai-ma-tran-1", text: "Nhân 2 ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7297110386455710994", icon: "✖️" },
+                    { id: "detail-bai-tap-nhan-ma-tran", text: "Bài tập về nhân 2 ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7298160504046882056", icon: "✍️" },
+                    { id: "detail-nhan-ma-tran-cap-2", text: "Nhân 2 ma trận cấp 2", link: "https://www.tiktok.com/@maitheduy1709/video/7291224057645649170", icon: "🔢" }
+                ],
+                "subtopic-phuong-trinh-ma-tran": [
+                    { id: "detail-phuong-trinh-ma-tran", text: "Phương trình ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7297636644004433170", icon: "📐" },
+                    { id: "detail-giai-phuong-trinh-ma-tran", text: "Giải phương trình ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7297436632779640072", icon: "✅" }
+                ],
+                "subtopic-anh-xa-tuyen-tinh": [
+                    { id: "detail-anh-xa-tuyen-tinh", text: "Ảnh của một véc tơ qua ánh xạ tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7297157053292760338", icon: "➡️" }
+                ],
+                "subtopic-kien-thuc-nen-tang": [
+                    { id: "detail-cach-tinh-nghich-dao-1", text: "Cách tính ma trận nghịch đảo (1)", link: "https://www.tiktok.com/@maitheduy1709/video/7376868868133817608", icon: "🔢" },
+                    { id: "detail-cach-tinh-nghich-dao-cap-3", text: "Cách tính ma trận nghịch đảo cấp 3", link: "https://www.tiktok.com/@maitheduy1709/video/7376961276418804999", icon: "🔢" },
+                    { id: "detail-cach-tinh-nghich-dao-2", text: "Cách tính ma trận nghịch đảo (2)", link: "https://www.tiktok.com/@maitheduy1709/video/7290846972766866696", icon: "🔢" },
+                    { id: "detail-minor-cofactor-la-gi", text: "Minor và cofactor là gì", link: "https://www.tiktok.com/@maitheduy1709/video/7293041943007776018", icon: "📊" },
+                    { id: "detail-nhac-lai-minor-cofactor", text: "Nhắc lại Minor và cofactor là gì", link: "https://www.tiktok.com/@maitheduy1709/video/7326124261578509576", icon: "📝" },
+                    { id: "detail-ghi-nho-nghich-dao-cap-2", text: "Cách ghi nhớ tính ma trận nghịch đảo của ma trận vuông cấp 2 sao cho nhanh", link: "https://www.tiktok.com/@maitheduy1709/video/7376911952284552466", icon: "💡" },
+                    { id: "detail-entry-adjugate", text: "Entry của Adjugate", link: "https://www.tiktok.com/@maitheduy1709/video/7291607487042555154", icon: "📊" },
+                    { id: "detail-tim-a-nghich-dao", text: "Tìm A−1 từ hệ thức", link: "https://www.tiktok.com/@maitheduy1709/video/7293175552834293010", icon: "🔍" },
+                    { id: "detail-tinh-ma-tran-nghich-dao", text: "Tính ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7291596924854045960", icon: "🔢" }
+                ],
+                "subtopic-bai-tap-ung-dung-ma-tran-nghich-dao": [
+                    { id: "detail-giai-phuong-trinh-tim-nghich-dao", text: "Giải phương trình tìm ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7293168967378668808", icon: "✅" },
+                    { id: "detail-bai-tap-nghich-dao", text: "Bài tập về ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7293124677189258514", icon: "✍️" },
+                    { id: "detail-tham-so-kha-nghich", text: "Tìm tham số để ma trận khả nghịch", link: "https://www.tiktok.com/@maitheduy1709/video/7293043794151230738", icon: "🔍" },
+                    { id: "detail-giai-he-bang-nghich-dao", text: "Giải hệ phương trình bằng phương pháp ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7298924501054622994", icon: "✅" },
+                    { id: "detail-he-vo-so-nghiem", text: "Giải hệ phương trình tuyến tính có vô số nghiệm", link: "https://www.tiktok.com/@maitheduy1709/video/7295428697601903880", icon: "🔍" },
+                    { id: "detail-he-vo-so-nghiem-nghich-dao", text: "Giải hệ phương trình tuyến tính có vô số nghiệm bằng ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7377241744431156488", icon: "✅" },
+                    { id: "detail-dang-bai-tap-nghich-dao", text: "Các dạng bài tập liên quan tới ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7298283154941529362", icon: "✍️" },
+                    { id: "detail-ung-dung-nghich-dao", text: "Ứng dụng của ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7298255191378300178", icon: "💡" },
+                    { id: "detail-tinh-chat-det-nghich-dao", text: "Tính chất của Det và ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7295951293527493895", icon: "📝" },
+                    { id: "detail-moi-quan-he-chuyen-vi", text: "Mối quan hệ giữa ma trận nghịch đảo và chuyển vị của ma trận nghịch đảo", link: "https://www.tiktok.com/@maitheduy1709/video/7330126346993126664", icon: "🔄" }
+                ],
+                "subtopic-phuong-trinh-vec-to": [
+                    { id: "detail-giai-phuong-trinh-ma-tran", text: "Giải phương trình ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7296798189670206727", icon: "📐" },
+                    { id: "detail-phuong-trinh-det-bang-0", text: "Giải phương trình ma trận có det bằng 0", link: "https://www.tiktok.com/@maitheduy1709/video/7295321149481700615", icon: "🔍" },
+                    { id: "detail-phuong-trinh-do-lon", text: "Giải phương trình ma trận và độ lớn của một véc tơ", link: "https://www.tiktok.com/@maitheduy1709/video/7293435954092641544", icon: "🔢" }
+                ],
+                "subtopic-bien-doi-tuyen-tinh": [
+                    { id: "detail-ma-tran-bien-hinh", text: "Ma trận của một phép biến hình bất kỳ", link: "https://www.tiktok.com/@maitheduy1709/video/7297021134598393095", icon: "➡️" },
+                    { id: "detail-ma-tran-bien-doi-tuyen-tinh", text: "Ma trận của phép biến đổi tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7301602189997313298", icon: "🔄" },
+                    { id: "detail-tim-ma-tran-bien-doi-1", text: "Tìm ma trận của phép biến đổi tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7297412710445108487", icon: "🔍" },
+                    { id: "detail-tim-ma-tran-bien-doi-2", text: "Tìm ma trận của phép biến đổi tuyến tính (2)", link: "https://www.tiktok.com/@maitheduy1709/video/7326775700801817874", icon: "🔍" },
+                    { id: "detail-tim-ma-tran-quay", text: "Tìm ma trận quay", link: "https://www.tiktok.com/@maitheduy1709/video/7295375924483345672", icon: "🔄" },
+                    { id: "detail-nhan-ma-tran-bien-doi", text: "Nhân ma trận là một phép biến đổi tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7297396635359825159", icon: "✖️" },
+                    { id: "detail-bai-tap-anh-xa", text: "Bài tập về ánh xạ tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7293126057450949896", icon: "✍️" },
+                    { id: "detail-tac-dong-bien-doi", text: "Tác động của phép biến đổi tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7291605226031828232", icon: "➡️" },
+                    { id: "detail-tim-anh-vec-to-1", text: "Tìm ảnh của véc tơ qua ánh xạ tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7291601318932679944", icon: "➡️" },
+                    { id: "detail-anh-vec-to", text: "Ảnh của véc tơ qua ánh xạ tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7291205547511041288", icon: "➡️" }
+                ],
+                "subtopic-kien-thuc-co-ban-det": [
+                    { id: "detail-cofactor", text: "Cofactor", link: "https://www.tiktok.com/@maitheduy1709/video/7287610459425885448", icon: "📊" },
+                    { id: "detail-tinh-determinant", text: "Tính determinant", link: "https://www.tiktok.com/@maitheduy1709/video/7293135054803356936", icon: "🔢" },
+                    { id: "detail-tinh-det-1", text: "Tính định thức 1", link: "https://www.tiktok.com/@maitheduy1709/video/7377323400118734088", icon: "🔢" },
+                    { id: "detail-tinh-det-2", text: "Tính định thức 2", link: "https://www.tiktok.com/@maitheduy1709/video/7287194037855997202", icon: "🔢" },
+                    { id: "detail-tinh-det-3", text: "Tính định thức 3", link: "https://www.tiktok.com/@maitheduy1709/video/7377299424017403154", icon: "🔢" },
+                    { id: "detail-tinh-det-cap-4", text: "Tính định thức cấp 4 như thế nào", link: "https://www.tiktok.com/@maitheduy1709/video/7291674882817936648", icon: "📐" }
+                ],
+                "subtopic-bai-tap-ung-dung-det": [
+                    { id: "detail-bai-tap-tinh-det", text: "Bài tập về tính định thức", link: "https://www.tiktok.com/@maitheduy1709/video/7298754741209795847", icon: "✍️" },
+                    { id: "detail-tinh-det-tinh-chat", text: "Tính Det dựa vào tính chất của Det", link: "https://www.tiktok.com/@maitheduy1709/video/7295605723357105416", icon: "🔍" },
+                    { id: "detail-bai-tap-tinh-chat-det", text: "Bài tập về tính chất của định thức", link: "https://www.tiktok.com/@maitheduy1709/video/7293118536480853255", icon: "✍️" },
+                    { id: "detail-tinh-det-dua-vao-det-khac", text: "Tính định thức dựa vào một định thức khác", link: "https://www.tiktok.com/@maitheduy1709/video/7293186694130584840", icon: "🔢" },
+                    { id: "detail-dang-bai-tap-det", text: "Các dạng bài liên quan tới định thức", link: "https://www.tiktok.com/@maitheduy1709/video/7298297546320006407", icon: "✍️" }
+                ],
+                "subtopic-det-lien-he-ma-tran": [
+                    { id: "detail-det-adj-a", text: "Det(Adj(A))", link: "https://www.tiktok.com/@maitheduy1709/video/7298303653172006151", icon: "📊" },
+                    { id: "detail-tinh-det-adj-a", text: "Tính định thức Adj(A)", link: "https://www.tiktok.com/@maitheduy1709/video/7298730147258125586", icon: "🔢" }
+                ],
+                "subtopic-det-he-phuong-trinh": [
+                    { id: "detail-tham-so-nghiem-duy-nhat", text: "Tìm tham số để hệ phương trình có nghiệm duy nhất", link: "https://www.tiktok.com/@maitheduy1709/video/7290970138336152850", icon: "🔍" },
+                    { id: "detail-nhan-voi-tich-ma-tran", text: "Một số nhân với tích của 2 ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7291110222297304338", icon: "✖️" }
+                ],
+                "subtopic-tong-hop-cong-thuc": [
+                    { id: "detail-tinh-chat-det", text: "Các tính chất của định thức", link: "https://www.tiktok.com/@maitheduy1709/video/7290958766500089095", icon: "📝" },
+                    { id: "detail-cong-thuc-det", text: "Các công thức liên quan tới định thức", link: "https://www.tiktok.com/@maitheduy1709/video/7290871779818491154", icon: "📚" }
+                ],
+                "subtopic-he-phuong-trinh-cramer": [
+                    { id: "detail-he-cramer", text: "Hệ phương trình Crammer", link: "https://www.tiktok.com/@maitheduy1709/video/7297447619192720648", icon: "✅" },
+                    { id: "detail-he-cramer-so-phuong-trinh", text: "Hệ Crammer là hệ phương trình có số phương trình thực sự bằng số ẩn", link: "https://www.tiktok.com/@maitheduy1709/video/7297151817954118920", icon: "📝" }
+                ],
+                "subtopic-gia-tri-rieng-nen-tang": [
+                    { id: "detail-gia-tri-rieng", text: "Giá trị riêng và véc tơ riêng", link: "https://www.tiktok.com/@maitheduy1709/video/7196836720275377434", icon: "📚" },
+                    { id: "detail-da-thuc-dac-trung", text: "Đa thức đặc trưng của ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7293170869214514450", icon: "🔢" },
+                    { id: "detail-tinh-gia-tri-rieng-vec-to", text: "Tính giá trị riêng và véc tơ riêng", link: "https://www.tiktok.com/@maitheduy1709/video/7289149380114844946", icon: "🔍" },
+                    { id: "detail-tinh-gia-tri-rieng-ma-tran", text: "Tính giá trị riêng của ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7337194633509833991", icon: "🔢" },
+                    { id: "detail-vec-to-rieng-la-gi", text: "Véc tơ riêng của ma trận là gì", link: "https://www.tiktok.com/@maitheduy1709/video/7295354135057141010", icon: "❓" },
+                    { id: "detail-tim-gia-tri-vec-to-rieng", text: "Tìm giá trị riêng và véc tơ riêng", link: "https://www.tiktok.com/@maitheduy1709/video/7306775425647250706", icon: "🔍" }
+                ],
+                "subtopic-tim-kiem-tra-vec-to-rieng": [
+                    { id: "detail-tim-vec-to-rieng-1", text: "Tìm véc tơ riêng (1)", link: "https://www.tiktok.com/@maitheduy1709/video/7295344217478483218", icon: "✍️" },
+                    { id: "detail-tim-vec-to-rieng-2", text: "Tìm véc tơ riêng (2)", link: "https://www.tiktok.com/@maitheduy1709/video/7337906400510709000", icon: "✍️" },
+                    { id: "detail-bai-tap-tim-vec-to", text: "Bài tập tìm véc tơ riêng", link: "https://www.tiktok.com/@maitheduy1709/video/7293166760302349576", icon: "✍️" },
+                    { id: "detail-kiem-tra-vec-to-rieng", text: "Kiểm tra véc tơ riêng", link: "https://www.tiktok.com/@maitheduy1709/video/7337911357079047431", icon: "✅" },
+                    { id: "detail-co-so-vec-to-rieng", text: "Tìm cơ sở của véc tơ riêng", link: "https://www.tiktok.com/@maitheduy1709/video/7379566187681811730", icon: "🔍" }
+                ],
+                "subtopic-y-nghia-hinh-hoc": [
+                    { id: "detail-minh-hoa-hinh-hoc", text: "Minh hoạ ý nghĩa hình học của véc tơ riêng và giá trị riêng qua coding program", link: "https://www.tiktok.com/@maitheduy1709/video/7295584697063656711", icon: "📊" }
+                ],
+                "subtopic-cheo-hoa-ma-tran": [
+                    { id: "detail-cheo-hoa-1", text: "Chéo hoá ma trận 1", link: "https://www.tiktok.com/@maitheduy1709/video/7379543859660885255", icon: "🔄" },
+                    { id: "detail-cheo-hoa-2", text: "Chéo hoá ma trận 2", link: "https://www.tiktok.com/@maitheduy1709/video/7294250868394741010", icon: "🔄" }
+                ],
+                "subtopic-tong-quan-on-tap": [
+                    { id: "detail-noi-dung-on-tap-part-2", text: "Nội dung ôn tập Part 2", link: "https://www.tiktok.com/@maitheduy1709/video/7301308940975983890", icon: "📝" },
+                    { id: "detail-noi-dung-on-tap-part-3", text: "Nội dung ôn tập Part 3", link: "https://www.tiktok.com/@maitheduy1709/video/7301339709890989330", icon: "📝" },
+                    { id: "detail-liet-ke-noi-dung-on-tap", text: "Liệt kê các nội dung cần ôn tập", link: "https://www.tiktok.com/@maitheduy1709/video/7293816229813325064", icon: "📚" }
+                ],
+                "subtopic-khai-niem-khong-gian-vec-to": [
+                    { id: "detail-vec-to-la-gi", text: "Véc tơ là gì", link: "https://www.tiktok.com/@maitheduy1709/video/7295444953046486280", icon: "➡️" },
+                    { id: "detail-mo-dau-khong-gian-vec-to", text: "Mở đầu về không gian véc tơ", link: "https://www.tiktok.com/@maitheduy1709/video/7294686477412273416", icon: "📚" },
+                    { id: "detail-bai-giang-khong-gian-vec-to-1", text: "Bài giảng về không gian véc tơ số 1", link: "https://www.tiktok.com/@maitheduy1709/video/7374360982694448385", icon: "🎬" },
+                    { id: "detail-bai-giang-khong-gian-vec-to-2", text: "Bài giảng về không gian véc tơ số 2", link: "https://www.tiktok.com/@maitheduy1709/video/7374642974451371280", icon: "🎬" }
+                ],
+                "subtopic-he-co-so-to-hop": [
+                    { id: "detail-he-co-so-khong-gian-vec-to", text: "Bài giảng về hệ cơ sở của không gian véc tơ", link: "https://www.tiktok.com/@maitheduy1709/video/7376895450617482503", icon: "🔢" },
+                    { id: "detail-dieu-kien-he-co-so", text: "Điều kiện để một hệ véc tơ là cơ sở", link: "https://www.tiktok.com/@maitheduy1709/video/7293172712472694023", icon: "📝" },
+                    { id: "detail-to-hop-tuyen-tinh", text: "Bài giảng về tổ hợp tuyến tính, độc lập tuyến tính và phụ thuộc tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7374736019582635280", icon: "🔗" }
+                ],
+                "subtopic-tinh-chat-vec-to": [
+                    { id: "detail-tinh-chat-vec-to", text: "Bài giảng liệt kê các tính chất và đặc tính của véc tơ cần học", link: "https://www.tiktok.com/@maitheduy1709/video/7374703722783460625", icon: "📝" }
+                ],
+                "subtopic-duong-thang-khong-gian": [
+                    { id: "detail-phuong-trinh-tham-so", text: "Phương trình tham số của đường thẳng trong không gian", link: "https://www.tiktok.com/@maitheduy1709/video/7304548040021527826", icon: "📏" },
+                    { id: "detail-phuong-trinh-duong-thang", text: "Phương trình của đường thẳng trong không gian", link: "https://www.tiktok.com/@maitheduy1709/video/7293034435023293714", icon: "📐" }
+                ],
+                "subtopic-phep-chieu-tich-vo-huong": [
+                    { id: "detail-phep-chieu-vuong-goc", text: "Phép chiếu vuông góc", link: "https://www.tiktok.com/@maitheduy1709/video/7303792514396359944", icon: "🔢" },
+                    { id: "detail-bai-tap-chieu-vuong-goc", text: "Bài tập về phép chiếu vuông góc", link: "https://www.tiktok.com/@maitheduy1709/video/7328710780726021383", icon: "✍️" },
+                    { id: "detail-toa-do-chieu-vuong-goc", text: "Tìm toạ độ của phép chiếu vuông góc", link: "https://www.tiktok.com/@maitheduy1709/video/7296710218329771282", icon: "🔍" },
+                    { id: "detail-bai-tap-tich-vo-huong", text: "Bài tập về tích vô hướng và các véc tơ vuông góc với nhau", link: "https://www.tiktok.com/@maitheduy1709/video/7326105700852075783", icon: "✍️" }
+                ],
+                "subtopic-phep-phan-xa": [
+                    { id: "detail-phep-reflection", text: "Phép reflection", link: "https://www.tiktok.com/@maitheduy1709/video/7301621213313486098", icon: "🔄" },
+                    { id: "detail-the-reflection", text: "The reflection", link: "https://www.tiktok.com/@maitheduy1709/video/7305254704118828296", icon: "🔄" }
+                ],
+                "subtopic-ket-hop-bien-hinh": [
+                    { id: "detail-tich-hai-bien-hinh", text: "Tích của 2 phép biến hình", link: "https://www.tiktok.com/@maitheduy1709/video/7304602414319947015", icon: "➡️" }
+                ],
+                "subtopic-tich-co-huong": [
+                    { id: "detail-tich-co-huong-cross", text: "Tích có hướng cross product", link: "https://www.tiktok.com/@maitheduy1709/video/7304933198151142674", icon: "✖️" },
+                    { id: "detail-ung-dung-tich-co-huong", text: "Ứng dụng của Tích có hướng", link: "https://www.tiktok.com/@maitheduy1709/video/7341670587216989458", icon: "💡" }
+                ],
+                "subtopic-chuan-vec-to": [
+                    { id: "detail-chuan-norm", text: "Chuẩn Norm của một véc tơ", link: "https://www.tiktok.com/@maitheduy1709/video/7297646332053851400", icon: "📏" },
+                    { id: "detail-giai-thich-chuan", text: "Giải thích thêm về Chuẩn của một véc tơ", link: "https://www.tiktok.com/@maitheduy1709/video/7327585137552575762", icon: "📝" }
+                ],
+                "subtopic-kien-thuc-nen-ve-khong-gian": [
+                    { id: "detail-bai-giang-khong-gian-1", text: "Bài giảng về không gian véc tơ số 1", link: "https://www.tiktok.com/@maitheduy1709/video/7374360982694448385", icon: "🎬" },
+                    { id: "detail-bai-giang-khong-gian-2", text: "Bài giảng về không gian véc tơ số 2", link: "https://www.tiktok.com/@maitheduy1709/video/7374642974451371280", icon: "🎬" },
+                    { id: "detail-khong-gian-to-hop-tuyen-tinh", text: "Không gian véc tơ, tổ hợp tuyến tính, hệ sinh", link: "https://www.tiktok.com/@maitheduy1709/video/7296666454085111047", icon: "🔗" },
+                    { id: "detail-khong-gian-con", text: "Không gian véc tơ và không gian con", link: "https://www.tiktok.com/@maitheduy1709/video/7295557716536233234", icon: "📚" }
+                ],
+                "subtopic-tinh-chat-co-so": [
+                    { id: "detail-tinh-chat-vec-to", text: "Bài giảng liệt kê các tính chất và đặc tính của véc tơ cần học", link: "https://www.tiktok.com/@maitheduy1709/video/7374703722783460625", icon: "📝" },
+                    { id: "detail-to-hop-tuyen-tinh", text: "Bài giảng về tổ hợp tuyến tính, độc lập tuyến tính và phụ thuộc tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7374736019582635280", icon: "🔗" },
+                    { id: "detail-tieu-chuan-khep-kin", text: "Hai tiêu chuẩn khép kín đối với không gian véc tơ con", link: "https://www.tiktok.com/@maitheduy1709/video/7299100428489231624", icon: "🔍" },
+                    { id: "detail-khong-gian-con-khong-tinh-toan", text: "Không gian véc tơ con, không cần tính toán nhiều", link: "https://www.tiktok.com/@maitheduy1709/video/7347597496006348050", icon: "📚" },
+                    { id: "detail-khong-gian-vec-to-con", text: "Không gian véc tơ con", link: "https://www.tiktok.com/@maitheduy1709/video/7299409613089213714", icon: "📚" },
+                    { id: "detail-tieu-chuan-khong-gian-con", text: "Tiêu chuẩn của không gian véc tơ con", link: "https://www.tiktok.com/@maitheduy7/video/7298968480685100296", icon: "📝" }
+                ],
+                "subtopic-bai-tap-minh-hoa": [
+                    { id: "detail-bai-tap-khong-gian-con", text: "Bài tập về không gian véc tơ con", link: "https://www.tiktok.com/@maitheduy1709/video/7299100428489231624", icon: "✍️" },
+                    { id: "detail-chieu-co-so-khong-gian-con", text: "Chiều và cơ sở của không gian véc tơ con", link: "https://www.tiktok.com/@maitheduy1709/video/7303828867230305543", icon: "🔢" },
+                    { id: "detail-tim-co-so-gauss", text: "Tìm cơ sở và tính chiều của subspace bằng biến đổi Gauss", link: "https://www.tiktok.com/@maitheduy1709/video/7298665227632135432", icon: "🔍" },
+                    { id: "detail-tim-co-so-chieu", text: "Tìm cơ sở và chiều của không gian con", link: "https://www.tiktok.com/@maitheduy1709/video/7298665227632135432", icon: "🔍" }
+                ],
+                "subtopic-co-so-so-chieu": [
+                    { id: "detail-basis-dimension-subspace", text: "Basis and dimension của subspace", link: "https://www.tiktok.com/@maitheduy1709/video/7293037471665884434", icon: "📐" },
+                    { id: "detail-bai-tap-basis-dimension", text: "Bài tập về basis và dimension", link: "https://www.tiktok.com/@maitheduy1709/video/7298637675093871880", icon: "✍️" },
+                    { id: "detail-chieu-co-so-nghiem", text: "Chiều và cơ sở của không gian nghiệm", link: "https://www.tiktok.com/@maitheduy1709/video/7298637675093871880", icon: "🔢" },
+                     { id: "detail-bai-tap-chieu-co-so", text: "Bài tập chiều và cơ sở", link: "https://www.tiktok.com/@maitheduy1709/video/7298626083925118215", icon: "✍️" },
+                    { id: "detail-co-so-chieu-nghiem-he", text: "Cơ sở và số chiều của không gian nghiệm của hệ phương trình tuyến tính thuần nhất", link: "https://www.tiktok.com/@maitheduy1709/video/7298144363111140615", icon: "🔍" },
+                    { id: "detail-khong-gian-con-tap-nghiem", text: "Không gian véc tơ con của tập nghiệm", link: "https://www.tiktok.com/@maitheduy1709/video/7213179834418154778", icon: "📚" }
+                ],
+                "subtopic-doc-lap-tuyen-tinh": [
+                    { id: "detail-doc-lap-phu-thuoc", text: "Độc lập tuyến tính hay phụ thuộc tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7298908365843975432", icon: "🔗" },
+                    { id: "detail-doc-lap-phu-thuoc-he-vec-to", text: "Độc lập và phụ thuộc tuyến tính của một hệ véc tơ", link: "https://www.tiktok.com/@maitheduy1709/video/7293120645842439442", icon: "📝" },
+                    { id: "detail-bai-tap-doc-lap-phu-thuoc", text: "Bài tập về hệ véc tơ độc lập hoặc phụ thuộc tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7293056002574912775", icon: "✍️" },
+                    { id: "detail-vec-to-phu-thuoc", text: "Các véc tơ phụ thuộc tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7294691876857220370", icon: "🔍" },
+                    { id: "detail-cong-cu-det-gauss", text: "Hai công cụ để kiểm tra độc lập tuyến tính hay phụ thuộc tuyến tính là Det và Gauss", link: "https://www.tiktok.com/@maitheduy1709/video/7298196803940404498", icon: "🔢" }
+                ],
+                "subtopic-he-sinh-span": [
+                    { id: "detail-he-sinh", text: "Hệ sinh", link: "https://www.tiktok.com/@maitheduy1709/video/7298908365843975432", icon: "📚" },
+                    { id: "detail-span-basis", text: "Span và Basis", link: "https://www.tiktok.com/@maitheduy1709/video/7294698557733489928", icon: "📐" },
+                    { id: "detail-span-la-gi", text: "Span là gì ?", link: "https://www.tiktok.com/@maitheduy1709/video/7293131289668914439", icon: "❓" },
+                    { id: "detail-he-sinh-to-hop", text: "Hệ sinh và tổ hợp tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7295661722348571922", icon: "🔗" },
+                    { id: "detail-bieu-dien-to-hop-1", text: "Biểu diễn một véc tơ qua tổ hợp tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7295691062939569416", icon: "📝" },
+                    { id: "detail-bieu-dien-to-hop-2", text: "Biểu diễn véc tơ thành tổ hợp tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7295653954623409426", icon: "📝" },
+                    { id: "detail-bieu-dien-he-sinh", text: "Biểu diễn véc tơ qua hệ sinh", link: "https://www.tiktok.com/@maitheduy1709/video/7298725009374121224", icon: "📚" },
+                    { id: "detail-bai-tap-bieu-dien-nghiem", text: "Bài tập về biểu diễn nghiệm qua hệ véc tơ khác", link: "https://www.tiktok.com/@maitheduy1709/video/7298725009374121224", icon: "✍️" },
+                    { id: "detail-dieu-kien-bieu-dien", text: "Điều kiện để biểu diễn một véc tơ qua tổ hợp tuyến tính của các véc tơ khác", link: "https://www.tiktok.com/@maitheduy1709/video/7298725009374121224", icon: "🔍" }
+                ],
+                "subtopic-so-sanh-he-sinh-co-so": [
+                    { id: "detail-khac-nhau-he-sinh-co-so", text: "Sự khác nhau giữa hệ sinh và hệ cơ sở", link: "https://www.tiktok.com/@maitheduy1709/video/7303843578499976456", icon: "⚖️" },
+                    { id: "detail-he-sinh-vs-co-so", text: "Hệ sinh vs hệ cơ sở của không gian véc tơ ai to hơn", link: "https://www.tiktok.com/@maitheduy1709/video/7304919031302212882", icon: "📊" }
+                ],
+                "subtopic-co-so-chieu-khong-gian": [
+                    { id: "detail-chieu-co-so-khong-gian", text: "Chiều và cơ sở của không gian véc tơ", link: "https://www.tiktok.com/@maitheduy1709/video/7299286314896116999", icon: "📐" },
+                    { id: "detail-chieu-cot-hang", text: "Chiều của cột và của hàng của ma trận là bằng nhau", link: "https://www.tiktok.com/@maitheduy1709/video/7293086936544070930", icon: "🔢" },
+                    { id: "detail-bai-tap-basis-dimension-he-sinh", text: "Bài tập về Basis and dimension của một hệ sinh", link: "https://www.tiktok.com/@maitheduy1709/video/7213176264440417563", icon: "✍️" }
+                ],
+                "subtopic-tich-vo-huong-ung-dung": [
+                    { id: "detail-tich-vo-huong-2-vec-to", text: "Tích vô hướng của 2 véc tơ", link: "https://www.tiktok.com/@maitheduy7/video/7297248102413569288", icon: "🔢" },
+                    { id: "detail-tich-vo-huong-khoang-cach", text: "Tích vô hướng, khoảng cách ngắn nhất", link: "https://www.tiktok.com/@maitheduy1709/video/7339072721218850056", icon: "📏" }
+                ],
+                "subtopic-vec-to-dinh-huong-truc-giao": [
+                    { id: "detail-vec-to-chi-phuong-phap-tuyen", text: "Véc tơ chỉ phương và véc tơ pháp tuyến", link: "https://www.tiktok.com/@maitheduy1709/video/7327563593086487816", icon: "➡️" },
+                    { id: "detail-he-truc-giao", text: "Hệ trực giao", link: "https://www.tiktok.com/@maitheduy1709/video/7304565171488378130", icon: "🔗" },
+                    { id: "detail-bai-tap-he-truc-giao", text: "Bài tập về hệ trực giao", link: "https://www.tiktok.com/@maitheduy1709/video/7291145433705876743", icon: "✍️" }
+                ],
+                "subtopic-khai-niem-co-ban-khac": [
+                    { id: "detail-hang-ma-tran", text: "Hạng của ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7293127847806307602", icon: "📊" }
+                ],
+                "subtopic-tong-quan-hang-ma-tran": [
+                    { id: "detail-bai-giang-hang-ma-tran", text: "Bài giảng về hạng của ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7376901971506105608", icon: "🎬" },
+                    { id: "detail-hang-ma-tran-bat-ky", text: "Hạng của một ma trận bất kỳ", link: "https://www.tiktok.com/@maitheduy1709/video/7297104408557522184", icon: "📊" },
+                    { id: "detail-rank-ma-tran", text: "Rank của ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7298273012812352776", icon: "🔢" }
+                ],
+                "subtopic-tinh-chat-y-nghia-hang": [
+                    { id: "detail-bien-doi-so-cap", text: "Các phép biến đổi sơ cấp không ảnh hưởng tới hạng của ma trận", link: "https://www.tiktok.com/@maitheduy1709/video/7295331729315794184", icon: "🔄" },
+                    { id: "detail-so-dong-doc-lap", text: "Số dòng (cột) độc lập tuyến tính của ma trận là hạng của ma trận đó", link: "https://www.tiktok.com/@maitheduy1709/video/7297136484342058258", icon: "🔢" },
+                    { id: "detail-rank-quyet-dinh-doc-lap", text: "Rank quyết định đến việc độc lập tuyến tính và phụ thuộc tuyến tính", link: "https://www.tiktok.com/@maitheduy1709/video/7298273012812352776", icon: "📝" }
+                ],
+                "subtopic-khai-niem-lien-quan": [
+                    { id: "detail-kernel-image", text: "Kernel and Image", link: "https://www.tiktok.com/@maitheduy1709/video/7310063412711623943", icon: "🔗" }
+                ],
+                "subtopic-bai-tap-ap-dung": [
+                    { id: "detail-cac-kieu-bai-tap", text: "Các kiểu bài tập", link: "https://www.tiktok.com/@maitheduy1709/video/7329436624595504392", icon: "✍️" }
+                ]            
+            };
+            return details[subtopicId] || [];
+        }
+        async function renderSlots() {
+            showLoading(slotContainer);
+            const slots = await fetchSlots();
+            slotContainer.innerHTML = '';
+            slots.forEach(slot => {
+                const slotEl = document.createElement('div');
+                slotEl.className = 'bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 ease-in-out cursor-pointer border border-transparent hover:border-indigo-500 dark:hover:border-indigo-400';
+                slotEl.dataset.slotId = slot.id;
+                slotEl.dataset.slotTitle = slot.title;
+                slotEl.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 p-3 rounded-lg mr-5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">${slot.title}</h2>
+                            <p class="text-gray-500 dark:text-gray-400 mt-1 font-light">${slot.description}</p>
+                        </div>
+                        <div class="ml-auto text-gray-400 dark:text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </div>
+                    </div>
+                `;
+                slotEl.addEventListener('click', handleSlotClick);
+                slotContainer.appendChild(slotEl);
+            });
+        }
+
+        async function renderSubtopics(slotId, title) {
+            subtopicTitle.textContent = title;
+            showLoading(subtopicContainer);
+            const subtopics = await fetchSubtopics(slotId);
+            subtopicContainer.innerHTML = '';
+            subtopics.forEach(subtopic => {
+                const subtopicEl = document.createElement('div');
+                subtopicEl.className = 'relative text-center p-5 rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 ease-in-out cursor-pointer bg-white dark:bg-gray-800';
+                subtopicEl.dataset.targetId = subtopic.id;
+                subtopicEl.dataset.targetTitle = subtopic.title;
+                subtopicEl.innerHTML = `
+                    <div class="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">${subtopic.icon}</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 dark:text-gray-200">${subtopic.title}</h3>
+                `;
+                subtopicEl.addEventListener('click', handleSubtopicClick);
+                subtopicContainer.appendChild(subtopicEl);
+            });
+        }
+
+        async function renderDetails(subtopicId, title) {
+            detailTitle.textContent = title;
+            showLoading(detailContainer);
+            const details = await fetchDetails(subtopicId);
+            detailContainer.innerHTML = '';
+            if (details.length > 0) {
+                details.forEach(detail => {
+                    const detailEl = document.createElement('div');
+                    detailEl.className = 'group flex items-center p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] bg-white dark:bg-gray-800';
+                    detailEl.innerHTML = `
+                        <span class="text-2xl mr-4">${detail.icon}</span>
+                        <a href="${detail.link}" target="_blank" rel="noopener noreferrer" class="flex-grow font-medium text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">${detail.text}</a>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto text-gray-400 dark:text-gray-500 group-hover:text-indigo-500 transition-transform duration-300 group-hover:translate-x-1"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    `;
+                    // Thêm sự kiện click cho link bên trong
+                    detailEl.querySelector('a').addEventListener('click', function(e) {
+                        e.stopPropagation(); // Ngăn chặn sự kiện lan ra ngoài khi click link
+                    });
+                    detailContainer.appendChild(detailEl);
+                });
+            } else {
+                detailContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center p-4">Chưa có nội dung chi tiết cho mục này.</p>';
+            }
+        }
+
+        function handleSlotClick(event) {
+            const card = event.currentTarget;
+            renderSubtopics(card.dataset.slotId, card.dataset.slotTitle);
+            showView(subtopicView);
+        }
+
+        function handleSubtopicClick(event) {
+            const card = event.currentTarget;
+            const targetId = card.dataset.targetId;
+            const targetTitle = card.dataset.targetTitle;
+            renderDetails(targetId, targetTitle);
+            showView(detailView);
+        }
+
+        document.querySelectorAll('.back-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const parentView = button.closest('.view');
+                if (parentView.id === 'detail-view') showView(subtopicView);
+                else if (parentView.id === 'subtopic-view') showView(slotSelectionView);
+            });
+        });
+
+        renderSlots();
+        showView(slotSelectionView);
+    });
+    </script>
+</body>
+</html>

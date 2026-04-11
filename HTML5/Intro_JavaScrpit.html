@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài tập thực hành JS DOM</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Khung hiển thị kết quả */
+        .result-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            min-height: 100px;
+            border: 2px solid #ddd;
+        }
+
+        /* Các nút bấm điều khiển */
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Chia 2 cột */
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button.danger {
+            background-color: #dc3545; /* Màu đỏ cho nút xóa */
+        }
+        button.danger:hover {
+            background-color: #a71d2a;
+        }
+
+        /* Class đặc biệt để test tính năng classList */
+        .highlight {
+            background-color: yellow;
+            color: red;
+            font-weight: bold;
+            border: 2px dashed red;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Khu vực hiển thị (DOM)</h2>
+    <div id="demoArea" class="result-box">
+        <h1 id="title">Tiêu đề gốc (Chưa sửa)</h1>
+        <p class="text-para">Đoạn văn bản mẫu số 1.</p>
+        <p class="text-para">Đoạn văn bản mẫu số 2.</p>
+    </div>
+
+    <h2>Bảng điều khiển (JavaScript Control)</h2>
+    <div class="controls">
+        <button onclick="testAlert()">1. Test Alert (Thông báo)</button>
+        <button onclick="testPrompt()">2. Test Prompt (Nhập liệu)</button>
+
+        <button onclick="changeText()">3. Đổi nội dung Text (innerText)</button>
+        <button onclick="changeStyle()">4. Đổi màu sắc (Style)</button>
+
+        <button onclick="toggleClass()">5. Bật/Tắt Class (classList.toggle)</button>
+
+        <button onclick="addElement()">6. Thêm phần tử mới (Create/Append)</button>
+        <button class="danger" onclick="removeElement()">7. Xóa tiêu đề (Remove)</button>
+    </div>
+
+    <script>
+        // --- 1. Các hàm thông báo (Output/Input) ---
+        function testAlert() {
+            alert("Xin chào! Đây là hàm alert().");
+        }
+
+        function testPrompt() {
+            // Hỏi tên và hiển thị lại
+            const name = prompt("Bạn tên là gì?");
+            if (name) {
+                alert("Xin chào " + name + "!");
+            }
+        }
+
+        // --- 2. Thay đổi nội dung & Style (Manipulation) ---
+        function changeText() {
+            // Chọn phần tử H1 bằng ID
+            const title = document.getElementById("title");
+            
+            // Kiểm tra xem phần tử còn tồn tại không (phòng trường hợp đã bị xóa ở bước 7)
+            if (title) {
+                title.innerText = "Nội dung đã được thay đổi bằng JS!";
+            } else {
+                alert("Lỗi: Bạn đã xóa tiêu đề rồi, hãy tải lại trang (F5) để thử lại.");
+            }
+        }
+
+        function changeStyle() {
+            // Chọn các thẻ <p> có class là 'text-para'
+            // querySelector chỉ chọn cái đầu tiên tìm thấy
+            const para = document.querySelector(".text-para");
+            
+            if (para) {
+                para.style.color = "blue";
+                para.style.fontSize = "20px";
+                para.style.fontStyle = "italic";
+                para.innerText = "Đoạn văn này đã được đổi Style!";
+            }
+        }
+
+        // --- 3. Thao tác với Class (classList) ---
+        function toggleClass() {
+            const box = document.getElementById("demoArea");
+            // toggle: Nếu có class 'highlight' thì xóa, chưa có thì thêm
+            box.classList.toggle("highlight");
+        }
+
+        // --- 4. Tạo và Thêm phần tử (Create & Append) ---
+        function addElement() {
+            // Bước 1: Tạo thẻ div mới
+            const newDiv = document.createElement("div");
+            
+            // Bước 2: Thêm nội dung cho nó
+            newDiv.innerHTML = "<b>Phần tử mới</b> - Được tạo lúc: " + new Date().toLocaleTimeString();
+            newDiv.style.borderBottom = "1px solid #ccc";
+            newDiv.style.padding = "5px";
+
+            // Bước 3: Gắn vào khu vực hiển thị
+            const container = document.getElementById("demoArea");
+            container.append(newDiv); // Thêm vào cuối danh sách
+        }
+
+        // --- 5. Xóa phần tử (Remove) ---
+        function removeElement() {
+            const title = document.getElementById("title");
+            if (title) {
+                const confirmDelete = confirm("Bạn có chắc muốn xóa tiêu đề không?");
+                if (confirmDelete) {
+                    title.remove(); // Xóa hoàn toàn khỏi HTML
+                }
+            } else {
+                alert("Tiêu đề đã bị xóa rồi!");
+            }
+        }
+    </script>
+</body>
+</html>

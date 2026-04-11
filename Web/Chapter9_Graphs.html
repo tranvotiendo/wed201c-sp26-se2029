@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAD101 | Chapter 9: Graphs (Đồ Thị)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0f1e3d;
+  --navy-mid: #1a3261;
+  --teal: #00c2a8;
+  --teal-light: #00e5c8;
+  --gold: #f5a623;
+  --gold-light: #ffd580;
+  --cream: #f8f5ef;
+  --white: #ffffff;
+  --gray-100: #f0f0f0;
+  --gray-200: #dde4ee;
+  --gray-300: #9bacc4;
+  --text-main: #1a2340;
+  --text-sub: #4a5e7e;
+  --radius: 12px;
+  --radius-lg: 20px;
+  --shadow: 0 4px 20px rgba(15,30,61,0.10);
+  --shadow-hover: 0 8px 32px rgba(15,30,61,0.18);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--cream);
+  color: var(--text-main);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--gray-100); }
+::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 3px; }
+
+/* ── HERO ── */
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 60%, #0a3550 100%);
+  color: var(--white);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 40px 70px;
+  position: relative;
+  z-index: 2;
+}
+.hero-badge {
+  display: inline-block;
+  background: rgba(0,194,168,0.2);
+  border: 1px solid var(--teal);
+  color: var(--teal-light);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(40px, 6vw, 68px);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  letter-spacing: -1px;
+}
+.hero h1 span { color: var(--teal); }
+.hero-sub {
+  font-size: 18px;
+  color: rgba(255,255,255,0.72);
+  max-width: 560px;
+  margin-bottom: 40px;
+  font-style: italic;
+}
+.hero-quote {
+  border-left: 3px solid var(--gold);
+  padding: 12px 20px;
+  font-style: italic;
+  color: var(--gold-light);
+  font-size: 15px;
+  max-width: 560px;
+  background: rgba(245,166,35,0.06);
+  border-radius: 0 8px 8px 0;
+}
+.hero-deco {
+  position: absolute;
+  right: -60px; top: -60px;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  border: 60px solid rgba(0,194,168,0.06);
+  z-index: 1;
+}
+.hero-deco2 {
+  position: absolute;
+  right: 80px; bottom: -80px;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  border: 40px solid rgba(245,166,35,0.07);
+  z-index: 1;
+}
+
+/* ── NAV ── */
+.sticky-nav {
+  position: sticky;
+  top: 0;
+  background: rgba(15,30,61,0.96);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  padding: 0 40px;
+  border-bottom: 1px solid rgba(0,194,168,0.2);
+}
+.nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-inner a {
+  display: inline-block;
+  padding: 14px 18px;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.nav-inner a:hover {
+  color: var(--teal-light);
+  border-bottom-color: var(--teal);
+}
+
+/* ── LAYOUT ── */
+.page-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px 80px;
+}
+
+/* ── SECTION ── */
+.section {
+  margin-top: 72px;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 36px;
+}
+.section-icon {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.icon-blue { background: #e8f0fe; }
+.icon-teal { background: #d5f8f4; }
+.icon-gold { background: #fef3d8; }
+.icon-rose { background: #fde8e8; }
+.icon-purple { background: #ede8fe; }
+.icon-green { background: #e0f7ea; }
+.section-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.2;
+}
+.section-header p {
+  font-size: 14px;
+  color: var(--text-sub);
+  margin-top: 4px;
+}
+.divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, var(--teal), transparent);
+  margin-bottom: 32px;
+  opacity: 0.4;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-hover); }
+
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.card-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+/* ── OBJECTIVES ── */
+.obj-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.obj-list li {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 18px;
+  background: var(--gray-100);
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--text-main);
+  border-left: 3px solid var(--teal);
+}
+.obj-num {
+  background: var(--teal);
+  color: white;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+
+/* ── TERMS ── */
+.term-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.term-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.term-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
+  background: var(--teal);
+  border-radius: 4px 0 0 4px;
+}
+.term-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.term-en {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px; font-weight: 600;
+  color: var(--navy);
+}
+.term-vi {
+  font-size: 13px;
+  color: var(--text-sub);
+  margin-top: 4px;
+}
+.term-def {
+  font-size: 14px;
+  color: var(--text-main);
+  margin-top: 8px;
+  line-height: 1.55;
+}
+
+/* ── THEOREM ── */
+.theorem-box {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a3261 100%);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 36px 40px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.theorem-box::before {
+  content: '∑';
+  position: absolute;
+  right: 30px; top: 20px;
+  font-size: 120px;
+  opacity: 0.06;
+  font-family: serif;
+}
+.theorem-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--teal-light);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.theorem-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: white;
+}
+.formula {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,194,168,0.4);
+  border-radius: 10px;
+  padding: 16px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  color: var(--teal-light);
+  margin: 16px 0;
+  text-align: center;
+}
+.theorem-note {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  font-style: italic;
+}
+
+/* ── TIPS ── */
+.tip-card {
+  background: linear-gradient(135deg, #fffbf0, #fff8e7);
+  border: 1px solid #f5e0a0;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+}
+.tip-card h4 {
+  color: #b07a00;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.tip-card ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.tip-card li {
+  font-size: 14px;
+  padding-left: 20px;
+  position: relative;
+  color: var(--text-main);
+}
+.tip-card li::before {
+  content: '→';
+  position: absolute; left: 0;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* ── COMPARISON TABLE ── */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 14px;
+}
+.compare-table th {
+  background: var(--navy);
+  color: white;
+  padding: 12px 16px;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.compare-table th:first-child { border-radius: 8px 0 0 0; }
+.compare-table th:last-child { border-radius: 0 8px 0 0; }
+.compare-table td {
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid var(--gray-200);
+  vertical-align: middle;
+}
+.compare-table tr:hover td { background: var(--gray-100); }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table td:first-child {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--navy);
+  text-align: left;
+}
+.badge-teal {
+  background: var(--teal);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.badge-gold {
+  background: var(--gold);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── SVG GRAPH ── */
+.graph-wrap {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+}
+.graph-wrap h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--navy);
+}
+.graph-wrap p { font-size: 13px; color: var(--text-sub); margin-bottom: 20px; }
+svg.graph-svg {
+  width: 100%;
+  max-height: 260px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.graph-legend {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gray-200);
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--text-sub);
+}
+.legend-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+
+/* ── ALGORITHM ── */
+.algo-box {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+  margin-bottom: 28px;
+}
+.algo-header {
+  background: var(--navy);
+  color: white;
+  padding: 20px 28px;
+  display: flex; align-items: center; gap: 14px;
+}
+.algo-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+.algo-header .algo-badge {
+  background: var(--teal);
+  color: white;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+.algo-body { padding: 28px; }
+.algo-idea {
+  background: #f0fdf9;
+  border: 1px solid #b2f0e4;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  font-size: 15px;
+  color: var(--text-main);
+}
+.algo-idea strong { color: #007a65; }
+.steps-list { counter-reset: steps; display: flex; flex-direction: column; gap: 14px; }
+.step-item {
+  display: flex; gap: 16px;
+  padding: 14px 18px;
+  background: var(--gray-100);
+  border-radius: 10px;
+  counter-increment: steps;
+}
+.step-num {
+  background: var(--teal);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-content { font-size: 14px; color: var(--text-main); }
+.step-content strong { color: var(--navy); }
+
+/* ── PSEUDOCODE ── */
+.pseudo-block {
+  background: #0d1b2e;
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-top: 24px;
+  overflow-x: auto;
+  position: relative;
+}
+.pseudo-label {
+  position: absolute;
+  top: 12px; right: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
+}
+.pseudo-block pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #a8d8ea;
+  line-height: 1.8;
+  white-space: pre;
+}
+.kw { color: #c792ea; }
+.cm { color: #546e7a; font-style: italic; }
+.fn { color: #82aaff; }
+.nm { color: #ffcb6b; }
+.op { color: #89ddff; }
+.st { color: #c3e88d; }
+
+/* ── SIMULATOR ── */
+.simulator {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+.sim-header {
+  background: linear-gradient(90deg, #0f3460, #16213e);
+  color: white;
+  padding: 20px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sim-header h3 { font-family: 'Playfair Display', serif; font-size: 20px; }
+.sim-controls { display: flex; gap: 10px; }
+.btn {
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.btn-teal { background: var(--teal); color: white; }
+.btn-teal:hover { background: var(--teal-light); color: var(--navy); }
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+}
+.btn-outline:hover { border-color: var(--teal); color: var(--teal-light); }
+.btn-disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--navy); color: white; }
+.btn-primary:hover { background: var(--navy-mid); }
+
+.sim-body { padding: 28px; }
+.sim-svg-wrap { margin-bottom: 24px; }
+.step-indicator {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.step-indicator span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+.step-dots { display: flex; gap: 6px; }
+.step-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--gray-200);
+  transition: background 0.3s;
+}
+.step-dot.active { background: var(--teal); }
+.step-dot.done { background: var(--navy); }
+.sim-info {
+  background: var(--gray-100);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 14px;
+  border-left: 3px solid var(--teal);
+}
+.sim-info .info-label { font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+.sim-table-wrap { overflow-x: auto; margin-top: 16px; }
+.sim-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+.sim-table th {
+  background: var(--navy);
+  color: white;
+  padding: 8px 14px;
+  text-align: center;
+}
+.sim-table td {
+  padding: 8px 14px;
+  text-align: center;
+  border-bottom: 1px solid var(--gray-200);
+  transition: background 0.3s;
+}
+.sim-table td.highlight { background: rgba(0,194,168,0.15); font-weight: 700; color: var(--navy); }
+.sim-table td.in-s { background: rgba(26,50,97,0.1); color: var(--text-sub); }
+
+/* ── APPLICATIONS ── */
+.app-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.app-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  border-top: 3px solid var(--teal);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.app-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+.app-icon { font-size: 32px; margin-bottom: 12px; }
+.app-card h4 { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.app-card p { font-size: 13px; color: var(--text-sub); line-height: 1.55; }
+.app-card .app-tag {
+  display: inline-block;
+  margin-top: 10px;
+  background: var(--gray-100);
+  color: var(--text-sub);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* ── EXERCISES ── */
+.ex-tabs { display: flex; gap: 4px; margin-bottom: 24px; }
+.ex-tab {
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: 2px solid var(--gray-200);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-sub);
+  background: var(--white);
+  transition: all 0.2s;
+}
+.ex-tab.easy { border-color: #4caf50; }
+.ex-tab.easy.active, .ex-tab.easy:hover { background: #4caf50; color: white; }
+.ex-tab.medium { border-color: #ff9800; }
+.ex-tab.medium.active, .ex-tab.medium:hover { background: #ff9800; color: white; }
+.ex-tab.hard { border-color: #f44336; }
+.ex-tab.hard.active, .ex-tab.hard:hover { background: #f44336; color: white; }
+.ex-panel { display: none; }
+.ex-panel.active { display: block; }
+.ex-item {
+  background: var(--white);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+}
+.ex-q {
+  padding: 18px 22px;
+  font-size: 15px;
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 16px;
+}
+.ex-q:hover { background: var(--gray-100); }
+.ex-q-text { font-weight: 600; }
+.ex-toggle {
+  font-size: 18px; color: var(--teal);
+  flex-shrink: 0; margin-top: 2px;
+  transition: transform 0.3s;
+}
+.ex-toggle.open { transform: rotate(45deg); }
+.ex-ans {
+  display: none;
+  padding: 16px 22px;
+  background: #f8fdf9;
+  border-top: 1px solid #b2f0e4;
+  font-size: 14px;
+  color: var(--text-main);
+  line-height: 1.7;
+}
+.ex-ans.open { display: block; }
+.hint-tag {
+  display: inline-block;
+  background: var(--teal);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+/* ── EULER/HAMILTON TABLE ── */
+.eh-table {
+  width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 16px;
+}
+.eh-table th {
+  background: var(--navy); color: white; padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace; text-align: center;
+}
+.eh-table td {
+  padding: 12px 16px; text-align: center; border-bottom: 1px solid var(--gray-200);
+}
+.eh-table tr:hover td { background: var(--gray-100); }
+.check { color: #4caf50; font-size: 18px; }
+.cross { color: #f44336; font-size: 18px; }
+.cond { color: var(--text-sub); font-size: 13px; font-style: italic; }
+
+/* ── SUMMARY ── */
+.summary-wrap {
+  background: linear-gradient(135deg, var(--navy), #0a3550);
+  color: white;
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  text-align: center;
+  margin-top: 60px;
+}
+.summary-wrap h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  margin-bottom: 14px;
+}
+.summary-wrap p { color: rgba(255,255,255,0.7); margin-bottom: 32px; }
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  text-align: left;
+}
+.sum-card {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.sum-card h4 { font-size: 14px; color: var(--teal-light); margin-bottom: 8px; font-weight: 700; }
+.sum-card p { font-size: 13px; color: rgba(255,255,255,0.65); margin: 0; line-height: 1.6; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--navy);
+  color: rgba(255,255,255,0.5);
+  text-align: center;
+  padding: 24px;
+  font-size: 13px;
+  margin-top: 80px;
+}
+footer span { color: var(--teal); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .page-wrap { padding: 0 20px 60px; }
+  .hero-inner { padding: 60px 24px 50px; }
+  .sticky-nav { padding: 0 20px; }
+  .card-grid, .card-grid-3, .app-grid, .summary-cards { grid-template-columns: 1fr; }
+  .term-grid { grid-template-columns: 1fr; }
+  .ex-tabs { flex-wrap: wrap; }
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.hero-inner > * { animation: fadeUp 0.6s ease both; }
+.hero-inner > *:nth-child(1) { animation-delay: 0.1s; }
+.hero-inner > *:nth-child(2) { animation-delay: 0.2s; }
+.hero-inner > *:nth-child(3) { animation-delay: 0.3s; }
+.hero-inner > *:nth-child(4) { animation-delay: 0.4s; }
+
+.info-block {
+  background: #e8f4fd;
+  border: 1px solid #b8d9f7;
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 14px;
+  color: #1a5276;
+  margin-top: 16px;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.info-block .info-ico { font-size: 18px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-deco"></div>
+  <div class="hero-deco2"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">MAD101 · Discrete Mathematics · Chapter 9</div>
+    <h1>Graphs<br><span>(Đồ Thị)</span></h1>
+    <p class="hero-sub">Lý thuyết đồ thị — nền tảng của mạng máy tính, mạng xã hội và thuật toán tìm đường.</p>
+    <div class="hero-quote">
+      "One graph is worth a thousand logs."<br>
+      <small>— Michal Aharon, Gilad Barash, Ira Cohen &amp; Eli Mordechai</small>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <a href="#intro">📘 Giới Thiệu</a>
+    <a href="#concepts">🔤 Khái Niệm</a>
+    <a href="#theorems">📐 Định Lý</a>
+    <a href="#special">⭐ Đồ Thị Đặc Biệt</a>
+    <a href="#bipartite">🔀 Bipartite</a>
+    <a href="#representation">📊 Biểu Diễn</a>
+    <a href="#connectivity">🔗 Kết Nối</a>
+    <a href="#dijkstra">🗺️ Dijkstra</a>
+    <a href="#euler">🛤️ Euler &amp; Hamilton</a>
+    <a href="#realworld">🌐 Thực Tế</a>
+    <a href="#exercises">✏️ Bài Tập</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+<!-- ════════════════════════════
+     SECTION 1: INTRODUCTION
+════════════════════════════ -->
+<section class="section" id="intro">
+  <div class="section-header">
+    <div class="section-icon icon-blue">📘</div>
+    <div>
+      <h2>Giới Thiệu Chương 9</h2>
+      <p>Tổng quan và mục tiêu học tập</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:16px;">📌 Tổng Quan</h3>
+      <p style="font-size:15px;color:var(--text-main);line-height:1.8;margin-bottom:16px;">
+        <strong>Graph (Đồ thị)</strong> là cấu trúc toán học gồm tập các <em>vertices (đỉnh)</em> và tập các <em>edges (cạnh)</em> kết nối chúng. Đây là công cụ mạnh mẽ để mô hình hóa các quan hệ thực tế.
+      </p>
+      <p style="font-size:14px;color:var(--text-sub);">Lý thuyết đồ thị được Euler sáng lập năm 1736 khi giải quyết bài toán 7 cầu Königsberg. Ngày nay, đồ thị xuất hiện khắp nơi trong khoa học máy tính.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:16px;">🌍 Tại Sao Quan Trọng?</h3>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+        <li style="display:flex;gap:10px;align-items:center;font-size:14px;">
+          <span style="color:var(--teal);font-size:18px;">🖧</span>
+          <span><strong>Mạng máy tính:</strong> Quan hệ giữa các máy tính</span>
+        </li>
+        <li style="display:flex;gap:10px;align-items:center;font-size:14px;">
+          <span style="color:var(--teal);font-size:18px;">🗺️</span>
+          <span><strong>Google Maps:</strong> Quan hệ giữa các thành phố</span>
+        </li>
+        <li style="display:flex;gap:10px;align-items:center;font-size:14px;">
+          <span style="color:var(--teal);font-size:18px;">🌐</span>
+          <span><strong>Internet:</strong> Quan hệ giữa các trang web</span>
+        </li>
+        <li style="display:flex;gap:10px;align-items:center;font-size:14px;">
+          <span style="color:var(--teal);font-size:18px;">👥</span>
+          <span><strong>Mạng xã hội:</strong> Quan hệ giữa người dùng</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);margin-bottom:20px;">🎯 Learning Objectives (Mục Tiêu Học Tập)</h3>
+    <ul class="obj-list">
+      <li><div class="obj-num">1</div><span>Định nghĩa và phân loại <strong>Graph</strong>: simple, undirected, directed, bipartite</span></li>
+      <li><div class="obj-num">2</div><span>Áp dụng <strong>Handshaking Theorem</strong> để tính số cạnh và bậc đỉnh</span></li>
+      <li><div class="obj-num">3</div><span>Nhận biết và xây dựng các <strong>Special Graphs</strong>: Kₙ, Cₙ, Wₙ, Qₙ, Kₘₙ</span></li>
+      <li><div class="obj-num">4</div><span>Biểu diễn đồ thị bằng <strong>Adjacency Matrix</strong> và <strong>Incidence Matrix</strong></span></li>
+      <li><div class="obj-num">5</div><span>Kiểm tra tính <strong>Isomorphism</strong> (đẳng cấu) giữa hai đồ thị</span></li>
+      <li><div class="obj-num">6</div><span>Phân tích <strong>Connectivity</strong>: connected, strongly/weakly connected</span></li>
+      <li><div class="obj-num">7</div><span>Thực thi <strong>Dijkstra's Algorithm</strong> để tìm đường đi ngắn nhất</span></li>
+      <li><div class="obj-num">8</div><span>Xác định và xây dựng <strong>Euler &amp; Hamilton</strong> paths/circuits</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SECTION 2: CONCEPTS
+════════════════════════════ -->
+<section class="section" id="concepts">
+  <div class="section-header">
+    <div class="section-icon icon-teal">🔤</div>
+    <div>
+      <h2>Khái Niệm Cơ Bản</h2>
+      <p>Thuật ngữ chuyên ngành (tiếng Anh) + giải thích tiếng Việt</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Graph definition -->
+  <div class="card" style="margin-bottom:24px;">
+    <h3 style="font-family:'Playfair Display',serif;font-size:19px;color:var(--navy);margin-bottom:16px;">📐 Định Nghĩa Cơ Bản</h3>
+    <div style="display:flex;gap:20px;align-items:center;background:var(--gray-100);border-radius:12px;padding:20px 24px;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--teal);flex-shrink:0;">G = (V, E)</div>
+      <div style="font-size:14px;color:var(--text-main);">
+        Trong đó: <strong>V</strong> = Vertices (tập đỉnh), <strong>E</strong> = Edges (tập cạnh)<br>
+        Ví dụ: V = {a, b, c, d}, E = { {a,b}, {a,c}, {c,b} }
+      </div>
+    </div>
+  </div>
+
+  <div class="term-grid">
+    <div class="term-card">
+      <div class="term-en">Graph (Đồ thị)</div>
+      <div class="term-def">Cấu trúc gồm tập đỉnh V và tập cạnh E. Ký hiệu: G = (V, E)</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Vertex / Node (Đỉnh)</div>
+      <div class="term-def">Các điểm trong đồ thị, đại diện cho các đối tượng (thành phố, máy tính, người...)</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Edge (Cạnh)</div>
+      <div class="term-def">Kết nối giữa hai đỉnh. Cạnh vô hướng: {u,v}. Cạnh có hướng: (u,v)</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Loop (Cạnh khuyên)</div>
+      <div class="term-def">Cạnh nối một đỉnh với chính nó. Ví dụ: {a,a}. Đóng góp 2 vào bậc đỉnh đó.</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Multigraph (Đa đồ thị)</div>
+      <div class="term-def">Đồ thị có nhiều cạnh song song (multi-edges) giữa hai đỉnh</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Simple Graph (Đồ thị đơn)</div>
+      <div class="term-def">Không có cạnh khuyên, không có cạnh song song. Dạng cơ bản nhất.</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Adjacent (Liền kề)</div>
+      <div class="term-def">Hai đỉnh u, v gọi là liền kề nếu tồn tại cạnh {u,v} ∈ E</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Incident (Liên thuộc)</div>
+      <div class="term-def">Cạnh {u,v} gọi là liên thuộc với đỉnh u và v</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Degree — deg(v) (Bậc đỉnh)</div>
+      <div class="term-def">Số cạnh liên thuộc với đỉnh v. Loop đóng góp 2. Đỉnh bậc 0: isolated (cô lập), bậc 1: pendant (treo).</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">In-degree / Out-degree</div>
+      <div class="term-def">Trong digraph: deg⁻(v) = số cạnh vào, deg⁺(v) = số cạnh ra</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Path (Đường đi)</div>
+      <div class="term-def">Dãy các cạnh liên tiếp. Simple path: không lặp cạnh. Path length = số cạnh.</div>
+    </div>
+    <div class="term-card">
+      <div class="term-en">Circuit (Chu trình)</div>
+      <div class="term-def">Đường đi bắt đầu và kết thúc tại cùng một đỉnh, độ dài > 0</div>
+    </div>
+  </div>
+
+  <!-- Graph types visualization -->
+  <div style="margin-top:28px;">
+    <div class="card-grid">
+      <div class="graph-wrap">
+        <h4>Undirected Graph (Đồ thị vô hướng)</h4>
+        <p>Cạnh không có chiều — quan hệ hai chiều</p>
+        <svg class="graph-svg" viewBox="0 0 300 180">
+          <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f1e3d"/>
+            </marker>
+          </defs>
+          <!-- edges -->
+          <line x1="80" y1="90" x2="150" y2="50" stroke="#dde4ee" stroke-width="2"/>
+          <line x1="80" y1="90" x2="150" y2="130" stroke="#dde4ee" stroke-width="2"/>
+          <line x1="150" y1="50" x2="220" y2="90" stroke="#dde4ee" stroke-width="2"/>
+          <line x1="150" y1="130" x2="220" y2="90" stroke="#dde4ee" stroke-width="2"/>
+          <line x1="150" y1="50" x2="150" y2="130" stroke="#dde4ee" stroke-width="2"/>
+          <!-- vertices -->
+          <circle cx="80" cy="90" r="18" fill="#0f1e3d" stroke="none"/>
+          <circle cx="150" cy="50" r="18" fill="#00c2a8" stroke="none"/>
+          <circle cx="220" cy="90" r="18" fill="#0f1e3d" stroke="none"/>
+          <circle cx="150" cy="130" r="18" fill="#0f1e3d" stroke="none"/>
+          <text x="80" y="95" text-anchor="middle" fill="white" font-size="13" font-weight="bold">a</text>
+          <text x="150" y="55" text-anchor="middle" fill="white" font-size="13" font-weight="bold">b</text>
+          <text x="220" y="95" text-anchor="middle" fill="white" font-size="13" font-weight="bold">c</text>
+          <text x="150" y="135" text-anchor="middle" fill="white" font-size="13" font-weight="bold">d</text>
+        </svg>
+        <div class="graph-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#0f1e3d;"></div>Đỉnh thường</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#00c2a8;"></div>Đỉnh nổi bật</div>
+        </div>
+      </div>
+      <div class="graph-wrap">
+        <h4>Directed Graph / Digraph (Đồ thị có hướng)</h4>
+        <p>Cạnh có chiều — quan hệ một chiều</p>
+        <svg class="graph-svg" viewBox="0 0 300 180">
+          <defs>
+            <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f1e3d"/>
+            </marker>
+            <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#00c2a8"/>
+            </marker>
+          </defs>
+          <line x1="95" y1="90" x2="202" y2="58" stroke="#0f1e3d" stroke-width="2" marker-end="url(#arr2)"/>
+          <line x1="95" y1="90" x2="147" y2="123" stroke="#00c2a8" stroke-width="2" marker-end="url(#arr3)"/>
+          <line x1="220" y1="90" x2="165" y2="123" stroke="#0f1e3d" stroke-width="2" marker-end="url(#arr2)"/>
+          <line x1="165" y1="58" x2="218" y2="88" stroke="#00c2a8" stroke-width="2" marker-end="url(#arr3)"/>
+          <circle cx="80" cy="90" r="18" fill="#0f1e3d"/>
+          <circle cx="165" cy="50" r="18" fill="#0f1e3d"/>
+          <circle cx="235" cy="90" r="18" fill="#0f1e3d"/>
+          <circle cx="150" cy="135" r="18" fill="#f5a623"/>
+          <text x="80" y="95" text-anchor="middle" fill="white" font-size="13" font-weight="bold">a</text>
+          <text x="165" y="55" text-anchor="middle" fill="white" font-size="13" font-weight="bold">b</text>
+          <text x="235" y="95" text-anchor="middle" fill="white" font-size="13" font-weight="bold">c</text>
+          <text x="150" y="140" text-anchor="middle" fill="white" font-size="13" font-weight="bold">d</text>
+        </svg>
+        <div class="graph-legend">
+          <div class="legend-item">→ Cạnh có hướng</div>
+          <div class="legend-item" style="color:#f5a623;">● Đỉnh đặc biệt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SECTION 3: THEOREMS
+════════════════════════════ -->
+<section class="section" id="theorems">
+  <div class="section-header">
+    <div class="section-icon icon-gold">📐</div>
+    <div>
+      <h2>Công Thức &amp; Định Lý</h2>
+      <p>Các định lý cốt lõi cần nắm vững</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- Handshaking Theorem -->
+  <div class="theorem-box">
+    <div class="theorem-label">📌 Định Lý Quan Trọng #1</div>
+    <div class="theorem-title">The Handshaking Theorem (Định Lý Bắt Tay)</div>
+    <p style="color:rgba(255,255,255,0.8);font-size:15px;margin-bottom:16px;">
+      Áp dụng cho <strong>đồ thị vô hướng</strong>. Tổng bậc của tất cả các đỉnh bằng hai lần số cạnh.
+    </p>
+    <div class="formula">Σ<sub>v∈V</sub> deg(v) = 2|E|</div>
+    <p class="theorem-note">💡 Hệ quả: Tổng bậc luôn là số <strong>chẵn</strong>. Số đỉnh bậc lẻ luôn là số chẵn.</p>
+  </div>
+
+  <!-- Example -->
+  <div class="card-grid" style="margin-bottom:24px;">
+    <div class="card">
+      <h4 style="color:var(--navy);font-size:17px;margin-bottom:16px;font-family:'Playfair Display',serif;">Ví Dụ Áp Dụng</h4>
+      <svg viewBox="0 0 240 160" style="width:100%;margin-bottom:12px;">
+        <!-- loop at a -->
+        <path d="M 60 80 C 30 40 10 40 35 80" stroke="#dde4ee" fill="none" stroke-width="2"/>
+        <line x1="60" y1="80" x2="160" y2="80" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="60" y1="80" x2="110" y2="40" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="110" y1="40" x2="160" y2="80" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="160" y1="80" x2="160" y2="80" stroke="#dde4ee" stroke-width="2"/>
+        <circle cx="60" cy="80" r="16" fill="#0f1e3d"/>
+        <circle cx="110" cy="40" r="16" fill="#0f1e3d"/>
+        <circle cx="160" cy="80" r="16" fill="#0f1e3d"/>
+        <circle cx="190" cy="120" r="16" fill="#9bacc4"/>
+        <text x="60" y="85" text-anchor="middle" fill="white" font-size="12" font-weight="bold">a</text>
+        <text x="110" y="45" text-anchor="middle" fill="white" font-size="12" font-weight="bold">b</text>
+        <text x="160" y="85" text-anchor="middle" fill="white" font-size="12" font-weight="bold">c</text>
+        <text x="190" y="125" text-anchor="middle" fill="white" font-size="12" font-weight="bold">d</text>
+        <text x="60" y="112" fill="#f5a623" font-size="11" text-anchor="middle">deg=3</text>
+        <text x="110" y="20" fill="#00c2a8" font-size="11" text-anchor="middle">deg=1</text>
+        <text x="160" y="112" fill="#f5a623" font-size="11" text-anchor="middle">deg=2</text>
+        <text x="190" y="146" fill="#9bacc4" font-size="11" text-anchor="middle">deg=0</text>
+      </svg>
+      <div style="background:var(--gray-100);border-radius:8px;padding:14px;font-size:14px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span>deg(a) + deg(b) + deg(c) + deg(d)</span>
+          <span style="font-family:'JetBrains Mono',monospace;color:var(--teal);font-weight:700;">= 3+1+2+0 = <strong>6</strong></span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span>2 × |E| (3 cạnh)</span>
+          <span style="font-family:'JetBrains Mono',monospace;color:var(--teal);font-weight:700;">= 2×3 = <strong>6</strong> ✓</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--navy);font-size:17px;margin-bottom:16px;font-family:'Playfair Display',serif;">Định Lý Cho Đồ Thị Có Hướng</h4>
+      <div class="theorem-label" style="background:#e8f0fe;color:#1a56db;border:none;padding:6px 12px;display:inline-block;border-radius:4px;margin-bottom:14px;">Định Lý #2</div>
+      <div style="background:var(--gray-100);border-radius:10px;padding:16px;margin-bottom:14px;font-family:'JetBrains Mono',monospace;font-size:16px;text-align:center;color:var(--navy);">
+        Σ deg⁻(v) = Σ deg⁺(v) = |E|
+      </div>
+      <p style="font-size:14px;color:var(--text-main);">
+        Tổng in-degree = Tổng out-degree = Tổng số cạnh có hướng.
+      </p>
+      <div class="info-block" style="margin-top:12px;">
+        <span class="info-ico">💡</span>
+        <span>Mỗi cạnh có hướng đóng góp 1 vào out-degree của đầu và 1 vào in-degree của cuối.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Directed graph table -->
+  <div class="card">
+    <h4 style="color:var(--navy);font-size:17px;margin-bottom:16px;font-family:'Playfair Display',serif;">Ví dụ: Bảng bậc trong Digraph</h4>
+    <div style="overflow-x:auto;">
+      <table class="compare-table">
+        <thead><tr>
+          <th>Vertex (Đỉnh)</th>
+          <th>In-degree (deg⁻)</th>
+          <th>Out-degree (deg⁺)</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>a</td><td>2</td><td>1</td></tr>
+          <tr><td>b</td><td>0</td><td>2</td></tr>
+          <tr><td>c</td><td>1</td><td>0</td></tr>
+          <tr><td>d</td><td>1</td><td>1</td></tr>
+          <tr><td><strong>Tổng</strong></td><td><span class="badge-teal">4</span></td><td><span class="badge-gold">4</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div style="margin-top:24px;">
+    <div class="tip-card">
+      <h4>💡 Mẹo Ghi Nhớ Nhanh — Handshaking Theorem</h4>
+      <ul>
+        <li>Mỗi cạnh được "đếm hai lần" — một lần ở mỗi đầu đỉnh → tổng bậc = 2×|E|</li>
+        <li>Nếu đề cho số đỉnh và yêu cầu kiểm tra đồ thị tồn tại: kiểm tra <strong>tổng bậc chẵn</strong></li>
+        <li>Loop tại đỉnh v làm tăng deg(v) thêm <strong>2</strong> (không phải 1)</li>
+        <li>Trong digraph: ∑in = ∑out = |E| (mỗi cạnh có một đầu vào và một đầu ra)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SECTION 4: SPECIAL GRAPHS
+════════════════════════════ -->
+<section class="section" id="special">
+  <div class="section-header">
+    <div class="section-icon icon-purple">⭐</div>
+    <div>
+      <h2>Đồ Thị Đặc Biệt</h2>
+      <p>Special Simple Graphs: Kₙ, Cₙ, Wₙ, Qₙ</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div style="overflow-x:auto;margin-bottom:28px;">
+    <table class="compare-table" style="min-width:620px;">
+      <thead><tr>
+        <th>Đồ Thị</th>
+        <th>Tên</th>
+        <th>|V| (đỉnh)</th>
+        <th>|E| (cạnh)</th>
+        <th>Bậc mỗi đỉnh</th>
+        <th>Ghi Chú</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>Kₙ</td>
+          <td>Complete Graph (Đồ thị đầy đủ)</td>
+          <td>n</td>
+          <td>C(n,2) = n(n-1)/2</td>
+          <td>n-1</td>
+          <td>Mọi cặp đỉnh đều nối nhau</td>
+        </tr>
+        <tr>
+          <td>Cₙ</td>
+          <td>Cycle (Chu trình)</td>
+          <td>n</td>
+          <td>n</td>
+          <td>2</td>
+          <td>Đường đi khép kín, n ≥ 3</td>
+        </tr>
+        <tr>
+          <td>Wₙ</td>
+          <td>Wheel (Bánh xe)</td>
+          <td>n+1</td>
+          <td>2n</td>
+          <td>Hub: n, Rim: 3</td>
+          <td>Cₙ + 1 đỉnh trung tâm, n ≥ 3</td>
+        </tr>
+        <tr>
+          <td>Qₙ</td>
+          <td>n-cube (Siêu lập phương)</td>
+          <td>2ⁿ</td>
+          <td>n·2ⁿ⁻¹</td>
+          <td>n</td>
+          <td>Hypercube n chiều</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-grid-3">
+    <!-- K4 -->
+    <div class="graph-wrap">
+      <h4>K₄ — Complete Graph</h4>
+      <p>4 đỉnh, C(4,2)=6 cạnh, mỗi đỉnh bậc 3</p>
+      <svg viewBox="0 0 200 180" style="width:100%;height:170px;">
+        <line x1="100" y1="30" x2="170" y2="110" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="100" y1="30" x2="30" y2="110" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="100" y1="30" x2="100" y2="155" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="170" y1="110" x2="30" y2="110" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="170" y1="110" x2="100" y2="155" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="30" y1="110" x2="100" y2="155" stroke="#dde4ee" stroke-width="2"/>
+        <circle cx="100" cy="30" r="15" fill="#00c2a8"/>
+        <circle cx="170" cy="110" r="15" fill="#0f1e3d"/>
+        <circle cx="30" cy="110" r="15" fill="#0f1e3d"/>
+        <circle cx="100" cy="155" r="15" fill="#0f1e3d"/>
+        <text x="100" y="35" text-anchor="middle" fill="white" font-size="12" font-weight="bold">a</text>
+        <text x="170" y="115" text-anchor="middle" fill="white" font-size="12" font-weight="bold">b</text>
+        <text x="30" y="115" text-anchor="middle" fill="white" font-size="12" font-weight="bold">c</text>
+        <text x="100" y="160" text-anchor="middle" fill="white" font-size="12" font-weight="bold">d</text>
+      </svg>
+    </div>
+    <!-- C5 -->
+    <div class="graph-wrap">
+      <h4>C₅ — Cycle</h4>
+      <p>5 đỉnh, 5 cạnh, mỗi đỉnh bậc 2</p>
+      <svg viewBox="0 0 200 180" style="width:100%;height:170px;">
+        <line x1="100" y1="25" x2="170" y2="75" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="170" y1="75" x2="145" y2="155" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="145" y1="155" x2="55" y2="155" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="55" y1="155" x2="30" y2="75" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="30" y1="75" x2="100" y2="25" stroke="#dde4ee" stroke-width="2"/>
+        <circle cx="100" cy="25" r="14" fill="#f5a623"/>
+        <circle cx="170" cy="75" r="14" fill="#0f1e3d"/>
+        <circle cx="145" cy="155" r="14" fill="#0f1e3d"/>
+        <circle cx="55" cy="155" r="14" fill="#0f1e3d"/>
+        <circle cx="30" cy="75" r="14" fill="#0f1e3d"/>
+        <text x="100" y="30" text-anchor="middle" fill="white" font-size="12" font-weight="bold">a</text>
+        <text x="170" y="80" text-anchor="middle" fill="white" font-size="12" font-weight="bold">b</text>
+        <text x="145" y="160" text-anchor="middle" fill="white" font-size="12" font-weight="bold">c</text>
+        <text x="55" y="160" text-anchor="middle" fill="white" font-size="12" font-weight="bold">d</text>
+        <text x="30" y="80" text-anchor="middle" fill="white" font-size="12" font-weight="bold">e</text>
+      </svg>
+    </div>
+    <!-- W5 -->
+    <div class="graph-wrap">
+      <h4>W₅ — Wheel</h4>
+      <p>6 đỉnh (n+1), 10 cạnh (2n)</p>
+      <svg viewBox="0 0 200 180" style="width:100%;height:170px;">
+        <!-- outer cycle -->
+        <line x1="100" y1="25" x2="170" y2="75" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="170" y1="75" x2="145" y2="155" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="145" y1="155" x2="55" y2="155" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="55" y1="155" x2="30" y2="75" stroke="#dde4ee" stroke-width="2"/>
+        <line x1="30" y1="75" x2="100" y2="25" stroke="#dde4ee" stroke-width="2"/>
+        <!-- hub spokes -->
+        <line x1="100" y1="90" x2="100" y2="25" stroke="#00c2a8" stroke-width="2" stroke-dasharray="4,3"/>
+        <line x1="100" y1="90" x2="170" y2="75" stroke="#00c2a8" stroke-width="2" stroke-dasharray="4,3"/>
+        <line x1="100" y1="90" x2="145" y2="155" stroke="#00c2a8" stroke-width="2" stroke-dasharray="4,3"/>
+        <line x1="100" y1="90" x2="55" y2="155" stroke="#00c2a8" stroke-width="2" stroke-dasharray="4,3"/>
+        <line x1="100" y1="90" x2="30" y2="75" stroke="#00c2a8" stroke-width="2" stroke-dasharray="4,3"/>
+        <circle cx="100" cy="25" r="14" fill="#0f1e3d"/>
+        <circle cx="170" cy="75" r="14" fill="#0f1e3d"/>
+        <circle cx="145" cy="155" r="14" fill="#0f1e3d"/>
+        <circle cx="55" cy="155" r="14" fill="#0f1e3d"/>
+        <circle cx="30" cy="75" r="14" fill="#0f1e3d"/>
+        <circle cx="100" cy="90" r="16" fill="#00c2a8"/>
+        <text x="100" y="30" text-anchor="middle" fill="white" font-size="11" font-weight="bold">b</text>
+        <text x="170" y="80" text-anchor="middle" fill="white" font-size="11" font-weight="bold">c</text>
+        <text x="145" y="160" text-anchor="middle" fill="white" font-size="11" font-weight="bold">d</text>
+        <text x="55" y="160" text-anchor="middle" fill="white" font-size="11" font-weight="bold">e</text>
+        <text x="30" y="80" text-anchor="middle" fill="white" font-size="11" font-weight="bold">f</text>
+        <text x="100" y="95" text-anchor="middle" fill="white" font-size="11" font-weight="bold">a</text>
+        <text x="100" y="170" fill="var(--text-sub)" font-size="10" text-anchor="middle">Hub (trung tâm) nối mọi đỉnh</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Premier League example -->
+  <div class="card" style="margin-top:24px;background:linear-gradient(135deg,#f8f5ef,#fff);">
+    <div style="display:flex;gap:20px;align-items:center;">
+      <div style="font-size:40px;">⚽</div>
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;font-size:18px;color:var(--navy);margin-bottom:8px;">Ứng Dụng Thực Tế: Giải Premier League</h4>
+        <p style="font-size:14px;color:var(--text-main);">
+          Premier League có <strong>20 đội</strong>. Mỗi cặp đội đấu với nhau (home + away = 2 trận).
+          Mô hình: <strong>K₂₀</strong> — đồ thị đầy đủ với 20 đỉnh.
+        </p>
+        <div style="background:var(--gray-100);border-radius:8px;padding:10px 16px;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:14px;">
+          |E| = C(20,2) = 20×19/2 = <strong style="color:var(--teal);">190 cặp đấu</strong> → 380 trận/mùa
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SECTION 5: BIPARTITE
+════════════════════════════ -->
+<section class="section" id="bipartite">
+  <div class="section-header">
+    <div class="section-icon icon-rose">🔀</div>
+    <div>
+      <h2>Bipartite Graphs (Đồ Thị Hai Phía)</h2>
+      <p>Phân hoạch và kiểm tra đồ thị hai phía</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:14px;">Định Nghĩa</h4>
+      <p style="font-size:14px;margin-bottom:14px;">
+        Đồ thị <strong>G = (V, E)</strong> gọi là <em>bipartite</em> nếu V có thể chia thành 2 tập rời nhau <strong>V₁</strong> và <strong>V₂</strong> sao cho:
+      </p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;">
+        <li style="display:flex;gap:8px;"><span style="color:var(--teal);">✓</span> V = V₁ ∪ V₂ và V₁ ∩ V₂ = ∅</li>
+        <li style="display:flex;gap:8px;"><span style="color:var(--teal);">✓</span> Không có cạnh nào nối 2 đỉnh trong cùng V₁</li>
+        <li style="display:flex;gap:8px;"><span style="color:var(--teal);">✓</span> Không có cạnh nào nối 2 đỉnh trong cùng V₂</li>
+      </ul>
+      <div class="info-block">
+        <span class="info-ico">🔑</span>
+        <span>Điều kiện cần &amp; đủ: G là bipartite ⟺ G <strong>không chứa chu trình lẻ</strong> (odd cycle)</span>
+      </div>
+    </div>
+    <div class="card">
+      <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:14px;">Cách Kiểm Tra (Tô Màu 2 Màu)</h4>
+      <ol style="display:flex;flex-direction:column;gap:8px;font-size:14px;padding-left:16px;">
+        <li>Chọn một đỉnh bất kỳ, tô màu <span style="background:#e53935;color:white;padding:1px 7px;border-radius:3px;font-size:12px;">ĐỎ</span></li>
+        <li>Tất cả đỉnh liền kề tô màu <span style="background:#1565c0;color:white;padding:1px 7px;border-radius:3px;font-size:12px;">XANH</span></li>
+        <li>Tiếp tục tô xen kẽ (BFS/DFS)</li>
+        <li>Nếu có 2 đỉnh <em>cùng màu</em> mà liền kề → <strong>không phải bipartite</strong></li>
+        <li>Nếu tô màu thành công toàn bộ → <strong>là bipartite</strong></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- C6 bipartite example -->
+  <div class="card" style="margin-top:20px;">
+    <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:16px;">Ví Dụ: C₆ là bipartite</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center;">
+      <svg viewBox="0 0 240 200" style="width:100%;">
+        <!-- Cycle C6 -->
+        <line x1="120" y1="25" x2="200" y2="70" stroke="#9bacc4" stroke-width="2"/>
+        <line x1="200" y1="70" x2="200" y2="140" stroke="#9bacc4" stroke-width="2"/>
+        <line x1="200" y1="140" x2="120" y2="180" stroke="#9bacc4" stroke-width="2"/>
+        <line x1="120" y1="180" x2="40" y2="140" stroke="#9bacc4" stroke-width="2"/>
+        <line x1="40" y1="140" x2="40" y2="70" stroke="#9bacc4" stroke-width="2"/>
+        <line x1="40" y1="70" x2="120" y2="25" stroke="#9bacc4" stroke-width="2"/>
+        <!-- V1 = red: a, c, e -->
+        <circle cx="120" cy="25" r="16" fill="#e53935"/>
+        <circle cx="200" cy="140" r="16" fill="#e53935"/>
+        <circle cx="40" cy="70" r="16" fill="#e53935"/>
+        <!-- V2 = blue: b, d, f -->
+        <circle cx="200" cy="70" r="16" fill="#1565c0"/>
+        <circle cx="120" cy="180" r="16" fill="#1565c0"/>
+        <circle cx="40" cy="140" r="16" fill="#1565c0"/>
+        <text x="120" y="30" text-anchor="middle" fill="white" font-size="13" font-weight="bold">a</text>
+        <text x="200" y="75" text-anchor="middle" fill="white" font-size="13" font-weight="bold">b</text>
+        <text x="200" y="145" text-anchor="middle" fill="white" font-size="13" font-weight="bold">c</text>
+        <text x="120" y="185" text-anchor="middle" fill="white" font-size="13" font-weight="bold">d</text>
+        <text x="40" y="145" text-anchor="middle" fill="white" font-size="13" font-weight="bold">e</text>
+        <text x="40" y="75" text-anchor="middle" fill="white" font-size="13" font-weight="bold">f</text>
+      </svg>
+      <div>
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+          <div style="background:#e53935;color:white;padding:4px 14px;border-radius:20px;font-size:14px;font-weight:700;">V₁ = {a, c, e}</div>
+          <div style="background:#1565c0;color:white;padding:4px 14px;border-radius:20px;font-size:14px;font-weight:700;">V₂ = {b, d, f}</div>
+        </div>
+        <p style="font-size:14px;color:var(--text-main);margin-bottom:10px;">Tất cả cạnh đều nối <strong>đỏ ↔ xanh</strong>, không có cạnh nào nối hai đỉnh cùng màu.</p>
+        <p style="font-size:14px;color:var(--text-main);">✅ <strong>C₆ là bipartite</strong> (chu trình chẵn luôn là bipartite)</p>
+        <div class="tip-card" style="margin-top:14px;">
+          <h4>💡 Mẹo Nhớ</h4>
+          <ul>
+            <li><strong>Cₙ chẵn</strong> (C₄, C₆, C₈...) → luôn là bipartite</li>
+            <li><strong>Cₙ lẻ</strong> (C₃, C₅, C₇...) → không là bipartite</li>
+            <li><strong>Kₙ</strong> với n ≥ 3 → không là bipartite</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Km,n -->
+  <div class="card" style="margin-top:20px;">
+    <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:16px;">Kₘₙ — Complete Bipartite Graph</h4>
+    <p style="font-size:14px;color:var(--text-main);margin-bottom:16px;">
+      Mỗi đỉnh trong V₁ (m đỉnh) nối với <em>tất cả</em> đỉnh trong V₂ (n đỉnh). <br>
+      <strong>|V| = m+n,  |E| = m×n</strong>
+    </p>
+    <svg viewBox="0 0 340 160" style="width:100%;max-height:160px;">
+      <!-- K3,4 example -->
+      <!-- V1: 3 vertices on left -->
+      <circle cx="60" cy="50" r="14" fill="#e53935"/><text x="60" y="55" text-anchor="middle" fill="white" font-size="12" font-weight="bold">1</text>
+      <circle cx="60" cy="95" r="14" fill="#e53935"/><text x="60" y="100" text-anchor="middle" fill="white" font-size="12" font-weight="bold">2</text>
+      <circle cx="60" cy="140" r="14" fill="#e53935"/><text x="60" y="145" text-anchor="middle" fill="white" font-size="12" font-weight="bold">3</text>
+      <!-- V2: 4 vertices on right -->
+      <circle cx="280" cy="30" r="14" fill="#1565c0"/><text x="280" y="35" text-anchor="middle" fill="white" font-size="12" font-weight="bold">a</text>
+      <circle cx="280" cy="75" r="14" fill="#1565c0"/><text x="280" y="80" text-anchor="middle" fill="white" font-size="12" font-weight="bold">b</text>
+      <circle cx="280" cy="120" r="14" fill="#1565c0"/><text x="280" y="125" text-anchor="middle" fill="white" font-size="12" font-weight="bold">c</text>
+      <circle cx="280" cy="160" r="14" fill="#1565c0"/><text x="280" y="165" text-anchor="middle" fill="white" font-size="12" font-weight="bold">d</text>
+      <!-- All edges 3×4=12 -->
+      <line x1="74" y1="50" x2="266" y2="30" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="50" x2="266" y2="75" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="50" x2="266" y2="120" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="50" x2="266" y2="160" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="95" x2="266" y2="30" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="95" x2="266" y2="75" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="95" x2="266" y2="120" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="95" x2="266" y2="160" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="140" x2="266" y2="30" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="140" x2="266" y2="75" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="140" x2="266" y2="120" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <line x1="74" y1="140" x2="266" y2="160" stroke="#9bacc4" stroke-width="1.5" opacity="0.7"/>
+      <text x="170" y="15" text-anchor="middle" fill="var(--navy)" font-size="13" font-weight="bold">K₃,₄  |V|=7, |E|=12</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SECTION 6: REPRESENTATION
+════════════════════════════ -->
+<section class="section" id="representation">
+  <div class="section-header">
+    <div class="section-icon icon-green">📊</div>
+    <div>
+      <h2>Biểu Diễn Đồ Thị</h2>
+      <p>Adjacency Matrix &amp; Incidence Matrix</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:14px;">📊 Adjacency Matrix (Ma Trận Kề)</h4>
+      <p style="font-size:14px;color:var(--text-sub);margin-bottom:14px;">Ma trận vuông A = [aᵢⱼ] kích thước n×n, trong đó aᵢⱼ = số cạnh nối vᵢ và vⱼ</p>
+      <div style="overflow-x:auto;">
+        <table style="border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:14px;margin:0 auto;">
+          <tr>
+            <th style="padding:8px 12px;background:var(--navy);color:white;"></th>
+            <th style="padding:8px 12px;background:var(--navy);color:white;">a</th>
+            <th style="padding:8px 12px;background:var(--navy);color:white;">b</th>
+            <th style="padding:8px 12px;background:var(--navy);color:white;">c</th>
+            <th style="padding:8px 12px;background:var(--navy);color:white;">d</th>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;font-weight:700;background:var(--gray-100);">a</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);">0</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;font-weight:700;background:var(--gray-100);">b</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);background:rgba(245,166,35,0.1);color:#b07a00;font-weight:700;">2</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;font-weight:700;background:var(--gray-100);">c</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+          </tr>
+          <tr>
+            <td style="padding:8px 12px;font-weight:700;background:var(--gray-100);">d</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);background:rgba(245,166,35,0.1);color:#b07a00;font-weight:700;">2</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:8px 12px;text-align:center;border:1px solid var(--gray-200);">0</td>
+          </tr>
+        </table>
+      </div>
+      <div class="info-block" style="margin-top:14px;">
+        <span class="info-ico">📌</span>
+        <div>
+          <strong>Tính deg(v) từ ma trận kề:</strong><br>
+          deg(v) = tổng hàng của v <em>(+ thêm 1 nếu có loop vì loop xuất hiện 1 lần trong ma trận nhưng đóng góp 2 vào bậc)</em>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:14px;">📋 Incidence Matrix (Ma Trận Liên Thuộc)</h4>
+      <p style="font-size:14px;color:var(--text-sub);margin-bottom:14px;">Ma trận M = [mᵢⱼ] kích thước n×m, trong đó mᵢⱼ = 1 nếu đỉnh vᵢ liên thuộc cạnh eⱼ</p>
+      <div style="overflow-x:auto;">
+        <table style="border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13px;margin:0 auto;">
+          <tr>
+            <th style="padding:7px 10px;background:var(--navy);color:white;"></th>
+            <th style="padding:7px 10px;background:var(--navy);color:white;">e₁</th>
+            <th style="padding:7px 10px;background:var(--navy);color:white;">e₂</th>
+            <th style="padding:7px 10px;background:var(--navy);color:white;">e₃</th>
+            <th style="padding:7px 10px;background:var(--navy);color:white;">e₄</th>
+            <th style="padding:7px 10px;background:var(--navy);color:white;">e₅</th>
+          </tr>
+          <tr>
+            <td style="padding:7px 10px;font-weight:700;background:var(--gray-100);">a</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 10px;font-weight:700;background:var(--gray-100);">b</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 10px;font-weight:700;background:var(--gray-100);">c</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 10px;font-weight:700;background:var(--gray-100);">d</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);background:rgba(0,194,168,0.1);color:var(--teal);font-weight:700;">1</td>
+            <td style="padding:7px 10px;text-align:center;border:1px solid var(--gray-200);">0</td>
+          </tr>
+        </table>
+      </div>
+      <div class="info-block" style="margin-top:14px;">
+        <span class="info-ico">📌</span>
+        <span>Tổng mỗi cột = 2 (mỗi cạnh liên thuộc đúng 2 đỉnh). Tổng mỗi hàng = deg(vᵢ)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Isomorphism -->
+  <div class="card" style="margin-top:24px;">
+    <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:14px;">🔄 Isomorphism (Đẳng Cấu Đồ Thị)</h4>
+    <div class="card-grid">
+      <div>
+        <p style="font-size:14px;color:var(--text-main);margin-bottom:14px;">Hai đồ thị G₁=(V₁,E₁) và G₂=(V₂,E₂) là <strong>đẳng cấu</strong> nếu tồn tại song ánh f: V₁→V₂ sao cho:</p>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;font-size:14px;">
+          <li style="display:flex;gap:8px;"><span style="color:var(--teal);">①</span> f là <strong>1-1</strong> (injective) và <strong>onto</strong> (surjective)</li>
+          <li style="display:flex;gap:8px;"><span style="color:var(--teal);">②</span> {u,v} ∈ E₁ ⟺ {f(u),f(v)} ∈ E₂</li>
+        </ul>
+        <div class="tip-card" style="margin-top:14px;">
+          <h4>⚡ Điều Kiện Cần (Kiểm Tra Nhanh)</h4>
+          <ul>
+            <li>Số đỉnh bằng nhau: |V₁| = |V₂|</li>
+            <li>Số cạnh bằng nhau: |E₁| = |E₂|</li>
+            <li>Dãy bậc (degree sequence) giống nhau</li>
+          </ul>
+        </div>
+      </div>
+      <div style="background:var(--gray-100);border-radius:12px;padding:16px;">
+        <p style="font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px;">Phản ví dụ:</p>
+        <p style="font-size:13px;color:var(--text-sub);">G: deg sequence = {1, 2, 3, 3}<br>
+        H: deg sequence = {1, 2, 2, 3, 3, 1}<br>
+        → <strong style="color:#e53935;">Khác số đỉnh → Không đẳng cấu ✗</strong></p>
+        <p style="font-size:13px;color:var(--text-sub);margin-top:10px;">G: có đỉnh bậc 1<br>
+        H: không có đỉnh bậc 1<br>
+        → <strong style="color:#e53935;">Deg sequence khác → Không đẳng cấu ✗</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connectivity -->
+  <div id="connectivity" class="card" style="margin-top:24px;">
+    <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:14px;">🔗 Connectivity (Tính Liên Thông)</h4>
+    <div class="card-grid">
+      <div>
+        <p style="font-size:14px;color:var(--text-main);margin-bottom:14px;">Đồ thị <strong>connected (liên thông)</strong>: có đường đi giữa mọi cặp đỉnh phân biệt.</p>
+        <div style="overflow-x:auto;"><table class="compare-table" style="font-size:13px;">
+          <thead><tr><th>Loại</th><th>Điều Kiện</th></tr></thead>
+          <tbody>
+            <tr><td>Connected</td><td>∀u,v ∈ V: có đường đi từ u đến v</td></tr>
+            <tr><td>Strongly Connected</td><td>∀u,v: có đường đi có hướng u→v VÀ v→u</td></tr>
+            <tr><td>Weakly Connected</td><td>Liên thông khi bỏ hướng cạnh</td></tr>
+            <tr><td>Connected Component</td><td>Thành phần con liên thông cực đại</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div>
+        <p style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px;">💡 Mẹo phân biệt:</p>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <span style="background:#4caf50;color:white;padding:2px 8px;border-radius:4px;flex-shrink:0;">SC</span>
+            <span>Strongly Connected ⊂ Weakly Connected. SC mạnh hơn.</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <span style="background:#ff9800;color:white;padding:2px 8px;border-radius:4px;flex-shrink:0;">WC</span>
+            <span>Weakly Connected: đồ thị có hướng trở thành connected khi xóa chiều.</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start;">
+            <span style="background:#e53935;color:white;padding:2px 8px;border-radius:4px;flex-shrink:0;">DC</span>
+            <span>Disconnected: có ít nhất 2 thành phần liên thông riêng biệt.</span>
+          </div>
+        </div>
+        <div class="info-block" style="margin-top:12px;">
+          <span class="info-ico">📌</span>
+          <span>Dùng A^n để đếm số đường đi độ dài n giữa hai đỉnh (bằng phép nhân ma trận kề).</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SECTION 7: DIJKSTRA
+════════════════════════════ -->
+<section class="section" id="dijkstra">
+  <div class="section-header">
+    <div class="section-icon icon-teal">🗺️</div>
+    <div>
+      <h2>Dijkstra's Algorithm</h2>
+      <p>Tìm đường đi ngắn nhất (Shortest Path)</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="algo-box">
+    <div class="algo-header">
+      <div>
+        <h3>Dijkstra's Shortest Path Algorithm</h3>
+        <p style="color:rgba(255,255,255,0.6);font-size:13px;margin-top:4px;">Áp dụng cho: đồ thị có trọng số, không âm, liên thông</p>
+      </div>
+      <span class="algo-badge">O(n²)</span>
+    </div>
+    <div class="algo-body">
+      <div class="algo-idea">
+        <strong>💡 Ý tưởng:</strong> Duy trì tập S chứa các đỉnh đã tìm được đường ngắn nhất. Ở mỗi bước, thêm đỉnh u ngoài S có nhãn L(u) nhỏ nhất. Cập nhật nhãn các đỉnh lân cận của u nếu tìm được đường ngắn hơn.
+      </div>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-content"><strong>Khởi tạo:</strong> L(a) = 0 (đỉnh xuất phát), L(v) = ∞ với mọi đỉnh còn lại. S = ∅</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-content"><strong>Chọn đỉnh u:</strong> Chọn đỉnh u ∉ S có L(u) nhỏ nhất. Thêm u vào S.</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-content"><strong>Cập nhật nhãn:</strong> Với mỗi đỉnh v ∉ S liền kề u: L(v) = min{L(v), L(u) + w(u,v)}</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-content"><strong>Lặp lại:</strong> Quay lại Bước 2 cho đến khi đỉnh đích z ∈ S. Kết quả: L(z) là đường ngắn nhất.</div>
+        </div>
+      </div>
+
+      <div class="pseudo-block">
+        <span class="pseudo-label">PSEUDOCODE</span>
+        <pre><span class="kw">procedure</span> <span class="fn">shortestpath</span>(w[,]: <span class="st">matrix of weights</span>)
+  L[1] := <span class="nm">0</span>            <span class="cm">-- đỉnh xuất phát có nhãn 0</span>
+  <span class="kw">for</span> i := <span class="nm">2</span> <span class="kw">to</span> n
+    L[i] := <span class="nm">∞</span>          <span class="cm">-- mọi đỉnh khác nhãn vô cực</span>
+  <span class="kw">for</span> i := <span class="nm">1</span> <span class="kw">to</span> n
+    s[i] := <span class="nm">0</span>          <span class="cm">-- S = ∅ (chưa đỉnh nào trong S)</span>
+
+  u := <span class="nm">1</span>               <span class="cm">-- bắt đầu từ đỉnh 1</span>
+  <span class="kw">while</span> (s[z] = <span class="nm">0</span>)     <span class="cm">-- lặp cho đến khi đích z vào S</span>
+    s[u] := <span class="nm">1</span>          <span class="cm">-- thêm u vào S</span>
+    <span class="kw">for</span> v := <span class="nm">1</span> <span class="kw">to</span> n
+      <span class="kw">if</span> (s[v] = <span class="nm">0</span>)     <span class="cm">-- v chưa trong S</span>
+        L[v] := <span class="fn">min</span>{L[u] + w[u,v], L[v]}
+    minlabel := <span class="nm">∞</span>
+    <span class="kw">for</span> v := <span class="nm">1</span> <span class="kw">to</span> n
+      <span class="kw">if</span> (s[v] = <span class="nm">0</span> <span class="op">and</span> L[v] < minlabel)
+        u := v
+        minlabel := L[v]
+  <span class="kw">return</span> L[z]           <span class="cm">-- độ dài đường ngắn nhất đến z</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Dijkstra Simulator -->
+  <div class="simulator">
+    <div class="sim-header">
+      <h3>🎮 Mô Phỏng Dijkstra (Từng Bước)</h3>
+      <div class="sim-controls">
+        <button class="btn btn-outline" id="resetBtn" onclick="resetSim()">⟳ Reset</button>
+        <button class="btn btn-teal" id="nextBtn" onclick="nextStep()">Bước Tiếp →</button>
+      </div>
+    </div>
+    <div class="sim-body">
+      <!-- Graph display -->
+      <div class="sim-svg-wrap">
+        <div class="step-indicator">
+          <span id="stepLabel">Bước 0/6 — Nhấn "Bước Tiếp" để bắt đầu</span>
+          <div class="step-dots" id="stepDots">
+            <div class="step-dot" id="dot0"></div>
+            <div class="step-dot" id="dot1"></div>
+            <div class="step-dot" id="dot2"></div>
+            <div class="step-dot" id="dot3"></div>
+            <div class="step-dot" id="dot4"></div>
+            <div class="step-dot" id="dot5"></div>
+          </div>
+        </div>
+        <svg id="dijkstraSvg" viewBox="0 0 560 220" style="width:100%;background:#f8f9fa;border-radius:10px;padding:10px;">
+          <!-- Edges with weights -->
+          <line id="e-ac" x1="90" y1="110" x2="230" y2="60" stroke="#dde4ee" stroke-width="2"/>
+          <line id="e-ab" x1="90" y1="110" x2="230" y2="160" stroke="#dde4ee" stroke-width="2"/>
+          <line id="e-cb" x1="230" y1="60" x2="230" y2="160" stroke="#dde4ee" stroke-width="2"/>
+          <line id="e-ce" x1="230" y1="60" x2="370" y2="60" stroke="#dde4ee" stroke-width="2"/>
+          <line id="e-be" x1="230" y1="160" x2="370" y2="160" stroke="#dde4ee" stroke-width="2"/>
+          <line id="e-ed" x1="370" y1="60" x2="370" y2="160" stroke="#dde4ee" stroke-width="2"/>
+          <line id="e-cd" x1="230" y1="60" x2="370" y2="160" stroke="#dde4ee" stroke-width="2"/>
+          <line id="e-ez" x1="370" y1="60" x2="470" y2="110" stroke="#dde4ee" stroke-width="2"/>
+          <line id="e-dz" x1="370" y1="160" x2="470" y2="110" stroke="#dde4ee" stroke-width="2"/>
+          <!-- Weight labels -->
+          <text x="150" y="75" fill="#9bacc4" font-size="12" text-anchor="middle">3</text>
+          <text x="150" y="148" fill="#9bacc4" font-size="12" text-anchor="middle">4</text>
+          <text x="230" y="120" fill="#9bacc4" font-size="12" text-anchor="middle">6</text>
+          <text x="300" y="50" fill="#9bacc4" font-size="12" text-anchor="middle">11</text>
+          <text x="300" y="172" fill="#9bacc4" font-size="12" text-anchor="middle">7</text>
+          <text x="370" y="115" fill="#9bacc4" font-size="12" text-anchor="middle">9</text>
+          <text x="305" y="128" fill="#9bacc4" font-size="12" text-anchor="middle">5</text>
+          <text x="425" y="75" fill="#9bacc4" font-size="12" text-anchor="middle">16</text>
+          <text x="425" y="148" fill="#9bacc4" font-size="12" text-anchor="middle">2</text>
+          <!-- Vertices -->
+          <circle id="v-a" cx="90" cy="110" r="20" fill="#0f1e3d"/>
+          <circle id="v-c" cx="230" cy="60" r="20" fill="#0f1e3d"/>
+          <circle id="v-b" cx="230" cy="160" r="20" fill="#0f1e3d"/>
+          <circle id="v-e" cx="370" cy="60" r="20" fill="#0f1e3d"/>
+          <circle id="v-d" cx="370" cy="160" r="20" fill="#0f1e3d"/>
+          <circle id="v-z" cx="470" cy="110" r="20" fill="#0f1e3d"/>
+          <!-- Vertex labels -->
+          <text id="lbl-a" x="90" y="115" text-anchor="middle" fill="white" font-size="14" font-weight="bold">a</text>
+          <text id="lbl-c" x="230" y="65" text-anchor="middle" fill="white" font-size="14" font-weight="bold">c</text>
+          <text id="lbl-b" x="230" y="165" text-anchor="middle" fill="white" font-size="14" font-weight="bold">b</text>
+          <text id="lbl-e" x="370" y="65" text-anchor="middle" fill="white" font-size="14" font-weight="bold">e</text>
+          <text id="lbl-d" x="370" y="165" text-anchor="middle" fill="white" font-size="14" font-weight="bold">d</text>
+          <text id="lbl-z" x="470" y="115" text-anchor="middle" fill="white" font-size="14" font-weight="bold">z</text>
+          <!-- Distance labels -->
+          <text id="dist-a" x="90" y="90" text-anchor="middle" fill="#f5a623" font-size="11" font-weight="bold" font-family="'JetBrains Mono'">0</text>
+          <text id="dist-c" x="230" y="38" text-anchor="middle" fill="#9bacc4" font-size="11" font-weight="bold" font-family="'JetBrains Mono'">∞</text>
+          <text id="dist-b" x="230" y="185" text-anchor="middle" fill="#9bacc4" font-size="11" font-weight="bold" font-family="'JetBrains Mono'">∞</text>
+          <text id="dist-e" x="370" y="38" text-anchor="middle" fill="#9bacc4" font-size="11" font-weight="bold" font-family="'JetBrains Mono'">∞</text>
+          <text id="dist-d" x="370" y="185" text-anchor="middle" fill="#9bacc4" font-size="11" font-weight="bold" font-family="'JetBrains Mono'">∞</text>
+          <text id="dist-z" x="470" y="88" text-anchor="middle" fill="#9bacc4" font-size="11" font-weight="bold" font-family="'JetBrains Mono'">∞</text>
+        </svg>
+      </div>
+
+      <div class="sim-info">
+        <div class="info-label" id="infoTitle">📋 Trạng Thái Ban Đầu</div>
+        <div id="infoText">L(a)=0, mọi đỉnh còn lại = ∞. S = ∅. Nhấn "Bước Tiếp" để bắt đầu thuật toán.</div>
+      </div>
+
+      <div class="sim-table-wrap">
+        <table class="sim-table">
+          <thead><tr>
+            <th>Bước</th>
+            <th>u được chọn</th>
+            <th>S</th>
+            <th>L(a)</th>
+            <th>L(c)</th>
+            <th>L(b)</th>
+            <th>L(e)</th>
+            <th>L(d)</th>
+            <th>L(z)</th>
+          </tr></thead>
+          <tbody id="simTableBody">
+            <tr id="sim-row-0">
+              <td>0</td><td>—</td><td>{}</td>
+              <td class="highlight">0</td>
+              <td>∞</td><td>∞</td><td>∞</td><td>∞</td><td>∞</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SECTION 8: EULER & HAMILTON
+════════════════════════════ -->
+<section class="section" id="euler">
+  <div class="section-header">
+    <div class="section-icon icon-blue">🛤️</div>
+    <div>
+      <h2>Euler &amp; Hamilton Paths</h2>
+      <p>Đường đi Euler và Đường đi Hamilton</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <!-- History -->
+  <div class="card" style="margin-bottom:24px;background:linear-gradient(135deg,#fff8e7,#fef3d8);">
+    <div style="display:flex;gap:20px;align-items:flex-start;">
+      <div style="font-size:48px;flex-shrink:0;">🌉</div>
+      <div>
+        <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:8px;">Bài Toán 7 Cầu Königsberg (1736)</h4>
+        <p style="font-size:14px;color:var(--text-main);">
+          Leonhard Euler (1707–1783) đặt câu hỏi: <em>"Liệu có thể đi qua tất cả 7 cây cầu của thành phố Königsberg, mỗi cầu đúng một lần, rồi trở về điểm xuất phát không?"</em>
+          <br><br>
+          Euler chứng minh: <strong>Không thể!</strong> Vì đồ thị có 4 đỉnh bậc lẻ. Đây là khởi nguồn của Lý thuyết Đồ thị.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <!-- Euler -->
+    <div class="card">
+      <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:14px;">🛤️ Euler Path &amp; Circuit</h4>
+      <p style="font-size:14px;margin-bottom:14px;"><strong>Euler path (đường đi Euler):</strong> Đường đi đơn đi qua mọi <em>cạnh</em> đúng một lần.</p>
+      <p style="font-size:14px;margin-bottom:14px;"><strong>Euler circuit (chu trình Euler):</strong> Đường đi Euler bắt đầu và kết thúc tại cùng đỉnh.</p>
+      
+      <div style="background:#e8f4fd;border-radius:10px;padding:14px 18px;margin-bottom:14px;">
+        <div style="font-weight:700;color:#1a56db;margin-bottom:8px;">📐 Định Lý Euler (Multigraph liên thông)</div>
+        <ul style="list-style:none;font-size:14px;display:flex;flex-direction:column;gap:6px;">
+          <li>✅ <strong>Có Euler circuit</strong> ⟺ <em>Mọi đỉnh có bậc chẵn</em></li>
+          <li>✅ <strong>Có Euler path (không circuit)</strong> ⟺ <em>Đúng 2 đỉnh có bậc lẻ</em></li>
+          <li>❌ Nếu >2 đỉnh bậc lẻ: không có Euler path</li>
+        </ul>
+      </div>
+      <div class="tip-card">
+        <h4>💡 Mẹo Nhớ: "Đường đi qua CẠNH"</h4>
+        <ul>
+          <li><strong>E</strong>uler = <strong>E</strong>dge (cạnh) — Đi qua mọi cạnh</li>
+          <li>Bậc lẻ = "điểm vào khác điểm ra" → cần đúng 0 hoặc 2 đỉnh như vậy</li>
+          <li>0 đỉnh bậc lẻ → circuit; 2 đỉnh bậc lẻ → path</li>
+        </ul>
+      </div>
+    </div>
+    <!-- Hamilton -->
+    <div class="card">
+      <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:14px;">🏁 Hamilton Path &amp; Circuit</h4>
+      <p style="font-size:14px;margin-bottom:14px;"><strong>Hamilton path:</strong> Đường đi đơn đi qua mọi <em>đỉnh</em> đúng một lần.</p>
+      <p style="font-size:14px;margin-bottom:14px;"><strong>Hamilton circuit:</strong> Hamilton path bắt đầu và kết thúc tại cùng đỉnh.</p>
+
+      <div style="background:#fde8e8;border-radius:10px;padding:14px 18px;margin-bottom:14px;">
+        <div style="font-weight:700;color:#b71c1c;margin-bottom:8px;">⚠️ Chú Ý Quan Trọng</div>
+        <p style="font-size:13px;color:var(--text-main);">Không có điều kiện cần và đủ đơn giản cho Hamilton circuit!</p>
+        <ul style="list-style:none;font-size:13px;display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+          <li>✅ <strong>Dirac:</strong> Đơn giản, n≥3, ∀v: deg(v)≥n/2 → có Hamilton circuit</li>
+          <li>✅ <strong>Ore:</strong> ∀u,v không liền kề: deg(u)+deg(v)≥n → có Hamilton circuit</li>
+        </ul>
+      </div>
+      <div class="tip-card">
+        <h4>💡 Mẹo Nhớ: "Đường đi qua ĐỈNH"</h4>
+        <ul>
+          <li><strong>H</strong>amilton = "He visits every city" — Qua mọi <strong>đỉnh</strong></li>
+          <li>Euler: đi qua mọi cạnh; Hamilton: đi qua mọi đỉnh</li>
+          <li>TSP (Bài toán người du lịch) là biến thể của Hamilton</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Table -->
+  <div class="card" style="margin-top:20px;">
+    <h4 style="font-family:'Playfair Display',serif;color:var(--navy);font-size:18px;margin-bottom:16px;">📊 Bảng So Sánh: Khi Nào Kₙ, Cₙ, Wₙ, Qₙ Có Euler/Hamilton?</h4>
+    <div style="overflow-x:auto;">
+      <table class="eh-table">
+        <thead><tr>
+          <th>Đồ Thị</th>
+          <th>Euler Circuit</th>
+          <th>Điều Kiện</th>
+          <th>Hamilton Circuit</th>
+          <th>Điều Kiện</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Kₙ</strong></td>
+            <td><span class="check">✓</span></td>
+            <td class="cond">n lẻ (n≥3) → tất cả bậc = n-1 (chẵn)</td>
+            <td><span class="check">✓</span></td>
+            <td class="cond">n≥3</td>
+          </tr>
+          <tr>
+            <td><strong>Cₙ</strong></td>
+            <td><span class="check">✓</span></td>
+            <td class="cond">Mọi n≥3 (tất cả bậc = 2)</td>
+            <td><span class="check">✓</span></td>
+            <td class="cond">Mọi n≥3</td>
+          </tr>
+          <tr>
+            <td><strong>Wₙ</strong></td>
+            <td><span class="cross">✗</span></td>
+            <td class="cond">Hub có bậc n (lẻ/chẵn tùy n), rim có bậc 3 (lẻ)</td>
+            <td><span class="check">✓</span></td>
+            <td class="cond">Mọi n≥3</td>
+          </tr>
+          <tr>
+            <td><strong>Qₙ</strong></td>
+            <td><span class="check">✓</span></td>
+            <td class="cond">n≥2 (tất cả bậc = n, chẵn khi n chẵn)</td>
+            <td><span class="check">✓</span></td>
+            <td class="cond">Mọi n≥1</td>
+          </tr>
+          <tr>
+            <td><strong>Kₘₙ</strong></td>
+            <td><span class="check">✓</span></td>
+            <td class="cond">m = n, đều chẵn</td>
+            <td><span class="check">✓</span></td>
+            <td class="cond">m = n</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TSP -->
+  <div class="theorem-box" style="margin-top:24px;">
+    <div class="theorem-label">🧩 Bài Toán Ứng Dụng</div>
+    <div class="theorem-title">The Traveling Salesman Problem (TSP)</div>
+    <p style="color:rgba(255,255,255,0.8);font-size:15px;margin-bottom:14px;">
+      Người bán hàng xuất phát từ một thành phố, muốn thăm n thành phố mỗi thành phố đúng một lần và quay về điểm xuất phát với tổng quãng đường ngắn nhất. Đây là bài toán <strong>Hamilton circuit tối ưu</strong>.
+    </p>
+    <div class="formula" style="font-size:16px;">
+      Brute Force: (n-1)!/2 phép so sánh → O((n-1)!)
+    </div>
+    <p class="theorem-note">💡 Với n = 20 thành phố: 19!/2 ≈ 6×10¹⁶ phép so sánh — không thể giải quyết bằng brute force! Cần dùng <em>approximation algorithms</em>.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SECTION 9: REAL WORLD
+════════════════════════════ -->
+<section class="section" id="realworld">
+  <div class="section-header">
+    <div class="section-icon icon-green">🌐</div>
+    <div>
+      <h2>Ứng Dụng Thực Tế</h2>
+      <p>Graph trong cuộc sống và kỹ thuật phần mềm</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="app-grid">
+    <div class="app-card">
+      <div class="app-icon">🗺️</div>
+      <h4>Google Maps</h4>
+      <p>Dùng đồ thị có trọng số (thành phố = đỉnh, đường = cạnh) và Dijkstra để tìm tuyến đường ngắn nhất.</p>
+      <span class="app-tag">Dijkstra / A*</span>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🌐</div>
+      <h4>Google PageRank</h4>
+      <p>Web graph: trang web = đỉnh, liên kết = cạnh có hướng. PageRank dùng eigenvector để xếp hạng tầm quan trọng.</p>
+      <span class="app-tag">Directed Graph</span>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">👥</div>
+      <h4>Mạng Xã Hội</h4>
+      <p>Facebook: người dùng = đỉnh, tình bạn = cạnh vô hướng. Gợi ý kết bạn dựa trên đỉnh chung (common neighbors).</p>
+      <span class="app-tag">Undirected Graph</span>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🖧</div>
+      <h4>Mạng Máy Tính</h4>
+      <p>Router/Switch = đỉnh, đường truyền = cạnh có trọng số (bandwidth). Routing protocols (OSPF) dùng Dijkstra.</p>
+      <span class="app-tag">Weighted Graph</span>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">🧬</div>
+      <h4>Tin Sinh Học</h4>
+      <p>Protein interaction networks: protein = đỉnh, tương tác = cạnh. Phân tích bệnh lý dựa trên kết nối mạng.</p>
+      <span class="app-tag">Bipartite Graph</span>
+    </div>
+    <div class="app-card">
+      <div class="app-icon">✈️</div>
+      <h4>Lập Lịch Bay</h4>
+      <p>Sân bay = đỉnh, chuyến bay = cạnh có trọng số (thời gian/chi phí). TSP cho tuyến bay tối ưu.</p>
+      <span class="app-tag">Hamilton Circuit</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SECTION 10: EXERCISES
+════════════════════════════ -->
+<section class="section" id="exercises">
+  <div class="section-header">
+    <div class="section-icon icon-rose">✏️</div>
+    <div>
+      <h2>Bài Tập Luyện Tập</h2>
+      <p>Easy / Medium / Hard — Có hướng dẫn giải</p>
+    </div>
+  </div>
+  <div class="divider"></div>
+
+  <div class="ex-tabs">
+    <div class="ex-tab easy active" onclick="switchTab('easy')">🟢 Easy</div>
+    <div class="ex-tab medium" onclick="switchTab('medium')">🟡 Medium</div>
+    <div class="ex-tab hard" onclick="switchTab('hard')">🔴 Hard</div>
+  </div>
+
+  <!-- EASY -->
+  <div class="ex-panel active" id="panel-easy">
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">1. Đồ thị G có 7 cạnh. Nếu mọi đỉnh đều có bậc 2, hỏi G có bao nhiêu đỉnh?</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Gợi Ý</span><br>
+        Áp dụng Handshaking Theorem: Σ deg(v) = 2|E| = 2×7 = 14.<br>
+        Vì mọi đỉnh có bậc 2, số đỉnh = 14/2 = <strong>7 đỉnh</strong>.
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">2. K₅ có bao nhiêu cạnh? Bậc của mỗi đỉnh là bao nhiêu?</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Gợi Ý</span><br>
+        K₅: Đồ thị đầy đủ với 5 đỉnh.<br>
+        |E| = C(5,2) = 5×4/2 = <strong>10 cạnh</strong>.<br>
+        Bậc mỗi đỉnh = n-1 = 5-1 = <strong>4</strong>.
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">3. Đồ thị C₆ có phải bipartite không? Tại sao?</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Gợi Ý</span><br>
+        C₆ là chu trình <strong>chẵn</strong> (6 đỉnh). Theo định lý, đồ thị là bipartite ⟺ không chứa chu trình lẻ.<br>
+        Tô màu: V₁ = {a, c, e}, V₂ = {b, d, f}. Mọi cạnh đều nối V₁↔V₂.<br>
+        ✅ <strong>C₆ là bipartite.</strong>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">4. W₅ có bao nhiêu đỉnh và bao nhiêu cạnh?</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Gợi Ý</span><br>
+        W₅ = Wheel with n=5 (5 đỉnh vành ngoài + 1 hub).<br>
+        |V| = n+1 = <strong>6 đỉnh</strong>.<br>
+        |E| = 2n = <strong>10 cạnh</strong>.<br>
+        Hub có bậc 5; mỗi đỉnh vành ngoài có bậc 3.
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIUM -->
+  <div class="ex-panel" id="panel-medium">
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">1. Có tồn tại đồ thị đơn với dãy bậc (degree sequence) 5, 4, 3, 2, 1, 1, 0 không?</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Hướng Dẫn</span><br>
+        Giả sử tồn tại. V = {a,b,c,d,e,f,g} với deg tương ứng 5,4,3,2,1,1,0.<br>
+        deg(a)=5 → a liền kề với 5 đỉnh còn lại: b,c,d,e,f.<br>
+        deg(e)=deg(f)=1 → e và f chỉ liền kề a, không liền kề b.<br>
+        → deg(b) ≤ 3 (b chỉ có thể liền kề c,d và a) → deg(b) < 4 (mâu thuẫn!).<br>
+        ❌ <strong>Không tồn tại đồ thị đơn như vậy.</strong>
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">2. Cho ma trận kề. Tính deg(c). Biết ma trận: a=[1,2,1,0], b=[2,0,2,2], c=[1,2,1,0], d=[0,2,0,0]</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Hướng Dẫn</span><br>
+        Hàng c = [1, 2, 1, 0] ứng với (c,a), (c,b), (c,c), (c,d).<br>
+        Ô (c,c) = 1 → có loop tại c → đóng góp <strong>2</strong> vào bậc (không phải 1).<br>
+        deg(c) = 1 + 2 + (1×2) + 0 = <strong>5</strong>.
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">3. Đồ thị G có 5 đỉnh bậc 3 và 3 đỉnh bậc 5. Đồ thị H đẳng cấu với G. H có bao nhiêu cạnh?</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Hướng Dẫn</span><br>
+        Σ deg = 5×3 + 3×5 = 15 + 15 = 30.<br>
+        Theo Handshaking: |E| = 30/2 = <strong>15 cạnh</strong>.<br>
+        H đẳng cấu G → H cũng có <strong>15 cạnh</strong> (đẳng cấu bảo toàn số cạnh).
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">4. Đồ thị G nào sau đây có Euler circuit: K₄, K₅, C₄, W₄?</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Hướng Dẫn</span><br>
+        Điều kiện: Mọi đỉnh có bậc chẵn.<br>
+        • K₄: mọi bậc = 3 (lẻ) → <strong>❌ Không có Euler circuit</strong><br>
+        • K₅: mọi bậc = 4 (chẵn) → <strong>✅ Có Euler circuit</strong><br>
+        • C₄: mọi bậc = 2 (chẵn) → <strong>✅ Có Euler circuit</strong><br>
+        • W₄: rim bậc 3 (lẻ) → <strong>❌ Không có Euler circuit</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- HARD -->
+  <div class="ex-panel" id="panel-hard">
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">1. Tìm đường đi ngắn nhất từ a đến z dùng Dijkstra. Đồ thị: a-c(3), a-b(4), c-b(6), c-e(11), b-e(7), e-d(9), c-d(5), e-z(16), d-z(2)</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Hướng Dẫn Chi Tiết</span><br>
+        <strong>Bước 1:</strong> L(a)=0, mọi đỉnh khác=∞. Chọn u=a, S={a}<br>
+        Cập nhật: L(c)=min(∞,0+3)=3; L(b)=min(∞,0+4)=4<br>
+        <strong>Bước 2:</strong> Chọn u=c (L=3), S={a,c}<br>
+        Cập nhật: L(b)=min(4,3+6)=4; L(e)=min(∞,3+11)=14; L(d)=min(∞,3+5)=8<br>
+        <strong>Bước 3:</strong> Chọn u=b (L=4), S={a,c,b}<br>
+        Cập nhật: L(e)=min(14,4+7)=11<br>
+        <strong>Bước 4:</strong> Chọn u=d (L=8), S={a,c,b,d}<br>
+        Cập nhật: L(z)=min(∞,8+2)=10; L(e)=min(11,8+9)=11 (không đổi)<br>
+        <strong>Bước 5:</strong> Chọn u=e (L=11), S={a,c,b,d,e}<br>
+        Cập nhật: L(z)=min(10,11+16)=10 (không đổi)<br>
+        <strong>Bước 6:</strong> Chọn u=z (L=10), S={a,c,b,d,e,z}. Xong!<br><br>
+        <strong>Kết quả: Đường ngắn nhất = 10</strong><br>
+        Đường đi: <strong>a → c → d → z</strong> (3+5+2=10)
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">2. Chứng minh hoặc bác bỏ: Mọi đồ thị có Hamilton circuit cũng có Euler circuit.</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Phản Ví Dụ</span><br>
+        <strong>Mệnh đề SAI.</strong> Phản ví dụ: K₄.<br>
+        K₄ có Hamilton circuit (ví dụ: a→b→c→d→a).<br>
+        K₄ <em>không</em> có Euler circuit vì mọi đỉnh có bậc 3 (lẻ).<br>
+        → Điều kiện Hamilton circuit và Euler circuit là độc lập với nhau. ✗
+      </div>
+    </div>
+    <div class="ex-item">
+      <div class="ex-q" onclick="toggleAns(this)">
+        <span class="ex-q-text">3. Đồ thị G có adjacency matrix A. Ma trận A² cho ta thông tin gì? Tính số đường đi độ dài 2 từ a đến c với A = [[0,1,1,0],[1,0,1,1],[1,1,0,0],[0,1,0,0]]</span>
+        <span class="ex-toggle">+</span>
+      </div>
+      <div class="ex-ans">
+        <span class="hint-tag">💡 Lý Thuyết</span><br>
+        A² = A×A. Phần tử (i,j) của A² = số đường đi độ dài 2 từ vᵢ đến vⱼ.<br><br>
+        <strong>Tính A²[a][c]:</strong> (hàng a) × (cột c)<br>
+        Hàng a = [0,1,1,0]; Cột c = [1,1,0,0]<br>
+        A²[a][c] = 0×1 + 1×1 + 1×0 + 0×0 = <strong>1</strong><br>
+        → Có <strong>1 đường đi độ dài 2</strong> từ a đến c: a→b→c
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUMMARY -->
+<div class="summary-wrap">
+  <h2>📚 Tổng Kết Chương 9</h2>
+  <p>Những điểm cốt lõi cần ghi nhớ</p>
+  <div class="summary-cards">
+    <div class="sum-card">
+      <h4>9.1–9.2 · Đồ Thị &amp; Thuật Ngữ</h4>
+      <p>G=(V,E), degree, Handshaking Theorem (Σdeg=2|E|), simple/directed/bipartite, special graphs Kₙ Cₙ Wₙ Qₙ</p>
+    </div>
+    <div class="sum-card">
+      <h4>9.3 · Biểu Diễn &amp; Đẳng Cấu</h4>
+      <p>Adjacency matrix, Incidence matrix, Isomorphism (kiểm tra dãy bậc, số đỉnh, số cạnh)</p>
+    </div>
+    <div class="sum-card">
+      <h4>9.4 · Liên Thông</h4>
+      <p>Connected, strongly/weakly connected, connected components. Đếm đường đi bằng Aⁿ</p>
+    </div>
+    <div class="sum-card">
+      <h4>9.5 · Euler &amp; Hamilton</h4>
+      <p>Euler: đi qua mọi cạnh. Hamilton: đi qua mọi đỉnh. Điều kiện Euler đơn giản; Hamilton không có điều kiện tổng quát.</p>
+    </div>
+    <div class="sum-card">
+      <h4>9.6 · Dijkstra O(n²)</h4>
+      <p>Tìm đường ngắn nhất trong đồ thị có trọng số dương. Dùng greedy: mỗi bước chọn đỉnh nhãn nhỏ nhất chưa trong S.</p>
+    </div>
+    <div class="sum-card">
+      <h4>🌐 Ứng Dụng</h4>
+      <p>Google Maps (Dijkstra), PageRank (directed graph), mạng xã hội, routing protocols, TSP, scheduling...</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- end page-wrap -->
+
+<footer>
+  <strong>MAD101 · Discrete Mathematics</strong> · <span>Chapter 9: Graphs</span> · FPT University<br>
+  <small>Bài giảng số — Dành cho sinh viên năm 2 ngành Kỹ thuật Phần mềm</small>
+</footer>
+
+<script>
+// ── Exercise Toggle ──
+function toggleAns(el) {
+  const ans = el.nextElementSibling;
+  const tog = el.querySelector('.ex-toggle');
+  const isOpen = ans.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.ex-ans.open').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.ex-toggle.open').forEach(t => t.classList.remove('open'));
+  if (!isOpen) {
+    ans.classList.add('open');
+    tog.classList.add('open');
+  }
+}
+
+// ── Exercise Tabs ──
+function switchTab(level) {
+  document.querySelectorAll('.ex-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ex-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('.ex-tab.' + level).classList.add('active');
+  document.getElementById('panel-' + level).classList.add('active');
+}
+
+// ── Dijkstra Simulator ──
+const steps = [
+  {
+    label: "Bước 1/6 — Chọn u=a (L=0), thêm a vào S",
+    info: "Khởi tạo: L(a)=0, mọi đỉnh khác=∞. Chọn đỉnh xuất phát a. Cập nhật: L(c)=3, L(b)=4",
+    inS: ['a'],
+    current: 'a',
+    dists: {a:'0', c:'3', b:'4', e:'∞', d:'∞', z:'∞'},
+    highlighted: ['v-a'],
+    edgeHL: ['e-ac','e-ab'],
+    row: [1,'a','{a}','0','3','4','∞','∞','∞']
+  },
+  {
+    label: "Bước 2/6 — Chọn u=c (L=3), thêm c vào S",
+    info: "Đỉnh ngoài S có L nhỏ nhất: c (L=3). Cập nhật: L(b)=min(4,9)=4, L(e)=14, L(d)=8",
+    inS: ['a','c'],
+    current: 'c',
+    dists: {a:'0', c:'3', b:'4', e:'14', d:'8', z:'∞'},
+    highlighted: ['v-a','v-c'],
+    edgeHL: ['e-cb','e-ce','e-cd'],
+    row: [2,'c','{a,c}','0','3','4','14','8','∞']
+  },
+  {
+    label: "Bước 3/6 — Chọn u=b (L=4), thêm b vào S",
+    info: "Đỉnh ngoài S có L nhỏ nhất: b (L=4). Cập nhật: L(e)=min(14,11)=11",
+    inS: ['a','c','b'],
+    current: 'b',
+    dists: {a:'0', c:'3', b:'4', e:'11', d:'8', z:'∞'},
+    highlighted: ['v-a','v-c','v-b'],
+    edgeHL: ['e-be'],
+    row: [3,'b','{a,c,b}','0','3','4','11','8','∞']
+  },
+  {
+    label: "Bước 4/6 — Chọn u=d (L=8), thêm d vào S",
+    info: "Đỉnh ngoài S có L nhỏ nhất: d (L=8). Cập nhật: L(z)=min(∞,10)=10",
+    inS: ['a','c','b','d'],
+    current: 'd',
+    dists: {a:'0', c:'3', b:'4', e:'11', d:'8', z:'10'},
+    highlighted: ['v-a','v-c','v-b','v-d'],
+    edgeHL: ['e-dz'],
+    row: [4,'d','{a,c,b,d}','0','3','4','11','8','10']
+  },
+  {
+    label: "Bước 5/6 — Chọn u=e (L=11), thêm e vào S",
+    info: "Đỉnh ngoài S có L nhỏ nhất: e (L=11). L(z)=min(10,27)=10 (không đổi)",
+    inS: ['a','c','b','d','e'],
+    current: 'e',
+    dists: {a:'0', c:'3', b:'4', e:'11', d:'8', z:'10'},
+    highlighted: ['v-a','v-c','v-b','v-d','v-e'],
+    edgeHL: ['e-ez'],
+    row: [5,'e','{a,c,b,d,e}','0','3','4','11','8','10']
+  },
+  {
+    label: "Bước 6/6 — Chọn u=z (L=10) ✅ HOÀN THÀNH",
+    info: "✅ z vào S. Đường ngắn nhất từ a đến z = 10. Đường đi: a → c → d → z (3+5+2=10)",
+    inS: ['a','c','b','d','e','z'],
+    current: 'z',
+    dists: {a:'0', c:'3', b:'4', e:'11', d:'8', z:'10'},
+    highlighted: ['v-a','v-c','v-b','v-d','v-e','v-z'],
+    edgeHL: [],
+    row: [6,'z','{a,c,b,d,e,z}','0','3','4','11','8','10'],
+    done: true
+  }
+];
+
+let currentStep = -1;
+const vertexKeys = ['a','c','b','e','d','z'];
+
+function resetSim() {
+  currentStep = -1;
+  document.getElementById('stepLabel').textContent = 'Bước 0/6 — Nhấn "Bước Tiếp" để bắt đầu';
+  document.getElementById('infoTitle').textContent = '📋 Trạng Thái Ban Đầu';
+  document.getElementById('infoText').textContent = 'L(a)=0, mọi đỉnh còn lại = ∞. S = ∅. Nhấn "Bước Tiếp" để bắt đầu thuật toán.';
+  vertexKeys.forEach(v => {
+    const el = document.getElementById('v-'+v);
+    if(el) el.setAttribute('fill', '#0f1e3d');
+  });
+  ['e-ac','e-ab','e-cb','e-ce','e-be','e-ed','e-cd','e-ez','e-dz'].forEach(e => {
+    const el = document.getElementById(e);
+    if(el) { el.setAttribute('stroke','#dde4ee'); el.setAttribute('stroke-width','2'); }
+  });
+  document.getElementById('dist-a').textContent='0';
+  document.getElementById('dist-a').setAttribute('fill','#f5a623');
+  ['c','b','e','d','z'].forEach(v => {
+    const el = document.getElementById('dist-'+v);
+    if(el){ el.textContent='∞'; el.setAttribute('fill','#9bacc4'); }
+  });
+  document.querySelectorAll('.step-dot').forEach(d => { d.className='step-dot'; });
+  document.getElementById('simTableBody').innerHTML = `<tr id="sim-row-0">
+    <td>0</td><td>—</td><td>{}</td>
+    <td class="highlight">0</td><td>∞</td><td>∞</td><td>∞</td><td>∞</td><td>∞</td></tr>`;
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('nextBtn').className = 'btn btn-teal';
+}
+
+function nextStep() {
+  currentStep++;
+  if(currentStep >= steps.length) return;
+  const s = steps[currentStep];
+  // Label
+  document.getElementById('stepLabel').textContent = s.label;
+  document.getElementById('infoTitle').textContent = '📋 ' + s.label;
+  document.getElementById('infoText').textContent = s.info;
+  // Dots
+  document.querySelectorAll('.step-dot').forEach((d,i) => {
+    d.className = 'step-dot' + (i < currentStep ? ' done' : '') + (i === currentStep ? ' active' : '');
+  });
+  // Reset vertex colors
+  vertexKeys.forEach(v => {
+    document.getElementById('v-'+v).setAttribute('fill', '#9bacc4');
+  });
+  // In S = navy
+  s.inS.forEach(v => {
+    document.getElementById('v-'+v).setAttribute('fill', '#0f1e3d');
+  });
+  // Current = teal
+  document.getElementById('v-'+s.current).setAttribute('fill', '#00c2a8');
+  // Reset edges
+  ['e-ac','e-ab','e-cb','e-ce','e-be','e-ed','e-cd','e-ez','e-dz'].forEach(e => {
+    const el = document.getElementById(e);
+    if(el){ el.setAttribute('stroke','#dde4ee'); el.setAttribute('stroke-width','2'); }
+  });
+  // Highlighted edges
+  s.edgeHL.forEach(e => {
+    const el = document.getElementById(e);
+    if(el){ el.setAttribute('stroke','#00c2a8'); el.setAttribute('stroke-width','3'); }
+  });
+  // Distances
+  Object.entries(s.dists).forEach(([v, d]) => {
+    const el = document.getElementById('dist-'+v);
+    if(el){ el.textContent = d; el.setAttribute('fill', d==='∞' ? '#9bacc4' : '#f5a623'); }
+  });
+  // Table row
+  const tbody = document.getElementById('simTableBody');
+  const row = s.row;
+  const tr = document.createElement('tr');
+  tr.id = 'sim-row-'+currentStep;
+  tr.innerHTML = `<td>${row[0]}</td><td style="font-family:'JetBrains Mono';font-weight:700;color:var(--teal);">${row[1]}</td><td>${row[2]}</td>
+    ${row.slice(3).map((v,i) => {
+      const isHL = s.inS.includes(vertexKeys[i]) && v!=='∞';
+      return `<td class="${isHL?'in-s':''}">${v}</td>`;
+    }).join('')}`;
+  tbody.appendChild(tr);
+  // Done
+  if(s.done || currentStep >= steps.length-1) {
+    document.getElementById('nextBtn').disabled = true;
+    document.getElementById('nextBtn').className = 'btn btn-teal btn-disabled';
+    // Highlight shortest path
+    ['e-ac','e-cd','e-dz'].forEach(e => {
+      const el = document.getElementById(e);
+      if(el){ el.setAttribute('stroke','#f5a623'); el.setAttribute('stroke-width','3'); }
+    });
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Học và Luyện tập: Không gian null và nghiệm hệ thuần nhất</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #f0f4f8;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --border-color: rgba(209, 213, 219, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --font-main: 'Inter', sans-serif;
+            --solution-bg: #f8f9fa;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: var(--primary-bg);
+            background-image: radial-gradient(circle at top left, #a1c4fd, #c2e9fb);
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 24px;
+            box-sizing: border-box;
+            gap: 24px;
+        }
+
+        .panel {
+            flex: 1;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 10px 35px 0 var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .panel-left { flex-basis: 58%; }
+        .panel-right { flex-basis: 42%; }
+
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 0;
+        }
+        
+        h2 { font-size: 1.6em; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; margin-bottom: 24px; }
+        h3 { font-size: 1.3em; margin-bottom: 18px; }
+        h4 { font-size: 1.15em; color: var(--accent-color); margin-bottom: 10px; }
+
+        .content-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .content-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: 600;
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            background-color: transparent;
+            color: var(--accent-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .content-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .content-btn:hover:not(.active) {
+            background-color: var(--accent-hover);
+            color: white;
+        }
+
+        .content-section { 
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .content-header { 
+            width: 100%;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px;
+        }
+
+        .slider-container, .video-container { 
+            width: 100%;
+            aspect-ratio: 16/9;
+            overflow: hidden; 
+            position: relative; 
+            background-color: #1f2937; 
+            border-radius: 16px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .slides-wrapper { 
+            display: flex; 
+            height: 100%; 
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+
+        .slide { 
+            flex: 0 0 100%; 
+            width: 100%; 
+            height: 100%; 
+            box-sizing: border-box; 
+            padding: 20px 30px;
+            color: #e5e7eb; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            opacity: 0; 
+            transform: translateX(20px); 
+            transition: opacity 0.6s ease, transform 0.6s ease; 
+        }
+
+        .slide.active-slide { opacity: 1; transform: translateX(0); }
+        
+        .slide .slide-title { 
+            font-size: 1.5em;
+            font-weight: 700; 
+            color: #d1d5db; 
+            border-bottom: 1px solid #4b5563; 
+            margin-bottom: 15px; 
+            padding-bottom: 10px; 
+        }
+        
+        .slide p, .slide ul { 
+            text-align: left; 
+            max-width: 95%; 
+            font-size: 1em;
+            margin: 10px 0;
+        }
+        
+        .slide .info-block { 
+            background-color: rgba(255, 255, 255, 0.05); 
+            padding: 12px 15px;
+            border-radius: 8px; 
+            margin-top: 12px; 
+            border-left: 4px solid var(--accent-color); 
+            text-align: left; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+
+        .slide .result-block { 
+            background-color: rgba(34, 197, 94, 0.1); 
+            border-left: 4px solid var(--success-color); 
+            color: #a7f3d0; 
+        }
+
+        .slider-nav { 
+            position: absolute; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 100%; 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 0 15px; 
+            box-sizing: border-box; 
+            opacity: 0; 
+            transition: opacity 0.3s ease; 
+        }
+
+        .slider-container:hover .slider-nav { opacity: 1; }
+        
+        .slider-nav button { 
+            background-color: rgba(0, 0, 0, 0.4); 
+            color: white; 
+            border: none; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-size: 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: background-color 0.3s, transform 0.3s; 
+        }
+
+        .slider-nav button:hover { 
+            background-color: rgba(0, 0, 0, 0.7); 
+            transform: scale(1.1); 
+        }
+
+        .video-container iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .video-container {
+            position: relative;
+        }
+
+        .video-container .strbl-watermark {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transform: scale(0.5);
+            transform-origin: top right;
+            z-index: 10;
+        }
+
+        .hidden { display: none !important; }
+
+        .lecture-container { flex-grow: 1; overflow-y: auto; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+        .lecture-content ol { padding-left: 25px; }
+
+        .audio-section { margin-bottom: 24px; }
+        .audio-section iframe { border-radius: 12px; box-shadow: 0 2px 10px var(--shadow-color); }
+        .audio-section a { font-size: 12px; color: var(--text-secondary); text-decoration: none; transition: color 0.3s; }
+        .audio-section a:hover { color: var(--accent-hover); }
+
+        .quiz-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; border-top: 1px solid var(--border-color); margin-top: 24px; padding-top: 24px; }
+        .quiz-progress { width: 100%; background-color: #e5e7eb; border-radius: 10px; height: 10px; margin-bottom: 10px; overflow: hidden; }
+        .progress-bar { width: 0; height: 100%; background-color: var(--accent-color); border-radius: 10px; transition: width 0.5s ease-out; }
+        .progress-text { text-align: right; font-size: 0.9em; font-weight: 500; color: var(--text-secondary); margin-bottom: 20px; }
+        .question { margin-bottom: 15px; font-size: 1.1em; font-weight: 500; }
+        .option { display: flex; align-items: center; margin: 10px 0; padding: 12px 15px; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .option:hover { border-color: var(--accent-color); background-color: #eff6ff; }
+        .option.selected { border-color: var(--accent-color); background-color: #dbeafe; }
+        .option.correct { background-color: #dcfce7; border-color: var(--success-color); color: #15803d; font-weight: 600; }
+        .option.incorrect { background-color: #fee2e2; border-color: var(--error-color); color: #b91c1c; }
+        .option input { display: none; }
+        .option label { flex-grow: 1; pointer-events: none; display: flex; align-items: center; gap: 10px; }
+
+        .solution-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+        .solution-box.visible { opacity: 1; transform: translateY(0); }
+        
+        .solution-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .solution-header h5 {
+            margin: 0;
+            font-size: 1.1em;
+            color: var(--text-primary);
+            border-bottom: none; 
+            padding-bottom: 0;
+        }
+        
+        .solution-audio {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
+            width: 45%;
+            max-width: 280px;
+            flex-shrink: 0;
+        }
+        
+        .solution-audio p {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            margin: 0 0 5px 0;
+        }
+
+        .solution-audio iframe {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            width: 100%;
+        }
+
+        .solution-audio a {
+            display: block;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin-top: 5px;
+            opacity: 0.8;
+            transition: color 0.3s, opacity 0.3s;
+        }
+
+        .solution-audio a:hover {
+            color: var(--accent-hover);
+            opacity: 1;
+        }
+
+        .solution-box .method-title { font-weight: 600; color: var(--accent-color); margin-top: 15px; }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 90%;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            box-sizing: border-box;
+        }
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--solution-bg);
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: color 0.3s;
+        }
+        .close-modal:hover {
+            color: var(--accent-hover);
+        }
+        .modal.hidden {
+            display: none;
+        }
+        .modal-question {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .quiz-footer { margin-top: 25px; text-align: center; }
+        .quiz-footer button { 
+            padding: 12px 25px; 
+            font-size: 1em; 
+            font-weight: 600; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            color: white; 
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08); 
+            margin: 0 5px;
+        }
+        .quiz-footer button:disabled { 
+            background-color: #9ca3af; 
+            cursor: not-allowed; 
+            box-shadow: none; 
+        }
+        #submitAnswerBtn { background-color: #10b981; }
+        #submitAnswerBtn:not(:disabled):hover { background-color: #059669; transform: translateY(-2px); }
+        #viewSolutionBtn { background-color: #8b5cf6; }
+        #viewSolutionBtn:not(:disabled):hover { background-color: #7c3aed; transform: translateY(-2px); }
+        #nextQuestionBtn { background-color: var(--accent-color); }
+        #nextQuestionBtn:not(:disabled):hover { background-color: var(--accent-hover); transform: translateY(-2px); }
+        #resetQuizBtn { background-color: #6b7280; }
+        #resetQuizBtn:not(:disabled):hover { background-color: #4b5563; transform: translateY(-2px); }
+        #quizResult { font-weight: 700; font-size: 1.25em; margin-bottom: 15px; }
+
+        @media (max-width: 1200px) {
+            .main-container { flex-direction: column; height: auto; overflow-y: auto; }
+            .panel { flex-basis: auto; height: auto; backdrop-filter: none; background: #fff; }
+            .panel-left { margin-right: 0; margin-bottom: 24px; }
+            .modal-content { max-width: 95%; }
+        }
+        
+        @media (max-width: 900px) {
+            .slider-container, .video-container { max-width: 100%; }
+            .modal-content { max-width: 95%; }
+        }
+        
+        @media (max-width: 768px) {
+            body { font-size: 15px; }
+            .main-container, .panel { padding: 15px; }
+            h2 { font-size: 1.3em; } 
+            h3 { font-size: 1.15em; }
+            .slider-container, .video-container { aspect-ratio: 4/3; }
+            .slide { padding: 15px 20px; }
+            .slide .slide-title { font-size: 1.3em; }
+            .modal-content { max-height: 85vh; padding: 15px; }
+            .quiz-footer button { padding: 10px 20px; font-size: 0.9em; }
+            .solution-header { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 15px;
+            }
+            .solution-audio { 
+                width: 100%;
+                max-width: none;
+                align-items: flex-start;
+            }
+            .content-btn { padding: 8px 15px; font-size: 0.9em; }
+            .video-container .strbl-watermark { transform: scale(0.4); }
+        }
+
+        /* Additional CSS to fix LaTeX rendering issues */
+        .mathjax-fix {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .mathjax-fix.fbox {
+            border: 1px solid #000;
+            padding: 2px 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="panel panel-left">
+            <div class="content-section">
+                <div class="content-wrapper">
+                    <div class="content-selector">
+                        <button class="content-btn active" onclick="showContent('slides')">Slide</button>
+                        <button class="content-btn" onclick="showContent('video')">Bài giảng video</button>
+                    </div>
+                    <div class="content-header">
+                        <h2 id="contentTitle">Slide</h2>
+                        <span class="toggle-content" onclick="toggleContentVisibility()">[Ẩn]</span>
+                    </div>
+                    <div id="slidesComponent" class="slider-container">
+                        <div class="slides-wrapper"></div>
+                        <div class="slider-nav">
+                            <button class="prev-btn" onclick="prevSlide()">❮</button>
+                            <button class="next-btn" onclick="nextSlide()">❯</button>
+                        </div>
+                    </div>
+                    <div id="videoComponent" class="video-container hidden">
+                        <div style="position:relative; width:100%; height:0px; padding-bottom:56.250%">
+                            <iframe allow="fullscreen" allowfullscreen height="100%" src="https://www.youtube.com/embed/dC94UFpXYfI" width="100%" style="border:none; width:100%; height:100%; position:absolute; left:0px; top:0px; overflow:hidden;"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lecture-container">
+                <h2>Bài giảng Chi tiết</h2>
+                <div class="lecture-content">
+                    <h3>Bài tập 1: Tìm không gian null của ma trận</h3>
+                    <div style="border: 2px solid #999; padding: 10px; border-radius: 8px; margin-bottom: 1em;">
+                        <p><strong>Ma trận:</strong></p>
+                        <div class="mathjax-fix">
+                            \[
+                            A = \begin{bmatrix}
+                            1 & 2 & 3 \\
+                            4 & 5 & 6
+                            \end{bmatrix}
+                            \]
+                        </div>
+                    </div>
+                    <h4>Phần 1: Viết hệ phương trình</h4>
+                    <p>Với <span class="mathjax-fix">\( \vec{x} = [x_1, x_2, x_3]^T \)</span>, ta có:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{cases}
+                        x_1 + 2x_2 + 3x_3 = 0 \\
+                        4x_1 + 5x_2 + 6x_3 = 0
+                        \end{cases}
+                        \]
+                    </div>
+                    <h4>Phần 2: Đưa ma trận về dạng bậc thang</h4>
+                    <p>Ma trận mở rộng:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{bmatrix}
+                        1 & 2 & 3 & 0 \\
+                        4 & 5 & 6 & 0
+                        \end{bmatrix}
+                        \]
+                    </div>
+                    <p>- Thực hiện <span class="mathjax-fix">\( R_2 \leftarrow R_2 - 4R_1 \)</span>:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{bmatrix}
+                        1 & 2 & 3 & 0 \\
+                        0 & -3 & -6 & 0
+                        \end{bmatrix}
+                        \]
+                    </div>
+                    <p>- Chia hàng 2 cho \(-3\): <span class="mathjax-fix">\( R_2 \leftarrow \frac{R_2}{-3} \)</span>:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{bmatrix}
+                        1 & 2 & 3 & 0 \\
+                        0 & 1 & 2 & 0
+                        \end{bmatrix}
+                        \]
+                    </div>
+                    <p>- Loại \( x_2 \) ở hàng 1: <span class="mathjax-fix">\( R_1 \leftarrow R_1 - 2R_2 \)</span>:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{bmatrix}
+                        1 & 0 & -1 & 0 \\
+                        0 & 1 & 2 & 0
+                        \end{bmatrix}
+                        \]
+                    </div>
+                    <h4>Phần 3: Giải hệ phương trình</h4>
+                    <p>Từ ma trận trên, ta có:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{cases}
+                        x_1 - x_3 = 0 \\
+                        x_2 + 2x_3 = 0
+                        \end{cases}
+                        \]
+                    </div>
+                    <p>- <span class="mathjax-fix">\( x_1 = x_3 \)</span></p>
+                    <p>- <span class="mathjax-fix">\( x_2 = -2x_3 \)</span></p>
+                    <p>Gán <span class="mathjax-fix">\( x_3 = t \)</span>, ta được:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \vec{x} = \begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix} = \begin{bmatrix} t \\ -2t \\ t \end{bmatrix} = t \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}
+                        \]
+                    </div>
+                    <h4>Phần 4: Không gian null</h4>
+                    <p>Không gian null được sinh bởi vector:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \boxed{\text{Null}(A) = \text{span}\left\{ \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix} \right\}}
+                        \]
+                    </div>
+
+                    <h3>Bài tập 2: Tìm không gian null của ma trận</h3>
+                    <div style="border: 2px solid #999; padding: 10px; border-radius: 8px; margin-bottom: 1em;">
+                        <p><strong>Ma trận:</strong></p>
+                        <div class="mathjax-fix">
+                            \[
+                            A = \begin{bmatrix}
+                            2 & 1 & 3 \\
+                            4 & 2 & 6
+                            \end{bmatrix}
+                            \]
+                        </div>
+                    </div>
+                    <h4>Phần 1: Viết hệ phương trình</h4>
+                    <p>Với <span class="mathjax-fix">\( \vec{x} = [x_1, x_2, x_3]^T \)</span>, ta có:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{cases}
+                        2x_1 + x_2 + 3x_3 = 0 \\
+                        4x_1 + 2x_2 + 6x_3 = 0
+                        \end{cases}
+                        \]
+                    </div>
+                    <h4>Phần 2: Đưa ma trận về dạng bậc thang</h4>
+                    <p>Ma trận mở rộng:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{bmatrix}
+                        2 & 1 & 3 & 0 \\
+                        4 & 2 & 6 & 0
+                        \end{bmatrix}
+                        \]
+                    </div>
+                    <p>- Thực hiện <span class="mathjax-fix">\( R_2 \leftarrow R_2 - 2R_1 \)</span>:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{bmatrix}
+                        2 & 1 & 3 & 0 \\
+                        0 & 0 & 0 & 0
+                        \end{bmatrix}
+                        \]
+                    </div>
+                    <p>- Chia hàng 1 cho 2: <span class="mathjax-fix">\( R_1 \leftarrow \frac{R_1}{2} \)</span>:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{bmatrix}
+                        1 & \frac{1}{2} & \frac{3}{2} & 0 \\
+                        0 & 0 & 0 & 0
+                        \end{bmatrix}
+                        \]
+                    </div>
+                    <h4>Phần 3: Giải hệ phương trình</h4>
+                    <p>Từ ma trận trên, ta có:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        x_1 + \frac{1}{2}x_2 + \frac{3}{2}x_3 = 0 \Rightarrow x_1 = -\frac{1}{2}x_2 - \frac{3}{2}x_3
+                        \]
+                    </div>
+                    <p>Gán <span class="mathjax-fix">\( x_2 = s \)</span>, <span class="mathjax-fix">\( x_3 = t \)</span>, ta được:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \vec{x} = \begin{bmatrix} -\frac{1}{2}s - \frac{3}{2}t \\ s \\ t \end{bmatrix} = s \begin{bmatrix} -\frac{1}{2} \\ 1 \\ 0 \end{bmatrix} + t \begin{bmatrix} -\frac{3}{2} \\ 0 \\ 1 \end{bmatrix}
+                        \]
+                    </div>
+                    <p>Để đơn giản, nhân với 2:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \vec{x} = s \begin{bmatrix} -1 \\ 2 \\ 0 \end{bmatrix} + t \begin{bmatrix} -3 \\ 0 \\ 2 \end{bmatrix}
+                        \]
+                    </div>
+                    <h4>Phần 4: Không gian null</h4>
+                    <p>Không gian null được sinh bởi:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \boxed{\text{Null}(A) = \text{span}\left\{ \begin{bmatrix} -1 \\ 2 \\ 0 \end{bmatrix}, \begin{bmatrix} -3 \\ 0 \\ 2 \end{bmatrix} \right\}}
+                        \]
+                    </div>
+
+                    <h3>Bài tập 3: Tìm không gian null của ma trận</h3>
+                    <div style="border: 2px solid #999; padding: 10px; border-radius: 8px; margin-bottom: 1em;">
+                        <p><strong>Ma trận:</strong></p>
+                        <div class="mathjax-fix">
+                            \[
+                            A = \begin{bmatrix}
+                            1 & 0 & 1 \\
+                            0 & 1 & -1
+                            \end{bmatrix}
+                            \]
+                        </div>
+                    </div>
+                    <h4>Phần 1: Viết hệ phương trình</h4>
+                    <p>Với <span class="mathjax-fix">\( \vec{x} = [x_1, x_2, x_3]^T \)</span>, ta có:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{cases}
+                        x_1 + x_3 = 0 \\
+                        x_2 - x_3 = 0
+                        \end{cases}
+                        \]
+                    </div>
+                    <h4>Phần 2: Đưa ma trận về dạng bậc thang</h4>
+                    <p>Ma trận mở rộng:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{bmatrix}
+                        1 & 0 & 1 & 0 \\
+                        0 & 1 & -1 & 0
+                        \end{bmatrix}
+                        \]
+                    </div>
+                    <p>Ma trận đã ở dạng bậc thang.</p>
+                    <h4>Phần 3: Giải hệ phương trình</h4>
+                    <p>Từ ma trận trên, ta có:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \begin{cases}
+                        x_1 + x_3 = 0 \\
+                        x_2 - x_3 = 0
+                        \end{cases}
+                        \]
+                    </div>
+                    <p>- <span class="mathjax-fix">\( x_1 = -x_3 \)</span></p>
+                    <p>- <span class="mathjax-fix">\( x_2 = x_3 \)</span></p>
+                    <p>Gán <span class="mathjax-fix">\( x_3 = t \)</span>, ta được:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \vec{x} = \begin{bmatrix} -t \\ t \\ t \end{bmatrix} = t \begin{bmatrix} -1 \\ 1 \\ 1 \end{bmatrix}
+                        \]
+                    </div>
+                    <h4>Phần 4: Không gian null</h4>
+                    <p>Không gian null được sinh bởi:</p>
+                    <div class="mathjax-fix">
+                        \[
+                        \boxed{\text{Null}(A) = \text{span}\left\{ \begin{bmatrix} -1 \\ 1 \\ 1 \end{bmatrix} \right\}}
+                        \]
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel panel-right">
+            <div class="audio-section">
+                <h3>Âm thanh giảng bài</h3>
+                <div>
+                    <iframe width="300" height="60" src="https://vocaroo.com/embed/17qNySMs4xfi?autoplay=0" frameborder="0" allow="autoplay"></iframe>
+                    <br>
+                    <a href="https://voca.ro/17qNySMs4xfi" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                </div>
+            </div>
+            <div class="quiz-wrapper">
+                <h3>Bài tập Củng cố</h3>
+                <div class="quiz-progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+                
+                <div id="quizContainer"></div>
+                <div id="solutionContainer"></div>
+                
+                <div class="quiz-footer">
+                    <div id="quizResult"></div>
+                    <button id="submitAnswerBtn" onclick="submitAnswer()" style="display: none;">Nộp Đáp Án</button>
+                    <button id="viewSolutionBtn" onclick="showSolution()" style="display: none;">Xem Lời Giải</button>
+                    <button id="nextQuestionBtn" onclick="nextQuestion()" style="display: none;">Câu tiếp theo</button>
+                    <button id="resetQuizBtn" onclick="resetQuiz()" style="display: none;">Làm lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="solutionModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSolutionModal()">×</span>
+            <div id="modalSolutionContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // MathJax configuration
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                ignoreHtmlClass: 'tex2jax_ignore'
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    MathJax.startup.promise.then(() => {
+                        console.log('MathJax is loaded and ready');
+                    });
+                }
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const slideData = [
+                {
+                    title: 'Hệ Phương Trình Thuần Nhất',
+                    content: `<div class="info-block">
+                                  <p style="font-size: 1.2em; text-align: center;">Giải hệ phương trình và phân tích không gian null</p>
+                              </div>`
+                },
+                {
+                    title: 'Bài toán',
+                    content: `<div class="info-block">
+                                  <p><strong>Hệ phương trình</strong></p>
+                                  <p>Giải hệ phương trình thuần nhất:</p>
+                                  <div class="mathjax-fix">
+                                  \\[
+                                  \\begin{cases}
+                                  3x_1 + x_2 + x_3 + x_4 = 0 \\\\
+                                  5x_1 - x_2 + x_3 - x_4 = 0
+                                  \\end{cases}
+                                  \\]
+                                  </div>
+                              </div>
+                              <div class="result-block">
+                                  <p><strong>Gợi ý</strong></p>
+                                  <p>Các vector trong không gian null là những vector bị ma trận <span class="mathjax-fix">\\( A \\)</span> biến thành vector <span class="mathjax-fix">\\( \\vec{0} \\)</span>.</p>
+                              </div>`
+                },
+                {
+                    title: 'Phần 1: Mẹo giải nhanh bằng cách đặt tham số tự do',
+                    content: `<div class="info-block">
+                                  <p><strong>Lời giải</strong></p>
+                                  <p>Đặt <span class="mathjax-fix">\\( x_3 = s \\)</span>, <span class="mathjax-fix">\\( x_4 = t \\)</span> là hai tham số tự do. Thay vào hệ:</p>
+                                  <div class="mathjax-fix">
+                                  \\[
+                                  \\begin{cases}
+                                  3x_1 + x_2 + s + t = 0 \\\\
+                                  5x_1 - x_2 + s - t = 0
+                                  \\end{cases}
+                                  \\]
+                                  </div>
+                                  <p>Cộng hai phương trình:</p>
+                                  <div class="mathjax-fix">
+                                  \\[
+                                  8x_1 + 2s = 0 \\Rightarrow x_1 = -\\frac{s}{4}
+                                  \\]
+                                  </div>
+                                  <p>Thay vào phương trình đầu:</p>
+                                  <div class="mathjax-fix">
+                                  \\[
+                                  3\\left(-\\frac{s}{4}\\right) + x_2 + s + t = 0 \\Rightarrow -\\frac{3s}{4} + x_2 + s + t = 0 \\Rightarrow x_2 = -\\frac{s}{4} - t
+                                  \\]
+								  
+                                  </div>
+                              </div>`
+                },
+                {
+                    title: 'Phần 2: Phân tích bằng không gian null',
+                    content: `<dSiv class="info-block">
+                                  <p><strong>Lời giải</strong></p>
+                                  <p>Ma trận hệ số:</p>
+                                  <div class="mathjax-fix">
+                                  \\[
+                                  A = \\begin{bmatrix}
+                                  3 & 1 & 1 & 1 \\\\
+                                  5 & -1 & 1 & -1
+                                  \\end{bmatrix}
+                                  \\]
+                                  </div>
+                                  <p>Không gian null của <span class="mathjax-fix">\\( A \\)</span> gồm các nghiệm của hệ <span class="mathjax-fix">\\( A\\vec{x} = \\vec{0} \\)</span>.</p>
+                                  <p>Hai nghiệm độc lập tuyến tính:</p>
+                                  <div class="mathjax-fix">
+                                  \\[
+                                  \\vec{v}_1 = 
+                                  \\begin{bmatrix}
+                                  -\\frac{1}{4} \\\\ -\\frac{1}{4} \\\\ 1 \\\\ 0
+                                  \\end{bmatrix}, \\quad
+                                  \\vec{v}_2 = 
+                                  \\begin{bmatrix}
+                                  0 \\\\ -1 \\\\ 0 \\\\ 1
+                                  \\end{bmatrix}
+                                  \\]
+                                  </div>
+                                  <div class="mathjax-fix">
+                                  \\[
+                                  \\text{Null}(A) = \\text{span} \\left\\{ \\vec{v}_1, \\vec{v}_2 \\right\\}
+                                  \\Rightarrow \\boxed{\\dim \\text{Null}(A) = 2}
+                                  \\]
+                                  </div>
+                              </div>`
+                },
+                {
+                    title: 'Kết luận',
+                    content: `<div class="info-block">
+                                  <p><strong>Cơ sở của không gian null</strong></p>
+                                  <p>Không gian null của <span class="mathjax-fix">\\( A \\)</span> có cơ sở là:</p>
+                                  <div class="mathjax-fix">
+                                  \\[
+                                  \\boxed{
+                                  \\left\\{
+                                  \\begin{bmatrix}
+                                  -\\frac{1}{4} \\\\ -\\frac{1}{4} \\\\ 1 \\\\ 0
+                                  \\end{bmatrix},
+                                  \\begin{bmatrix}
+                                  0 \\\\ -1 \\\\ 0 \\\\ 1
+                                  \\end{bmatrix}
+                                  \\right\\}
+                                  }
+                                  \\]
+                                  </div>
+                              </div>
+                              <div class="result-block">
+                                  <p><strong>Đáp án</strong></p>
+                                  <p><strong>Đáp án đúng:</strong> <span class="mathjax-fix fbox">D</span></p>
+                              </div>`
+                }
+            ];
+            
+            const slidesWrapper = document.querySelector('.slides-wrapper');
+            slidesWrapper.innerHTML = slideData.map((s, index) => `
+                <div class="slide ${index === 0 ? 'active-slide' : ''}" data-index="${index}">
+                    <div class="slide-title">${s.title}</div>
+                    <div class="slide-content">${s.content}</div>
+                </div>
+            `).join('');
+
+            window.slides = document.querySelectorAll('.slide');
+            window.currentSlideIndex = 0;
+            window.currentContent = 'slides';
+
+            window.quizData = [
+                {
+                    question: `<div class="mathjax-fix">Cho ma trận:
+                    \\[
+                    A = \\begin{bmatrix}
+                    1 & 2 & 3 \\\\
+                    4 & 5 & 6
+                    \\end{bmatrix}
+                    \\]
+                    Tìm không gian null của ma trận \\( A \\).</div>`,
+                    options: [
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} 1 \\\\ 2 \\\\ -1 \\end{bmatrix} \\right\\} \\)</span>",
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} 1 \\\\ -2 \\\\ 1 \\end{bmatrix} \\right\\} \\)</span>",
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} -1 \\\\ 2 \\\\ -1 \\end{bmatrix} \\right\\} \\)</span>",
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} 0 \\\\ 0 \\\\ 0 \\end{bmatrix} \\right\\} \\)</span>"
+                    ],
+                    answer: 1,
+                    solution: `<div class="solution-header">
+                                    <h5>Lời giải chi tiết</h5>
+                                    <div class="solution-audio">
+                                        <p>Ấn vào để nghe thuyết minh lời giải bên dưới:</p>
+                                        <iframe width="300" height="60" src="https://vocaroo.com/embed/1cbku7ILU7qS?autoplay=0" frameborder="0" allow="autoplay"></iframe>
+                                        <br><a href="https://voca.ro/1cbku7ILU7qS" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                                    </div>
+                               </div>
+                               <h4 class="method-title">Phần 1: Viết hệ phương trình</h4>
+                               <p>Với <span class="mathjax-fix">\\( \\vec{x} = [x_1, x_2, x_3]^T \\)</span>, ta có:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{cases}
+                               x_1 + 2x_2 + 3x_3 = 0 \\\\
+                               4x_1 + 5x_2 + 6x_3 = 0
+                               \\end{cases}
+                               \\]
+                               </div>
+                               <h4 class="method-title">Phần 2: Đưa ma trận về dạng bậc thang</h4>
+                               <p>Ma trận mở rộng:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{bmatrix}
+                               1 & 2 & 3 & 0 \\\\
+                               4 & 5 & 6 & 0
+                               \\end{bmatrix}
+                               \\]
+                               </div>
+                               <p>- Thực hiện <span class="mathjax-fix">\\( R_2 \\leftarrow R_2 - 4R_1 \\)</span>:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{bmatrix}
+                               1 & 2 & 3 & 0 \\\\
+                               0 & -3 & -6 & 0
+                               \\end{bmatrix}
+                               \\]
+                               </div>
+                               <p>- Chia hàng 2 cho \\(-3\\): <span class="mathjax-fix">\\( R_2 \\leftarrow \\frac{R_2}{-3} \\)</span>:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{bmatrix}
+                               1 & 2 & 3 & 0 \\\\
+                               0 & 1 & 2 & 0
+                               \\end{bmatrix}
+                               \\]
+                               </div>
+                               <p>- Loại \\( x_2 \\) ở hàng 1: <span class="mathjax-fix">\\( R_1 \\leftarrow R_1 - 2R_2 \\)</span>:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{bmatrix}
+                               1 & 0 & -1 & 0 \\\\
+                               0 & 1 & 2 & 0
+                               \\end{bmatrix}
+                               \\]
+                               </div>
+                               <h4 class="method-title">Phần 3: Giải hệ phương trình</h4>
+                               <p>Từ ma trận trên, ta có:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{cases}
+                               x_1 - x_3 = 0 \\\\
+                               x_2 + 2x_3 = 0
+                               \\end{cases}
+                               \\]
+                               </div>
+                               <p>- <span class="mathjax-fix">\\( x_1 = x_3 \\)</span></p>
+                               <p>- <span class="mathjax-fix">\\( x_2 = -2x_3 \\)</span></p>
+                               <p>Gán <span class="mathjax-fix">\\( x_3 = t \\)</span>, ta được:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\vec{x} = \\begin{bmatrix} x_1 \\\\ x_2 \\\\ x_3 \\end{bmatrix} = \\begin{bmatrix} t \\\\ -2t \\\\ t \\end{bmatrix} = t \\begin{bmatrix} 1 \\\\ -2 \\\\ 1 \\end{bmatrix}
+                               \\]
+                               </div>
+                               <h4 class="method-title">Phần 4: Không gian null</h4>
+                               <p>Không gian null được sinh bởi vector:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\boxed{\\text{Null}(A) = \\text{span}\\left\\{ \\begin{bmatrix} 1 \\\\ -2 \\\\ 1 \\end{bmatrix} \\right\\}}
+                               \\]
+                               </div>
+                               <p>Đáp án đúng: B</p>`
+                },
+                {
+                    question: `<div class="mathjax-fix">Cho ma trận:
+                    \\[
+                    A = \\begin{bmatrix}
+                    2 & 1 & 3 \\\\
+                    4 & 2 & 6
+                    \\end{bmatrix}
+                    \\]
+                    Tìm không gian null của ma trận \\( A \\).</div>`,
+                    options: [
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} -1 \\\\ 2 \\\\ 0 \\end{bmatrix}, \\begin{bmatrix} -3 \\\\ 0 \\\\ 2 \\end{bmatrix} \\right\\} \\)</span>",
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} 1 \\\\ -2 \\\\ 0 \\end{bmatrix}, \\begin{bmatrix} 3 \\\\ 0 \\\\ -2 \\end{bmatrix} \\right\\} \\)</span>",
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} -1 \\\\ 0 \\\\ 2 \\end{bmatrix}, \\begin{bmatrix} -3 \\\\ 2 \\\\ 0 \\end{bmatrix} \\right\\} \\)</span>",
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} 0 \\\\ 0 \\\\ 0 \\end{bmatrix} \\right\\} \\)</span>"
+                    ],
+                    answer: 0,
+                    solution: `<div class="solution-header">
+                                    <h5>Lời giải chi tiết</h5>
+                                    <div class="solution-audio">
+                                        <p>Ấn vào để nghe thuyết minh lời giải bên dưới:</p>
+                                        <iframe width="300" height="60" src="https://vocaroo.com/embed/1dhTkEMEMMqL?autoplay=0" frameborder="0" allow="autoplay"></iframe>
+                                        <br><a href="https://voca.ro/1dhTkEMEMMqL" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                                    </div>
+                               </div>
+                               <h4 class="method-title">Phần 1: Viết hệ phương trình</h4>
+                               <p>Với <span class="mathjax-fix">\\( \\vec{x} = [x_1, x_2, x_3]^T \\)</span>, ta có:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{cases}
+                               2x_1 + x_2 + 3x_3 = 0 \\\\
+                               4x_1 + 2x_2 + 6x_3 = 0
+                               \\end{cases}
+                               \\]
+                               </div>
+                               <h4 class="method-title">Phần 2: Đưa ma trận về dạng bậc thang</h4>
+                               <p>Ma trận mở rộng:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{bmatrix}
+                               2 & 1 & 3 & 0 \\\\
+                               4 & 2 & 6 & 0
+                               \\end{bmatrix}
+                               \\]
+                               </div>
+                               <p>- Thực hiện <span class="mathjax-fix">\\( R_2 \\leftarrow R_2 - 2R_1 \\)</span>:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{bmatrix}
+                               2 & 1 & 3 & 0 \\\\
+                               0 & 0 & 0 & 0
+                               \\end{bmatrix}
+                               \\]
+                               </div>
+                               <p>- Chia hàng 1 cho 2: <span class="mathjax-fix">\\( R_1 \\leftarrow \\frac{R_1}{2} \\)</span>:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{bmatrix}
+                               1 & \\frac{1}{2} & \\frac{3}{2} & 0 \\\\
+                               0 & 0 & 0 & 0
+                               \\end{bmatrix}
+                               \\]
+                               </div>
+                               <h4 class="method-title">Phần 3: Giải hệ phương trình</h4>
+                               <p>Từ ma trận trên, ta có:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               x_1 + \\frac{1}{2}x_2 + \\frac{3}{2}x_3 = 0 \\Rightarrow x_1 = -\\frac{1}{2}x_2 - \\frac{3}{2}x_3
+                               \\]
+                               </div>
+                               <p>Gán <span class="mathjax-fix">\\( x_2 = s \\)</span>, <span class="mathjax-fix">\\( x_3 = t \\)</span>, ta được:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\vec{x} = \\begin{bmatrix} -\\frac{1}{2}s - \\frac{3}{2}t \\\\ s \\\\ t \\end{bmatrix} = s \\begin{bmatrix} -\\frac{1}{2} \\\\ 1 \\\\ 0 \\end{bmatrix} + t \\begin{bmatrix} -\\frac{3}{2} \\\\ 0 \\\\ 1 \\end{bmatrix}
+                               \\]
+                               </div>
+                               <p>Nhân với 2 để đơn giản:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\vec{x} = s \\begin{bmatrix} -1 \\\\ 2 \\\\ 0 \\end{bmatrix} + t \\begin{bmatrix} -3 \\\\ 0 \\\\ 2 \\end{bmatrix}
+                               \\]
+                               </div>
+                               <h4 class="method-title">Phần 4: Không gian null</h4>
+                               <p>Không gian null được sinh bởi:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\boxed{\\text{Null}(A) = \\text{span}\\left\\{ \\begin{bmatrix} -1 \\\\ 2 \\\\ 0 \\end{bmatrix}, \\begin{bmatrix} -3 \\\\ 0 \\\\ 2 \\end{bmatrix} \\right\\}}
+                               \\]
+                               </div>
+                               <p>Đáp án đúng: A</p>`
+                },
+                {
+                    question: `<div class="mathjax-fix">Cho ma trận:
+                    \\[
+                    A = \\begin{bmatrix}
+                    1 & 0 & 1 \\\\
+                    0 & 1 & -1
+                    \\end{bmatrix}
+                    \\]
+                    Tìm không gian null của ma trận \\( A \\).</div>`,
+                    options: [
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} 1 \\\\ -1 \\\\ -1 \\end{bmatrix} \\right\\} \\)</span>",
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} -1 \\\\ 1 \\\\ 1 \\end{bmatrix} \\right\\} \\)</span>",
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} -1 \\\\ -1 \\\\ 1 \\end{bmatrix} \\right\\} \\)</span>",
+                        "<span class=\"mathjax-fix\">\\( \\left\\{ \\begin{bmatrix} 0 \\\\ 0 \\\\ 0 \\end{bmatrix} \\right\\} \\)</span>"
+                    ],
+                    answer: 1,
+                    solution: `<div class="solution-header">
+                                    <h5>Lời giải chi tiết</h5>
+                                    <div class="solution-audio">
+                                        <p>Ấn vào để nghe thuyết minh lời giải bên dưới:</p>
+                                        <iframe width="300" height="60" src="https://vocaroo.com/embed/1gezHGTCl8Dx?autoplay=0" frameborder="0" allow="autoplay"></iframe>
+                                        <br><a href="https://voca.ro/1gezHGTCl8Dx" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                                    </div>
+                               </div>
+                               <h4 class="method-title">Phần 1: Viết hệ phương trình</h4>
+                               <p>Với <span class="mathjax-fix">\\( \\vec{x} = [x_1, x_2, x_3]^T \\)</span>, ta có:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{cases}
+                               x_1 + x_3 = 0 \\\\
+                               x_2 - x_3 = 0
+                               \\end{cases}
+                               \\]
+                               </div>
+                               <h4 class="method-title">Phần 2: Đưa ma trận về dạng bậc thang</h4>
+                               <p>Ma trận mở rộng:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{bmatrix}
+                               1 & 0 & 1 & 0 \\\\
+                               0 & 1 & -1 & 0
+                               \\end{bmatrix}
+                               \\]
+                               </div>
+                               <p>Ma trận đã ở dạng bậc thang.</p>
+                               <h4 class="method-title">Phần 3: Giải hệ phương trình</h4>
+                               <p>Từ ma trận trên, ta có:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\begin{cases}
+                               x_1 + x_3 = 0 \\\\
+                               x_2 - x_3 = 0
+                               \\end{cases}
+                               \\]
+                               </div>
+                               <p>- <span class="mathjax-fix">\\( x_1 = -x_3 \\)</span></p>
+                               <p>- <span class="mathjax-fix">\\( x_2 = x_3 \\)</span></p>
+                               <p>Gán <span class="mathjax-fix">\\( x_3 = t \\)</span>, ta được:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\vec{x} = \\begin{bmatrix} -t \\\\ t \\\\ t \\end{bmatrix} = t \\begin{bmatrix} -1 \\\\ 1 \\\\ 1 \\end{bmatrix}
+                               \\]
+                               </div>
+                               <h4 class="method-title">Phần 4: Không gian null</h4>
+                               <p>Không gian null được sinh bởi:</p>
+                               <div class="mathjax-fix">
+                               \\[
+                               \\boxed{\\text{Null}(A) = \\text{span}\\left\\{ \\begin{bmatrix} -1 \\\\ 1 \\\\ 1 \\end{bmatrix} \\right\\}}
+                               \\]
+                               </div>
+                               <p>Đáp án đúng: B</p>`
+                }
+            ];
+            
+            window.currentQuestion = 0;
+            window.score = 0;
+            window.quizAnswered = false;
+            window.selectedAnswer = null;
+
+            loadQuestion();
+            renderMath();
+        });
+
+        function renderMath(target = document) {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetClear([target]);
+                window.MathJax.typesetPromise([target]).catch(err => {
+                    console.error('MathJax rendering failed:', err);
+                });
+            } else {
+                console.warn('MathJax is not loaded. Retrying after delay...');
+                setTimeout(() => renderMath(target), 1000);
+            }
+        }
+
+        window.showContent = function(type) {
+            const slidesComponent = document.getElementById('slidesComponent');
+            const videoComponent = document.getElementById('videoComponent');
+            const contentTitle = document.getElementById('contentTitle');
+            const buttons = document.querySelectorAll('.content-btn');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if (type === 'slides') {
+                slidesComponent.classList.remove('hidden');
+                videoComponent.classList.add('hidden');
+                contentTitle.textContent = 'Slide';
+                document.querySelector('button[onclick="showContent(\'slides\')"]').classList.add('active');
+                currentContent = 'slides';
+            } else {
+                slidesComponent.classList.add('hidden');
+                videoComponent.classList.remove('hidden');
+                contentTitle.textContent = 'Bài giảng Video';
+                document.querySelector('button[onclick="showContent(\'video\')"]').classList.add('active');
+                currentContent = 'video';
+            }
+
+            const toggleContent = document.querySelector('.toggle-content');
+            toggleContent.textContent = '[Ẩn]';
+            renderMath();
+        }
+
+        window.toggleContentVisibility = function() {
+            const slidesComponent = document.getElementById('slidesComponent');
+            const videoComponent = document.getElementById('videoComponent');
+            const toggleContent = document.querySelector('.toggle-content');
+            const contentDiv = currentContent === 'slides' ? slidesComponent : videoComponent;
+            
+            const isHidden = contentDiv.classList.contains('hidden');
+
+            if (isHidden) {
+                contentDiv.classList.remove('hidden');
+                toggleContent.textContent = '[Ẩn]';
+            } else {
+                contentDiv.classList.add('hidden');
+                toggleContent.textContent = '[Hiện]';
+            }
+            renderMath();
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active-slide', i === index));
+            document.querySelector('.slides-wrapper').style.transform = `translateX(${-index * 100}%)`;
+            currentSlideIndex = index;
+            renderMath();
+        }
+        window.nextSlide = () => showSlide((currentSlideIndex + 1) % slides.length);
+        window.prevSlide = () => showSlide((currentSlideIndex - 1 + slides.length) % slides.length);
+
+        function loadQuestion() {
+            quizAnswered = false;
+            selectedAnswer = null;
+            const q = quizData[currentQuestion];
+            const quizContainer = document.getElementById('quizContainer');
+            
+            const optionsHTML = q.options.map((opt, i) => `
+                <div class="option" onclick="selectAnswer(${i}, this)">
+                    <input type="radio" name="answer" value="${i}" id="opt${i}">
+                    <label for="opt${i}">
+                        <span>(${String.fromCharCode(65 + i)})</span>
+                        <span>${opt}</span>
+                    </label>
+                </div>
+            `).join('');
+            
+            quizContainer.innerHTML = `
+                <div class='question'>Câu ${currentQuestion + 1}: ${q.question}</div>
+                <div class="options-container">${optionsHTML}</div>
+            `;
+            document.getElementById('solutionContainer').innerHTML = '';
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+            document.getElementById('submitAnswerBtn').style.display = 'none';
+            document.getElementById('viewSolutionBtn').style.display = 'none';
+            document.getElementById('nextQuestionBtn').style.display = 'none';
+            document.getElementById('resetQuizBtn').style.display = 'none';
+            document.getElementById('quizResult').textContent = '';
+            
+            updateProgress();
+            renderMath(quizContainer);
+        }
+
+        window.selectAnswer = function(index, element) {
+            if (quizAnswered) return;
+            const options = document.querySelectorAll('.option');
+            
+            if (selectedAnswer === index) {
+                options.forEach(opt => opt.classList.remove('selected'));
+                selectedAnswer = null;
+                document.getElementById('submitAnswerBtn').style.display = 'none';
+            } else {
+                options.forEach(opt => opt.classList.remove('selected'));
+                element.classList.add('selected');
+                selectedAnswer = index;
+                document.getElementById('submitAnswerBtn').style.display = 'inline-block';
+            }
+        }
+
+        window.submitAnswer = function() {
+            if (!quizAnswered && selectedAnswer !== null) {
+                quizAnswered = true;
+                const correctAnswerIndex = quizData[currentQuestion].answer;
+                const options = document.querySelectorAll('.option');
+                
+                if (selectedAnswer === correctAnswerIndex) {
+                    score++;
+                    options[selectedAnswer].classList.add('correct');
+                } else {
+                    options[selectedAnswer].classList.add('incorrect');
+                    if (correctAnswerIndex !== null) {
+                        options[correctAnswerIndex].classList.add('correct');
+                    }
+                }
+                
+                options.forEach(opt => opt.style.pointerEvents = 'none');
+                document.getElementById('submitAnswerBtn').style.display = 'none';
+                document.getElementById('viewSolutionBtn').style.display = 'inline-block';
+                document.getElementById('nextQuestionBtn').style.display = 'inline-block';
+            }
+        }
+        
+        window.showSolution = function() {
+            const solutionContainer = document.getElementById('modalSolutionContent');
+            const q = quizData[currentQuestion];
+            const solutionHTML = `
+                <div class="modal-question">Câu ${currentQuestion + 1}: ${q.question}</div>
+                <div class="solution-box">${q.solution}</div>
+            `;
+            solutionContainer.innerHTML = solutionHTML;
+            document.getElementById('solutionModal').classList.remove('hidden');
+            
+            renderMath(solutionContainer);
+            
+            setTimeout(() => {
+                const solutionBox = solutionContainer.querySelector('.solution-box');
+                if (solutionBox) {
+                    solutionBox.classList.add('visible');
+                }
+            }, 10);
+        }
+
+        window.closeSolutionModal = function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `Câu ${currentQuestion + 1} / ${quizData.length}`;
+        }
+        
+        window.nextQuestion = function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                showFinalResult();
+            }
+        }
+
+        function showFinalResult() {
+            document.getElementById('quizContainer').innerHTML = '';
+            document.getElementById('solutionContainer').innerHTML = '';
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+
+            const quizResult = document.getElementById('quizResult');
+            const resultText = `Bạn đã hoàn thành! Kết quả: ${score} / ${quizData.length} câu đúng.`;
+            const resultColor = score / quizData.length >= 0.8 ? 'var(--success-color)' : (score / quizData.length >= 0.5 ? '#f59e0b' : 'var(--error-color)');
+            
+            quizResult.innerHTML = `<span style="color: ${resultColor}">${resultText}</span>`;
+            
+            document.getElementById('nextQuestionBtn').style.display = 'none';
+            document.getElementById('viewSolutionBtn').style.display = 'none';
+            document.getElementById('submitAnswerBtn').style.display = 'none';
+            document.getElementById('resetQuizBtn').style.display = 'inline-block';
+            document.getElementById('progressBar').style.width = '100%';
+        }
+
+        window.resetQuiz = function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+            currentQuestion = 0;
+            score = 0;
+            quizAnswered = false;
+            selectedAnswer = null;
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+                opt.style.pointerEvents = 'auto';
+            });
+            loadQuestion();
+            document.getElementById('resetQuizBtn').style.display = 'none';
+            renderMath(document.getElementById('quizContainer'));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Logic - Mệnh Đề</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS_CHTML"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .accordion-content.active {
+            max-height: 1000px;
+        }
+        
+        .truth-table {
+            border-collapse: collapse;
+        }
+        
+        .truth-table td, .truth-table th {
+            border: 2px solid #e5e7eb;
+            padding: 8px 12px;
+            text-align: center;
+        }
+        
+        .drop-zone {
+            min-height: 40px;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .drop-zone.drag-over {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        
+        .draggable {
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center space-x-3">
+                <div class="text-3xl">🧠</div>
+                <h1 class="text-2xl font-bold">Học Logic - Mệnh Đề</h1>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Module Navigation -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover cursor-pointer" onclick="showModule('theory')">
+                <div class="text-4xl mb-4 text-center">📖</div>
+                <h3 class="text-lg font-semibold mb-2 text-center">Lý Thuyết</h3>
+                <p class="text-gray-600 text-sm mb-4 text-center">Khám phá các khái niệm mệnh đề cơ bản</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover cursor-pointer" onclick="showModule('quiz')">
+                <div class="text-4xl mb-4 text-center">🎯</div>
+                <h3 class="text-lg font-semibold mb-2 text-center">Bài Tập Ứng Dụng</h3>
+                <p class="text-gray-600 text-sm mb-4 text-center">Thực hành với các câu hỏi trắc nghiệm</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 card-hover cursor-pointer" onclick="showModule('truth-table')">
+                <div class="text-4xl mb-4 text-center">🧩</div>
+                <h3 class="text-lg font-semibold mb-2 text-center">Xây Dựng Bảng Chân Lý</h3>
+                <p class="text-gray-600 text-sm mb-4 text-center">Luyện tập xây dựng bảng chân lý cho các biểu thức</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Lý Thuyết Modal -->
+    <div id="theory-modal" class="modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">📖 Lý Thuyết</h2>
+                    <button onclick="closeModal('theory-modal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <!-- Mệnh đề -->
+                    <div class="border rounded-lg">
+                        <button class="w-full text-left p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors" onclick="toggleAccordion('theory-proposition')">
+                            Mệnh Đề Là Gì?
+                        </button>
+                        <div id="theory-proposition" class="accordion-content p-4">
+                            <p class="mb-3">Mệnh đề là một câu khẳng định có giá trị chân lý rõ ràng, chỉ có thể là <strong>Đúng (True, 1)</strong> hoặc <strong>Sai (False, 0)</strong>.</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-green-50 p-3 rounded">
+                                    <p class="font-medium text-green-700">✓ Ví dụ mệnh đề:</p>
+                                    <p class="text-sm">"Trời đang mưa" (Đúng hoặc Sai tùy ngữ cảnh).</p>
+                                </div>
+                                <div class="bg-red-50 p-3 rounded">
+                                    <p class="font-medium text-red-700">✗ Không phải mệnh đề:</p>
+                                    <p class="text-sm">"Trời mưa không?" (Câu hỏi, không có giá trị chân lý).</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phủ định -->
+                    <div class="border rounded-lg">
+                        <button class="w-full text-left p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors" onclick="toggleAccordion('theory-negation')">
+                            Phủ Định (Negation)
+                        </button>
+                        <div id="theory-negation" class="accordion-content p-4">
+                            <p class="mb-3">Phủ định của mệnh đề \( p \), ký hiệu \( \neg p \), đảo ngược giá trị chân lý: Đúng thành Sai, Sai thành Đúng.</p>
+                            <p class="mb-3"><strong>Thuật ngữ:</strong> "không", "nhưng".</p>
+                            <p class="mb-3"><strong>Ví dụ:</strong> \( p \): "Trời mưa" → \( \neg p \): "Trời không mưa".</p>
+                            <table class="truth-table mx-auto">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th>\( p \)</th>
+                                        <th>\( \neg p \)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1</td><td>0</td></tr>
+                                    <tr><td>0</td><td>1</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Phép giao -->
+                    <div class="border rounded-lg">
+                        <button class="w-full text-left p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors" onclick="toggleAccordion('theory-conjunction')">
+                            Phép Giao (Conjunction - "Và")
+                        </button>
+                        <div id="theory-conjunction" class="accordion-content p-4">
+                            <p class="mb-3">Phép giao \( p \wedge q \) chỉ <strong>Đúng</strong> khi cả \( p \) và \( q \) đều Đúng, các trường hợp khác là Sai.</p>
+                            <p class="mb-3"><strong>Thuật ngữ:</strong> "và", dấu phẩy, hoặc "nhưng".</p>
+                            <p class="mb-3"><strong>Ví dụ:</strong> "Tôi về nhà và làm bài tập" (\( p \wedge q \)).</p>
+                            <table class="truth-table mx-auto">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th>\( p \)</th>
+                                        <th>\( q \)</th>
+                                        <th>\( p \wedge q \)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1</td><td>1</td><td>1</td></tr>
+                                    <tr><td>1</td><td>0</td><td>0</td></tr>
+                                    <tr><td>0</td><td>1</td><td>0</td></tr>
+                                    <tr><td>0</td><td>0</td><td>0</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Phép hợp -->
+                    <div class="border rounded-lg">
+                        <button class="w-full text-left p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors" onclick="toggleAccordion('theory-disjunction')">
+                            Phép Hợp (Disjunction - "Hoặc")
+                        </button>
+                        <div id="theory-disjunction" class="accordion-content p-4">
+                            <p class="mb-3">Phép hợp \( p \vee q \) là <strong>Đúng</strong> nếu ít nhất một trong \( p \) hoặc \( q \) Đúng, chỉ Sai khi cả hai Sai.</p>
+                            <p class="mb-3"><strong>Thuật ngữ:</strong> "hoặc".</p>
+                            <p class="mb-3"><strong>Ví dụ:</strong> "Tôi về nhà hoặc làm bài tập" (\( p \vee q \)).</p>
+                            <table class="truth-table mx-auto">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th>\( p \)</th>
+                                        <th>\( q \)</th>
+                                        <th>\( p \vee q \)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1</td><td>1</td><td>1</td></tr>
+                                    <tr><td>1</td><td>0</td><td>1</td></tr>
+                                    <tr><td>0</td><td>1</td><td>1</td></tr>
+                                    <tr><td>0</td><td>0</td><td>0</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Phép hoặc loại trừ -->
+                    <div class="border rounded-lg">
+                        <button class="w-full text-left p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors" onclick="toggleAccordion('theory-xor')">
+                            Phép Hoặc Loại Trừ (Exclusive Or)
+                        </button>
+                        <div id="theory-xor" class="accordion-content p-4">
+                            <p class="mb-3">Phép hoặc loại trừ \( p \oplus q \) chỉ <strong>Đúng</strong> khi chỉ một trong \( p \) hoặc \( q \) là Đúng, Sai nếu cả hai cùng Đúng hoặc cùng Sai.</p>
+                            <p class="mb-3"><strong>Thuật ngữ:</strong> "chỉ \( p \) hoặc chỉ \( q \)".</p>
+                            <p class="mb-3"><strong>Ví dụ:</strong> "Hoặc tôi về nhà, hoặc làm bài tập, nhưng không cả hai" (\( p \oplus q \)).</p>
+                            <table class="truth-table mx-auto">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th>\( p \)</th>
+                                        <th>\( q \)</th>
+                                        <th>\( p \oplus q \)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1</td><td>1</td><td>0</td></tr>
+                                    <tr><td>1</td><td>0</td><td>1</td></tr>
+                                    <tr><td>0</td><td>1</td><td>1</td></tr>
+                                    <tr><td>0</td><td>0</td><td>0</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Câu điều kiện -->
+                    <div class="border rounded-lg">
+                        <button class="w-full text-left p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors" onclick="toggleAccordion('theory-conditional')">
+                            Câu Điều Kiện (Conditional)
+                        </button>
+                        <div id="theory-conditional" class="accordion-content p-4">
+                            <p class="mb-3">Câu điều kiện \( p \to q \) chỉ <strong>Sai</strong> khi \( p \) Đúng và \( q \) Sai, các trường hợp khác là Đúng.</p>
+                            <p class="mb-3"><strong>Thuật ngữ:</strong> "nếu \( p \) thì \( q \)", "\( q \) nếu \( p \)", "\( p \) đủ để \( q \)", "\( q \) là điều kiện cần cho \( p \)", "\( p \) chỉ khi \( q \)".</p>
+                            <p class="mb-3"><strong>Ví dụ:</strong> "Nếu tôi về nhà thì làm bài tập" (\( p \to q \)).</p>
+                            <table class="truth-table mx-auto">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th>\( p \)</th>
+                                        <th>\( q \)</th>
+                                        <th>\( p \to q \)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1</td><td>1</td><td>1</td></tr>
+                                    <tr><td>1</td><td>0</td><td>0</td></tr>
+                                    <tr><td>0</td><td>1</td><td>1</td></tr>
+                                    <tr><td>0</td><td>0</td><td>1</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Mệnh đề tương đương -->
+                    <div class="border rounded-lg">
+                        <button class="w-full text-left p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors" onclick="toggleAccordion('theory-biconditional')">
+                            Mệnh Đề Tương Đương (Biconditional)
+                        </button>
+                        <div id="theory-biconditional" class="accordion-content p-4">
+                            <p class="mb-3">Mệnh đề tương đương \( p \leftrightarrow q \) là <strong>Đúng</strong> khi \( p \) và \( q \) có cùng giá trị chân lý, Sai nếu khác nhau.</p>
+                            <p class="mb-3"><strong>Thuật ngữ:</strong> "nếu và chỉ nếu".</p>
+                            <p class="mb-3"><strong>Ví dụ:</strong> "Tôi làm bài tập nếu và chỉ nếu tôi về nhà" (\( p \leftrightarrow q \)).</p>
+                            <table class="truth-table mx-auto">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th>\( p \)</th>
+                                        <th>\( q \)</th>
+                                        <th>\( p \leftrightarrow q \)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1</td><td>1</td><td>1</td></tr>
+                                    <tr><td>1</td><td>0</td><td>0</td></tr>
+                                    <tr><td>0</td><td>1</td><td>0</td></tr>
+                                    <tr><td>0</td><td>0</td><td>1</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Lượng từ -->
+                    <div class="border rounded-lg">
+                        <button class="w-full text-left p-4 font-semibold bg-gray-100 hover:bg-gray-200 transition-colors" onclick="toggleAccordion('theory-quantifiers')">
+                            Lượng Từ (Quantifiers)
+                        </button>
+                        <div id="theory-quantifiers" class="accordion-content p-4">
+                            <h4 class="font-semibold mb-2">1. Với mọi (Universal Quantifier):</h4>
+                            <p class="mb-3">Câu "Với mọi \( x \), \( P(x) \)" là Đúng nếu \( P(x) \) Đúng cho mọi \( x \). Sai nếu có ít nhất một phản ví dụ.</p>
+                            <p class="mb-3"><strong>Thuật ngữ:</strong> "mọi", "tất cả", "bất kỳ".</p>
+                            <p class="mb-3"><strong>Ví dụ:</strong> "Mọi con mèo đều là động vật có vú" (Đúng).</p>
+                            
+                            <h4 class="font-semibold mb-2 mt-4">2. Tồn tại (Existential Quantifier):</h4>
+                            <p class="mb-3">Câu "Tồn tại \( x \) sao cho \( P(x) \)" là Đúng nếu có ít nhất một \( x \) làm \( P(x) \) Đúng. Sai nếu không có trường hợp nào.</p>
+                            <p class="mb-3"><strong>Thuật ngữ:</strong> "một", "có", "một số".</p>
+                            <p class="mb-3"><strong>Ví dụ:</strong> "Có con mèo màu đen" (Đúng).</p>
+                            
+                            <p class="mb-3"><strong>Phủ định lượng từ:</strong></p>
+                            <ul class="list-disc pl-5">
+                                <li>\( \neg (\forall x, P(x)) \equiv \exists x, \neg P(x) \)</li>
+                                <li>\( \neg (\exists x, P(x)) \equiv \forall x, \neg P(x) \)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bài Tập Ứng Dụng Modal -->
+    <div id="quiz-modal" class="modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">🎯 Bài Tập Ứng Dụng</h2>
+                    <button onclick="closeModal('quiz-modal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="space-y-8">
+                    <!-- Câu 1 -->
+                    <div>
+                        <p class="font-medium mb-2">Câu 1: Phủ định của mệnh đề "Mọi học sinh đều chăm chỉ" là:</p>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-1" value="A" class="mr-3">
+                                <span>A. Không có học sinh nào chăm chỉ</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-1" value="B" class="mr-3">
+                                <span>B. Có ít nhất một học sinh không chăm chỉ</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-1" value="C" class="mr-3">
+                                <span>C. Một số học sinh chăm chỉ</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-1" value="D" class="mr-3">
+                                <span>D. Tất cả học sinh đều không chăm chỉ</span>
+                            </label>
+                        </div>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors mt-4" onclick="checkQuizAnswer(1, 'B')">Kiểm Tra</button>
+                        <div id="quiz-result-1" class="mt-4 p-3 rounded hidden"></div>
+                    </div>
+
+                    <!-- Câu 2 -->
+                    <div>
+                        <p class="font-medium mb-2">Câu 2: Mệnh đề \( p \wedge q \) đúng khi nào?</p>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-2" value="A" class="mr-3">
+                                <span>A. Chỉ khi \( p \) đúng</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-2" value="B" class="mr-3">
+                                <span>B. Chỉ khi \( q \) đúng</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-2" value="C" class="mr-3">
+                                <span>C. Khi cả \( p \) và \( q \) đều đúng</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-2" value="D" class="mr-3">
+                                <span>D. Khi \( p \) hoặc \( q \) đúng</span>
+                            </label>
+                        </div>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors mt-4" onclick="checkQuizAnswer(2, 'C')">Kiểm Tra</button>
+                        <div id="quiz-result-2" class="mt-4 p-3 rounded hidden"></div>
+                    </div>
+
+                    <!-- Câu 3 -->
+                    <div>
+                        <p class="font-medium mb-2">Câu 3: Phủ định của \( p \vee q \) theo De Morgan là:</p>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-3" value="A" class="mr-3">
+                                <span>A. \( \neg p \wedge \neg q \)</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-3" value="B" class="mr-3">
+                                <span>B. \( \neg p \vee \neg q \)</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-3" value="C" class="mr-3">
+                                <span>C. \( p \wedge q \)</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-3" value="D" class="mr-3">
+                                <span>D. \( p \vee q \)</span>
+                            </label>
+                        </div>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors mt-4" onclick="checkQuizAnswer(3, 'A')">Kiểm Tra</button>
+                        <div id="quiz-result-3" class="mt-4 p-3 rounded hidden"></div>
+                    </div>
+
+                    <!-- Câu 4 -->
+                    <div>
+                        <p class="font-medium mb-2">Câu 4: \( p \to q \) sai khi nào?</p>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-4" value="A" class="mr-3">
+                                <span>A. \( p \) đúng, \( q \) đúng</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-4" value="B" class="mr-3">
+                                <span>B. \( p \) đúng, \( q \) sai</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-4" value="C" class="mr-3">
+                                <span>C. \( p \) sai, \( q \) đúng</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-4" value="D" class="mr-3">
+                                <span>D. \( p \) sai, \( q \) sai</span>
+                            </label>
+                        </div>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors mt-4" onclick="checkQuizAnswer(4, 'B')">Kiểm Tra</button>
+                        <div id="quiz-result-4" class="mt-4 p-3 rounded hidden"></div>
+                    </div>
+
+                    <!-- Câu 5 -->
+                    <div>
+                        <p class="font-medium mb-2">Câu 5: Phủ định của "Tồn tại x sao cho P(x)" là:</p>
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-5" value="A" class="mr-3">
+                                <span>A. Với mọi x, P(x)</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-5" value="B" class="mr-3">
+                                <span>B. Với mọi x, \neg P(x)</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-5" value="C" class="mr-3">
+                                <span>C. Tồn tại x, P(x)</span>
+                            </label>
+                            <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="quiz-5" value="D" class="mr-3">
+                                <span>D. Tồn tại x, \neg P(x)</span>
+                            </label>
+                        </div>
+                        <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors mt-4" onclick="checkQuizAnswer(5, 'B')">Kiểm Tra</button>
+                        <div id="quiz-result-5" class="mt-4 p-3 rounded hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Xây Dựng Bảng Chân Lý Modal -->
+    <div id="truth-table-modal" class="modal">
+        <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">🧩 Xây Dựng Bảng Chân Lý</h2>
+                    <button onclick="closeModal('truth-table-modal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+            </div>
+            <div class="p-6">
+                <div id="truth-table-exercise">
+                    <!-- Nội dung bài tập sẽ được load bằng JS -->
+                </div>
+                <div class="flex justify-between mt-6">
+                    <button class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition-colors" onclick="prevExercise()">Quay Lại</button>
+                    <button class="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-700 transition-colors" onclick="resetTable()">Làm Lại</button>
+                    <button class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition-colors" onclick="checkTruthTable()">Kiểm Tra</button>
+                    <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors" onclick="nextExercise()">Tiếp Theo</button>
+                </div>
+                <div id="truth-table-result" class="mt-4 p-3 rounded hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Utility Functions
+        function showModule(moduleType) {
+            const modal = document.getElementById(`${moduleType}-modal`);
+            modal.classList.add('active');
+            
+            if (moduleType === 'truth-table') {
+                currentExercise = 0;
+                loadTruthTableExercise();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Accordion cho phần lý thuyết
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const isActive = content.classList.contains('active');
+            // Đóng tất cả accordion
+            document.querySelectorAll('.accordion-content').forEach(item => {
+                item.classList.remove('active');
+            });
+            // Mở accordion được chọn nếu chưa active
+            if (!isActive) {
+                content.classList.add('active');
+            }
+            // Render lại MathJax
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        }
+
+        // Quiz Answers
+        const quizAnswers = {
+            1: 'B',
+            2: 'C',
+            3: 'A',
+            4: 'B',
+            5: 'B'
+        };
+
+        const quizExplanations = {
+            1: 'Phủ định của "Mọi học sinh đều chăm chỉ" là "Có ít nhất một học sinh không chăm chỉ".',
+            2: 'Mệnh đề \( p \wedge q \) đúng chỉ khi cả hai đều đúng.',
+            3: 'Theo De Morgan, phủ định của \( p \vee q \) là \( \neg p \wedge \neg q \).',
+            4: '\( p \to q \) sai chỉ khi \( p \) đúng và \( q \) sai.',
+            5: 'Phủ định của "Tồn tại x sao cho P(x)" là "Với mọi x, \\neg P(x)".'
+        };
+
+        function checkQuizAnswer(questionId, correctAnswer) {
+            const selectedAnswer = document.querySelector(`input[name="quiz-${questionId}"]:checked`);
+            const resultDiv = document.getElementById(`quiz-result-${questionId}`);
+            resultDiv.classList.remove('hidden');
+
+            if (selectedAnswer && selectedAnswer.value === quizAnswers[questionId]) {
+                resultDiv.className = 'mt-4 p-3 rounded bg-green-100 text-green-800';
+                resultDiv.textContent = `✅ Đúng! ${quizExplanations[questionId]}`;
+            } else {
+                resultDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                resultDiv.textContent = `❌ Sai! Đáp án đúng là ${quizAnswers[questionId]}. ${quizExplanations[questionId]}`;
+            }
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        }
+
+        // Truth Table Exercises
+        let currentExercise = 0;
+        const truthTableExercises = [
+            {
+                expression: 'p \\wedge q',
+                columns: ['p', 'q', 'p \\wedge q'],
+                rows: [
+                    {p: '1', q: '1', expected: '1'},
+                    {p: '1', q: '0', expected: '0'},
+                    {p: '0', q: '1', expected: '0'},
+                    {p: '0', q: '0', expected: '0'}
+                ],
+                draggables: 4
+            },
+            {
+                expression: 'p \\vee q',
+                columns: ['p', 'q', 'p \\vee q'],
+                rows: [
+                    {p: '1', q: '1', expected: '1'},
+                    {p: '1', q: '0', expected: '1'},
+                    {p: '0', q: '1', expected: '1'},
+                    {p: '0', q: '0', expected: '0'}
+                ],
+                draggables: 4
+            },
+            {
+                expression: 'p \\to q',
+                columns: ['p', 'q', 'p \\to q'],
+                rows: [
+                    {p: '1', q: '1', expected: '1'},
+                    {p: '1', q: '0', expected: '0'},
+                    {p: '0', q: '1', expected: '1'},
+                    {p: '0', q: '0', expected: '1'}
+                ],
+                draggables: 4
+            },
+            {
+                expression: '(p \\wedge q) \\to r',
+                columns: ['p', 'q', 'r', 'p \\wedge q', '(p \\wedge q) \\to r'],
+                rows: [
+                    {p: '1', q: '1', r: '1', 'p \\wedge q': '1', expected: '1'},
+                    {p: '1', q: '1', r: '0', 'p \\wedge q': '1', expected: '0'},
+                    {p: '1', q: '0', r: '1', 'p \\wedge q': '0', expected: '1'},
+                    {p: '1', q: '0', r: '0', 'p \\wedge q': '0', expected: '1'},
+                    {p: '0', q: '1', r: '1', 'p \\wedge q': '0', expected: '1'},
+                    {p: '0', q: '1', r: '0', 'p \\wedge q': '0', expected: '1'},
+                    {p: '0', q: '0', r: '1', 'p \\wedge q': '0', expected: '1'},
+                    {p: '0', q: '0', r: '0', 'p \\wedge q': '0', expected: '1'}
+                ],
+                draggables: 8
+            },
+            {
+                expression: 'p \\leftrightarrow q',
+                columns: ['p', 'q', 'p \\leftrightarrow q'],
+                rows: [
+                    {p: '1', q: '1', expected: '1'},
+                    {p: '1', q: '0', expected: '0'},
+                    {p: '0', q: '1', expected: '0'},
+                    {p: '0', q: '0', expected: '1'}
+                ],
+                draggables: 4
+            }
+        ];
+
+        function loadTruthTableExercise() {
+            const exercise = truthTableExercises[currentExercise];
+            const container = document.getElementById('truth-table-exercise');
+            container.innerHTML = `
+                <h3 class="text-lg font-semibold mb-4">Biểu thức: <span class="mathjax-expression">\\(${exercise.expression}\\)</span></h3>
+                <p class="mb-4">Kéo thả giá trị 0 hoặc 1 vào cột cuối cùng.</p>
+                <div class="mb-4">
+                    <h4 class="font-medium mb-2">Giá trị có sẵn:</h4>
+                    <div class="flex space-x-2 flex-wrap" id="draggables-container">
+                        ${generateDraggables(exercise.draggables)}
+                    </div>
+                </div>
+                <table class="truth-table mx-auto mb-4" id="truth-table">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            ${exercise.columns.map(col => `<th><span class="mathjax-expression">\\(${col}\\)</span></th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${exercise.rows.map(row => `
+                            <tr>
+                                ${Object.keys(row).filter(key => key !== 'expected').map(key => `<td>${row[key]}</td>`).join('')}
+                                <td class="drop-zone" data-expected="${row.expected}" ondrop="drop(event)" ondragover="allowDrop(event)"></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            setupDraggables();
+            // Render lại MathJax cho phần tử cụ thể
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, container]);
+        }
+
+        function generateDraggables(count) {
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                const value = i % 2 === 0 ? '1' : '0';
+                const color = value === '1' ? 'bg-green-500' : 'bg-red-500';
+                html += `<div class="draggable ${color} text-white px-3 py-1 rounded cursor-grab" draggable="true" data-value="${value}">${value}</div>`;
+            }
+            return html;
+        }
+
+        function setupDraggables() {
+            const draggables = document.querySelectorAll('.draggable');
+            draggables.forEach((draggable, index) => {
+                draggable.dataset.dragId = `drag-${currentExercise}-${index}`;
+                draggable.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', this.dataset.dragId);
+                });
+            });
+            
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragleave', function() {
+                    this.classList.remove('drag-over');
+                });
+            });
+        }
+
+        function prevExercise() {
+            if (currentExercise > 0) {
+                currentExercise--;
+                loadTruthTableExercise();
+                document.getElementById('truth-table-result').classList.add('hidden');
+            }
+        }
+
+        function nextExercise() {
+            if (currentExercise < truthTableExercises.length - 1) {
+                currentExercise++;
+                loadTruthTableExercise();
+                document.getElementById('truth-table-result').classList.add('hidden');
+            }
+        }
+
+        function resetTable() {
+            loadTruthTableExercise();
+            document.getElementById('truth-table-result').classList.add('hidden');
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.target.classList.add('drag-over');
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            ev.target.classList.remove('drag-over');
+            
+            const data = ev.dataTransfer.getData("text");
+            const draggedElement = document.querySelector(`[data-drag-id="${data}"]`);
+            const value = draggedElement.dataset.value;
+            
+            ev.target.textContent = value;
+            ev.target.dataset.userValue = value;
+            ev.target.classList.add(value === '1' ? 'bg-green-100' : 'bg-red-100');
+            
+            draggedElement.style.opacity = '0.5';
+            draggedElement.draggable = false;
+        }
+
+        function checkTruthTable() {
+            const dropZones = document.querySelectorAll('#truth-table .drop-zone');
+            let correct = 0;
+            let total = dropZones.length;
+            
+            dropZones.forEach(zone => {
+                const expected = zone.dataset.expected;
+                const userValue = zone.dataset.userValue;
+                
+                if (expected === userValue) {
+                    correct++;
+                    zone.classList.add('border-green-500', 'bg-green-100');
+                } else {
+                    zone.classList.add('border-red-500', 'bg-red-100');
+                }
+            });
+            
+            const resultDiv = document.getElementById('truth-table-result');
+            resultDiv.classList.remove('hidden');
+            
+            if (correct === total) {
+                resultDiv.className = 'mt-4 p-3 rounded bg-green-100 text-green-800';
+                resultDiv.textContent = '🎉 Chính xác! Bạn đã hoàn thành bảng chân lý.';
+            } else {
+                resultDiv.className = 'mt-4 p-3 rounded bg-red-100 text-red-800';
+                resultDiv.textContent = `❌ Chưa chính xác. Bạn đúng ${correct}/${total}. Hãy thử lại!`;
+            }
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Initialize MathJax
+        document.addEventListener('DOMContentLoaded', function() {
+            MathJax.Hub.Config({
+                tex2jax: {
+                    inlineMath: [['\\(', '\\)']],
+                    displayMath: [['\\[', '\\]']],
+                    processEscapes: true
+                }
+            });
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        });
+    </script>
+</body>
+</html>

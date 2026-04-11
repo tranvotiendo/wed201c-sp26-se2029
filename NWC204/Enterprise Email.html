@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NWC204 - PROJECT REPORT</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c12; --surface: #0d1520; --card: #111c2d; --border: #1e3050;
+    --accent: #00d4ff; --accent2: #ff6b35; --green: #00ff88; --yellow: #ffd700;
+    --text: #e8f4f8; --muted: #5a7a96; --fpt: #0066cc; --gmail: #ea4335;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; overflow-x:hidden; }
+  body::before { content:''; position:fixed; inset:0; background-image: linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px), linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; z-index:0; }
+  .container { max-width:1200px; margin:0 auto; padding:0 24px; position:relative; z-index:1; }
+
+  /* HEADER */
+  header { padding:48px 0 32px; border-bottom:1px solid var(--border); margin-bottom:48px; }
+  .header-tag { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent); letter-spacing:3px; text-transform:uppercase; margin-bottom:12px; }
+  header h1 { font-size:clamp(28px,5vw,52px); font-weight:800; line-height:1.1; background:linear-gradient(135deg,var(--text) 0%,var(--accent) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  header p { margin-top:12px; color:var(--muted); font-size:15px; max-width:600px; line-height:1.6; }
+  .header-badges { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+  .badge { font-family:'JetBrains Mono',monospace; font-size:11px; padding:4px 10px; border-radius:4px; border:1px solid; }
+  .badge-blue { color:var(--accent); border-color:rgba(0,212,255,0.3); background:rgba(0,212,255,0.06); }
+  .badge-orange { color:var(--accent2); border-color:rgba(255,107,53,0.3); background:rgba(255,107,53,0.06); }
+  .badge-green { color:var(--green); border-color:rgba(0,255,136,0.3); background:rgba(0,255,136,0.06); }
+
+  .section-title { font-size:13px; font-family:'JetBrains Mono',monospace; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; display:flex; align-items:center; gap:12px; }
+  .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* DIAGRAM */
+  .diagram-section { margin-bottom:56px; }
+  .diagram-wrapper { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:32px; position:relative; overflow:hidden; }
+  .diagram-wrapper::before { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; background:radial-gradient(circle,rgba(0,212,255,0.06) 0%,transparent 70%); border-radius:50%; }
+  .network-svg-wrap { width:100%; overflow-x:auto; }
+  svg.network { width:100%; min-width:700px; height:340px; }
+  .node-box { fill:var(--card); stroke:var(--border); stroke-width:1.5; }
+  .node-box.fpt { stroke:var(--fpt); } .node-box.gmail { stroke:var(--gmail); } .node-box.router { stroke:var(--accent); }
+  .packet { display:none; } .packet.active { display:block; }
+  @keyframes moveInternal {
+    0%   { transform:translate(155px,160px); opacity:1; }
+    45%  { transform:translate(345px,160px); opacity:1; }
+    55%  { transform:translate(345px,160px); opacity:1; }
+    100% { transform:translate(155px,260px); opacity:0; }
+  }
+  @keyframes moveCross {
+    0%   { transform:translate(155px,160px); opacity:1; }
+    25%  { transform:translate(345px,160px); opacity:1; }
+    40%  { transform:translate(430px,160px); opacity:1; }
+    58%  { transform:translate(545px,160px); opacity:1; }
+    72%  { transform:translate(630px,160px); opacity:1; }
+    88%  { transform:translate(700px,160px); opacity:1; }
+    100% { transform:translate(700px,160px); opacity:0; }
+  }
+  #packet-internal { animation:moveInternal 3s ease-in-out forwards; }
+  #packet-cross { animation:moveCross 4.5s ease-in-out forwards; }
+
+  .controls { display:flex; gap:12px; flex-wrap:wrap; margin-top:24px; }
+  .btn { font-family:'JetBrains Mono',monospace; font-size:12px; padding:10px 20px; border-radius:6px; border:1px solid; cursor:pointer; transition:all 0.2s; letter-spacing:0.5px; }
+  .btn-internal { color:var(--fpt); border-color:rgba(0,102,204,0.5); background:rgba(0,102,204,0.08); }
+  .btn-internal:hover { background:rgba(0,102,204,0.18); }
+  .btn-cross { color:var(--accent2); border-color:rgba(255,107,53,0.5); background:rgba(255,107,53,0.08); }
+  .btn-cross:hover { background:rgba(255,107,53,0.18); }
+  .btn-reset { color:var(--muted); border-color:var(--border); background:transparent; }
+  .btn-reset:hover { color:var(--text); border-color:var(--muted); }
+
+  .anim-status { font-family:'JetBrains Mono',monospace; font-size:12px; padding:8px 16px; border-radius:6px; border:1px solid rgba(0,255,136,0.3); background:rgba(0,255,136,0.06); color:var(--green); display:none; align-items:center; gap:8px; margin-top:12px; }
+  .anim-status.show { display:flex; }
+  .dot-anim { width:6px; height:6px; border-radius:50%; background:var(--green); animation:blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ══ LIVE PROCESSING PANEL ══ */
+  #live-panel { margin-top:28px; }
+  .live-header { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:2px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .live-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:blink 1.2s infinite; }
+
+  /* Node cards */
+  #process-grid { display:grid; gap:10px; margin-bottom:14px; }
+  .node-proc { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:11px 13px; transition:border-color 0.3s, box-shadow 0.3s; position:relative; overflow:hidden; }
+  .node-proc::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--border); transition:background 0.4s; }
+  .node-proc.active-proc::before { background:var(--accent); }
+  .node-proc.active-proc { border-color:rgba(0,212,255,0.35); box-shadow:0 0 16px rgba(0,212,255,0.07); }
+  .node-proc.done-proc::before { background:var(--green); }
+  .node-proc.done-proc { border-color:rgba(0,255,136,0.25); }
+  .node-proc.wan-proc.active-proc::before { background:var(--yellow); }
+  .node-proc.wan-proc.active-proc { border-color:rgba(255,215,0,0.35); box-shadow:0 0 16px rgba(255,215,0,0.07); }
+  .node-proc.gsrv-proc.active-proc::before { background:var(--gmail); }
+  .node-proc.gsrv-proc.active-proc { border-color:rgba(234,67,53,0.35); box-shadow:0 0 16px rgba(234,67,53,0.07); }
+  .nph { display:flex; align-items:center; justify-content:space-between; margin-bottom:7px; }
+  .np-name { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted); font-weight:700; }
+  .np-status { font-family:'JetBrains Mono',monospace; font-size:9px; padding:2px 6px; border-radius:3px; background:var(--surface); color:var(--muted); border:1px solid var(--border); transition:all 0.3s; white-space:nowrap; }
+  .np-status.processing { color:var(--accent); border-color:rgba(0,212,255,0.4); background:rgba(0,212,255,0.08); }
+  .np-status.done { color:var(--green); border-color:rgba(0,255,136,0.3); background:rgba(0,255,136,0.06); }
+  .np-status.waiting { color:var(--yellow); border-color:rgba(255,215,0,0.3); background:rgba(255,215,0,0.06); }
+  .np-task { font-size:11px; color:var(--text); min-height:16px; line-height:1.4; }
+  .np-sub { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted); margin-top:4px; }
+  .spin { display:inline-block; width:9px; height:9px; border:2px solid rgba(0,212,255,0.2); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; vertical-align:middle; margin-right:4px; }
+
+  /* Proc log */
+  .proc-terminal { background:#050a0f; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .proc-topbar { display:flex; align-items:center; justify-content:space-between; padding:9px 14px; background:var(--surface); border-bottom:1px solid var(--border); }
+  .proc-topbar-left { display:flex; align-items:center; gap:8px; }
+  .proc-ind { width:7px; height:7px; border-radius:50%; background:var(--green); animation:blink 1s infinite; }
+  #proc-title { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); }
+  .proc-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--border); }
+  #proc-log { padding:14px; min-height:130px; max-height:280px; overflow-y:auto; }
+  #proc-log::-webkit-scrollbar { width:4px; } #proc-log::-webkit-scrollbar-track { background:transparent; } #proc-log::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+  .proc-line { font-family:'JetBrains Mono',monospace; font-size:11px; line-height:1.85; display:flex; align-items:baseline; gap:7px; opacity:0; transform:translateY(5px); transition:opacity 0.2s ease, transform 0.2s ease; }
+  .proc-line.visible { opacity:1; transform:translateY(0); }
+  .pl-time { color:#2e4a62; flex-shrink:0; min-width:36px; font-size:10px; }
+  .pl-node { padding:1px 6px; border-radius:3px; font-size:9px; font-weight:700; flex-shrink:0; }
+  .pl-node.cli  { background:rgba(0,102,204,0.18); color:#66aaff; }
+  .pl-node.srv  { background:rgba(0,160,230,0.2);  color:#80ccff; }
+  .pl-node.dns  { background:rgba(255,215,0,0.14); color:#ffd700; }
+  .pl-node.wan  { background:rgba(255,107,53,0.15); color:#ff9a70; }
+  .pl-node.gsrv { background:rgba(234,67,53,0.18);  color:#ff7b6b; }
+  .pl-node.cli2 { background:rgba(234,67,53,0.12);  color:#ffaa9d; }
+  .pl-msg { color:var(--text); flex:1; }
+  .pl-ok { color:var(--green); font-weight:700; flex:1; }
+  .pl-detail { color:var(--muted); font-size:10px; }
+
+  /* CARDS */
+  .cards-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:20px; margin-bottom:56px; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; position:relative; overflow:hidden; }
+  .card::after { content:''; position:absolute; top:0; left:0; right:0; height:2px; }
+  .card.fpt-card::after { background:linear-gradient(90deg,var(--fpt),transparent); }
+  .card.gmail-card::after { background:linear-gradient(90deg,var(--gmail),transparent); }
+  .card-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; margin-bottom:16px; }
+  .card-icon.blue { background:rgba(0,102,204,0.15); } .card-icon.red { background:rgba(234,67,53,0.15); }
+  .card h3 { font-size:16px; font-weight:700; margin-bottom:4px; }
+  .card .card-domain { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:16px; }
+  .config-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .config-row:last-child { border-bottom:none; }
+  .config-key { color:var(--muted); font-size:12px; }
+  .config-val { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); }
+  .user-chips { display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { font-family:'JetBrains Mono',monospace; font-size:10px; padding:3px 8px; border-radius:4px; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); color:var(--accent); }
+
+  /* FLOW */
+  .flow-section { margin-bottom:56px; }
+  .flow-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:4px; margin-bottom:24px; width:fit-content; }
+  .tab-btn { font-family:'JetBrains Mono',monospace; font-size:12px; padding:8px 18px; border-radius:7px; border:none; cursor:pointer; transition:all 0.2s; background:transparent; color:var(--muted); }
+  .tab-btn.active { background:var(--card); color:var(--text); border:1px solid var(--border); }
+  .flow-panel { display:none; } .flow-panel.active { display:block; }
+  .steps-list { display:flex; flex-direction:column; }
+  .step { display:flex; gap:20px; position:relative; }
+  .step:not(:last-child) .step-line { position:absolute; left:19px; top:44px; bottom:0; width:2px; background:var(--border); }
+  .step-num { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; flex-shrink:0; border:2px solid; position:relative; z-index:1; }
+  .step-num.blue { color:var(--accent); border-color:var(--accent); background:rgba(0,212,255,0.08); }
+  .step-num.orange { color:var(--accent2); border-color:var(--accent2); background:rgba(255,107,53,0.08); }
+  .step-body { padding-bottom:28px; flex:1; }
+  .step-body h4 { font-size:14px; font-weight:700; margin-bottom:4px; }
+  .step-body p { font-size:13px; color:var(--muted); line-height:1.6; }
+  .proto-tag { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10px; padding:2px 7px; border-radius:3px; background:rgba(255,215,0,0.1); border:1px solid rgba(255,215,0,0.3); color:var(--yellow); margin-top:6px; }
+
+  /* LOG */
+  .log-section { margin-bottom:56px; }
+  .log-terminal { background:#050a0f; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+  .log-topbar { display:flex; align-items:center; gap:8px; padding:12px 16px; background:var(--surface); border-bottom:1px solid var(--border); }
+  .dot { width:10px; height:10px; border-radius:50%; }
+  .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+  .log-title { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin-left:6px; }
+  .log-body { padding:20px; }
+  .log-entry { font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.8; padding:8px 12px; border-radius:6px; margin-bottom:8px; border-left:3px solid; }
+  .log-entry.success { background:rgba(0,255,136,0.04); border-color:var(--green); }
+  .log-entry .log-time { color:var(--muted); } .log-entry .log-type { color:var(--yellow); }
+  .log-entry .log-from { color:var(--accent); } .log-entry .log-to { color:var(--accent2); }
+  .log-entry .log-status { color:var(--green); font-weight:700; } .log-entry .log-protocol { color:var(--yellow); }
+
+  /* QOS */
+  .qos-section { margin-bottom:56px; }
+  .qos-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:28px; }
+  .qos-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:600px){.qos-grid{grid-template-columns:1fr;} #process-grid{grid-template-columns:1fr 1fr !important;}}
+  .bandwidth-bar { margin-top:20px; }
+  .bw-label { font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:6px; display:flex; justify-content:space-between; }
+  .bw-track { height:20px; background:var(--card); border-radius:4px; overflow:hidden; border:1px solid var(--border); display:flex; }
+  .bw-fill { height:100%; display:flex; align-items:center; justify-content:flex-end; padding-right:8px; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
+  .bw-smtp { background:linear-gradient(90deg,rgba(0,212,255,0.6),var(--accent)); color:#000; width:0; }
+  .bw-other { background:rgba(90,122,150,0.3); color:var(--muted); flex:1; justify-content:flex-start; padding-left:8px; }
+  .stat-item { padding:16px; background:var(--card); border:1px solid var(--border); border-radius:8px; }
+  .stat-label { font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:6px; }
+  .stat-value { font-size:22px; font-weight:800; }
+  .stat-value.cyan{color:var(--accent);} .stat-value.green{color:var(--green);} .stat-value.yellow{color:var(--yellow);}
+
+  footer { border-top:1px solid var(--border); padding:24px 0; text-align:center; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-tag">// Cisco Packet Tracer Lab · NWC204 - PROJECT REPORT GROUP 2</div>
+    <h1>Enterprise Email<br>System</h1>
+    <p>Trực quan hóa hệ thống gửi nhận Email giữa Local Domain <strong>fpt.com</strong> và Remote Domain <strong>gmail.com</strong> qua liên kết WAN Serial.</p>
+    <div class="header-badges">
+      <span class="badge badge-blue">SMTP Port 25</span>
+      <span class="badge badge-blue">POP3 Port 110</span>
+      <span class="badge badge-orange">WAN Serial 2Mbps</span>
+      <span class="badge badge-green">QoS MQC Active</span>
+      <span class="badge badge-blue">DNS Resolved</span>
+    </div>
+  </header>
+
+  <section class="diagram-section">
+    <div class="section-title">Sơ đồ & Live Processing Monitor</div>
+    <div class="diagram-wrapper">
+
+      <!-- SVG DIAGRAM -->
+      <div class="network-svg-wrap">
+        <svg class="network" viewBox="0 0 860 340" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0 0,6 2,0 4" fill="#00d4ff" opacity="0.6"/></marker>
+            <marker id="arrowhead-wan" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><polygon points="0 0,6 2,0 4" fill="#ffd700" opacity="0.8"/></marker>
+          </defs>
+          <!-- FPT Zone -->
+          <rect x="10" y="20" width="310" height="300" rx="10" fill="rgba(0,102,204,0.04)" stroke="rgba(0,102,204,0.2)" stroke-width="1" stroke-dasharray="6,4"/>
+          <text x="24" y="42" font-family="JetBrains Mono,monospace" font-size="10" fill="#0066cc" opacity="0.8">NET 3 · fpt.com Zone</text>
+          <rect class="node-box fpt" x="20" y="60" width="120" height="80" rx="8"/>
+          <text x="80" y="88" font-family="JetBrains Mono,monospace" font-size="22" text-anchor="middle" fill="#e8f4f8">💻</text>
+          <text x="80" y="108" font-family="Syne,sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#e8f4f8">Client_1-1</text>
+          <text x="80" y="126" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle" fill="#5a7a96">@fpt.com</text>
+          <rect class="node-box fpt" x="20" y="200" width="120" height="80" rx="8"/>
+          <text x="80" y="228" font-family="JetBrains Mono,monospace" font-size="22" text-anchor="middle" fill="#e8f4f8">💻</text>
+          <text x="80" y="248" font-family="Syne,sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#e8f4f8">Client_1-2</text>
+          <text x="80" y="266" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle" fill="#5a7a96">@fpt.com</text>
+          <rect class="node-box fpt" x="175" y="100" width="130" height="100" rx="8"/>
+          <text x="240" y="135" font-family="JetBrains Mono,monospace" font-size="26" text-anchor="middle" fill="#e8f4f8">🖥</text>
+          <text x="240" y="158" font-family="Syne,sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#e8f4f8">Mail Server</text>
+          <text x="240" y="173" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle" fill="#0066cc">192.168.3.100</text>
+          <text x="240" y="187" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" fill="#5a7a96">fpt.com</text>
+          <line x1="140" y1="110" x2="175" y2="140" stroke="#0066cc" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+          <text x="153" y="118" font-family="JetBrains Mono,monospace" font-size="9" fill="#5a7a96">SMTP</text>
+          <line x1="175" y1="175" x2="140" y2="240" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+          <text x="142" y="210" font-family="JetBrains Mono,monospace" font-size="9" fill="#5a7a96">POP3</text>
+          <!-- DHCP Router -->
+          <rect class="node-box router" x="348" y="110" width="110" height="80" rx="8"/>
+          <text x="403" y="143" font-family="JetBrains Mono,monospace" font-size="22" text-anchor="middle" fill="#e8f4f8">🔀</text>
+          <text x="403" y="163" font-family="Syne,sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#e8f4f8">DHCP Router</text>
+          <text x="403" y="178" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" fill="#00d4ff">Gateway</text>
+          <line x1="305" y1="150" x2="348" y2="150" stroke="#00d4ff" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <!-- WAN -->
+          <rect x="478" y="128" width="100" height="44" rx="6" fill="rgba(255,215,0,0.06)" stroke="rgba(255,215,0,0.4)" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <text x="528" y="146" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" fill="#ffd700">SERIAL WAN</text>
+          <text x="528" y="160" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" fill="#ffd700">2 Mbps</text>
+          <line x1="458" y1="150" x2="478" y2="150" stroke="#ffd700" stroke-width="2" marker-end="url(#arrowhead-wan)"/>
+          <!-- Internet Router -->
+          <rect class="node-box router" x="596" y="110" width="110" height="80" rx="8"/>
+          <text x="651" y="143" font-family="JetBrains Mono,monospace" font-size="22" text-anchor="middle" fill="#e8f4f8">🌐</text>
+          <text x="651" y="163" font-family="Syne,sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#e8f4f8">Internet</text>
+          <text x="651" y="178" font-family="Syne,sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#e8f4f8">Router</text>
+          <line x1="578" y1="150" x2="596" y2="150" stroke="#ffd700" stroke-width="2" marker-end="url(#arrowhead-wan)"/>
+          <!-- Gmail Zone -->
+          <rect x="720" y="20" width="130" height="300" rx="10" fill="rgba(234,67,53,0.04)" stroke="rgba(234,67,53,0.2)" stroke-width="1" stroke-dasharray="6,4"/>
+          <text x="734" y="42" font-family="JetBrains Mono,monospace" font-size="10" fill="#ea4335" opacity="0.8">NET 5 · gmail</text>
+          <rect class="node-box gmail" x="728" y="65" width="115" height="100" rx="8"/>
+          <text x="785" y="105" font-family="JetBrains Mono,monospace" font-size="26" text-anchor="middle" fill="#e8f4f8">🖥</text>
+          <text x="785" y="128" font-family="Syne,sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#e8f4f8">Mail Server</text>
+          <text x="785" y="143" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle" fill="#ea4335">192.168.5.100</text>
+          <text x="785" y="157" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" fill="#5a7a96">gmail.com</text>
+          <rect class="node-box gmail" x="728" y="210" width="115" height="80" rx="8"/>
+          <text x="785" y="238" font-family="JetBrains Mono,monospace" font-size="22" text-anchor="middle" fill="#e8f4f8">💻</text>
+          <text x="785" y="258" font-family="Syne,sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#e8f4f8">Client_2-1</text>
+          <text x="785" y="276" font-family="JetBrains Mono,monospace" font-size="10" text-anchor="middle" fill="#5a7a96">@gmail.com</text>
+          <line x1="706" y1="150" x2="728" y2="115" stroke="#ea4335" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+          <line x1="785" y1="165" x2="785" y2="210" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+          <text x="793" y="192" font-family="JetBrains Mono,monospace" font-size="9" fill="#5a7a96">POP3</text>
+          <!-- Packets -->
+          <circle id="packet-internal" class="packet" r="8" fill="#00d4ff" opacity="0.9"/>
+          <circle id="packet-cross" class="packet" r="8" fill="#ff6b35" opacity="0.9"/>
+          <!-- DNS note -->
+          <text x="403" y="300" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" fill="#5a7a96">DNS: fpt.com→192.168.3.100</text>
+          <text x="403" y="314" font-family="JetBrains Mono,monospace" font-size="9" text-anchor="middle" fill="#5a7a96">DNS: gmail.com→192.168.5.100</text>
+        </svg>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="controls">
+        <button class="btn btn-internal" onclick="animateInternal()">▶ Gửi nội bộ (1-1 → 1-2)</button>
+        <button class="btn btn-cross" onclick="animateCross()">▶ Gửi liên miền (1-1 → 2-1)</button>
+        <button class="btn btn-reset" onclick="resetAnim()">↺ Reset</button>
+      </div>
+
+      <div class="anim-status" id="anim-status">
+        <div class="dot-anim"></div>
+        <span id="anim-text"></span>
+      </div>
+
+      <!-- ══ LIVE PROCESSING PANEL ══ -->
+      <div id="live-panel" style="display:none; margin-top:24px;">
+        <div class="live-header">
+          <span class="live-dot"></span>
+          LIVE PROCESSING MONITOR
+        </div>
+
+        <!-- Node status cards — filled by JS -->
+        <div id="process-grid"></div>
+
+        <!-- Rolling log -->
+        <div class="proc-terminal">
+          <div class="proc-topbar">
+            <div class="proc-topbar-left">
+              <div class="proc-ind"></div>
+              <span id="proc-title">Idle</span>
+            </div>
+            <span class="proc-label">PACKET TRACE LOG</span>
+          </div>
+          <div id="proc-log"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SERVER CONFIG CARDS -->
+  <section>
+    <div class="section-title">Cấu hình Server</div>
+    <div class="cards-grid">
+      <div class="card fpt-card">
+        <div class="card-icon blue">📧</div>
+        <h3>DNS Email Server</h3>
+        <div class="card-domain">fpt.com · Internal Domain</div>
+        <div class="config-row"><span class="config-key">IP Address</span><span class="config-val">192.168.3.100</span></div>
+        <div class="config-row"><span class="config-key">Default Gateway</span><span class="config-val">192.168.3.200</span></div>
+        <div class="config-row"><span class="config-key">Domain Name</span><span class="config-val">fpt.com</span></div>
+        <div class="config-row"><span class="config-key">Protocols</span><span class="config-val">SMTP + POP3</span></div>
+        <div class="config-row"><span class="config-key">Users</span><div class="user-chips"><span class="chip">Client_1-1</span><span class="chip">Client_1-2</span></div></div>
+      </div>
+      <div class="card gmail-card">
+        <div class="card-icon red">📨</div>
+        <h3>Gmail HTTP Server</h3>
+        <div class="card-domain">gmail.com · Remote Domain</div>
+        <div class="config-row"><span class="config-key">IP Address</span><span class="config-val" style="color:var(--gmail)">192.168.5.100</span></div>
+        <div class="config-row"><span class="config-key">Default Gateway</span><span class="config-val" style="color:var(--gmail)">192.168.5.200</span></div>
+        <div class="config-row"><span class="config-key">Domain Name</span><span class="config-val" style="color:var(--gmail)">gmail.com</span></div>
+        <div class="config-row"><span class="config-key">Protocols</span><span class="config-val" style="color:var(--gmail)">SMTP + POP3</span></div>
+        <div class="config-row"><span class="config-key">Users</span><div class="user-chips"><span class="chip" style="color:var(--gmail);border-color:rgba(234,67,53,0.3);background:rgba(234,67,53,0.08)">Client_2-1</span><span class="chip" style="color:var(--gmail);border-color:rgba(234,67,53,0.3);background:rgba(234,67,53,0.08)">Client_2-2</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLOW -->
+  <section class="flow-section">
+    <div class="section-title">Giải thích luồng xử lý</div>
+    <div class="flow-tabs">
+      <button class="tab-btn active" onclick="switchTab('internal',this)">📬 Gửi nội bộ</button>
+      <button class="tab-btn" onclick="switchTab('cross',this)">🌐 Gửi liên miền (WAN)</button>
+    </div>
+    <div class="flow-panel active" id="panel-internal">
+      <div class="steps-list">
+        <div class="step"><div class="step-line"></div><div class="step-num blue">1</div><div class="step-body"><h4>Client_1-1 soạn và gửi mail</h4><p>Client_1-1@fpt.com soạn email gửi cho Client_1-2@fpt.com. Mail client kết nối tới Mail Server qua giao thức SMTP (port 25).</p><span class="proto-tag">SMTP · TCP 25</span></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num blue">2</div><div class="step-body"><h4>Server xử lý nội bộ</h4><p>Mail Server nhận mail, kiểm tra người nhận. Vì Client_1-2 cùng domain fpt.com, server <strong>không cần truy vấn DNS ngoài</strong>. Mail lưu thẳng vào hộp thư nội bộ.</p><span class="proto-tag">LOCAL DELIVERY · No WAN</span></div></div>
+        <div class="step"><div class="step-num blue">3</div><div class="step-body"><h4>Client_1-2 nhận mail qua POP3</h4><p>Client_1-2 kết nối tới server qua POP3 (port 110) để tải mail. Timestamp: <strong style="color:var(--green)">Tue Mar 10 2026 13:28:56</strong></p><span class="proto-tag">POP3 · TCP 110</span></div></div>
+      </div>
+    </div>
+    <div class="flow-panel" id="panel-cross">
+      <div class="steps-list">
+        <div class="step"><div class="step-line"></div><div class="step-num orange">1</div><div class="step-body"><h4>Client_1-1 gửi mail đến địa chỉ ngoài</h4><p>Client_1-1@fpt.com gửi mail tới Client_2-1@gmail.com qua SMTP tới Local Mail Server 192.168.3.100.</p><span class="proto-tag">SMTP · TCP 25</span></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num orange">2</div><div class="step-body"><h4>DNS lookup — xác định server đích</h4><p>Local Server thấy domain gmail.com không thuộc mình. Truy vấn DNS → DNS trả về <strong style="color:var(--gmail)">192.168.5.100</strong>.</p><span class="proto-tag">DNS Query · UDP 53</span></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num orange">3</div><div class="step-body"><h4>Truyền qua WAN Serial — QoS bảo vệ</h4><p>Gói tin SMTP đẩy qua Serial 2Mbps. QoS MQC ưu tiên <strong>25% băng thông (500Kbps)</strong> cho SMTP port 25.</p><span class="proto-tag">WAN · Serial · QoS SMTP 25%</span></div></div>
+        <div class="step"><div class="step-line"></div><div class="step-num orange">4</div><div class="step-body"><h4>Remote Server tiếp nhận</h4><p>Gmail Mail Server nhận mail và lưu vào hộp thư Client_2-1.</p><span class="proto-tag">SMTP Relay · Remote Delivery</span></div></div>
+        <div class="step"><div class="step-num orange">5</div><div class="step-body"><h4>Client_2-1 nhận mail qua POP3</h4><p>Client_2-1 tải mail về qua POP3. Timestamp: <strong style="color:var(--green)">Tue Mar 10 2026 13:30:02</strong></p><span class="proto-tag">POP3 · TCP 110</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEST LOGS -->
+  <section class="log-section">
+    <div class="section-title">Kết quả kiểm thử — Test Logs</div>
+    <div class="log-terminal">
+      <div class="log-topbar">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        <span class="log-title">Email System Test Results — Cisco Packet Tracer Simulation</span>
+      </div>
+      <div class="log-body">
+        <div class="log-entry success">
+          <span class="log-time">[Tue Mar 10 2026 13:28:56]</span>&nbsp;
+          <span class="log-type">INTERNAL</span>&nbsp;&nbsp;
+          <span class="log-from">Client_1-1@fpt.com</span><span style="color:var(--muted)"> → </span><span class="log-to">Client_1-2@fpt.com</span>&nbsp;&nbsp;
+          <span class="log-protocol">[SMTP→POP3]</span>&nbsp;<span class="log-status">✓ SUCCESS</span>
+        </div>
+        <div class="log-entry success">
+          <span class="log-time">[Tue Mar 10 2026 13:30:02]</span>&nbsp;
+          <span class="log-type" style="color:var(--accent2)">CROSS-WAN</span>&nbsp;&nbsp;
+          <span class="log-from">Client_1-1@fpt.com</span><span style="color:var(--muted)"> → </span><span class="log-to">Client_2-1@gmail.com</span>&nbsp;&nbsp;
+          <span class="log-protocol">[SMTP→WAN→SMTP→POP3]</span>&nbsp;<span class="log-status">✓ SUCCESS</span>
+        </div>
+        <div style="margin-top:16px;padding:12px;border-radius:6px;background:rgba(0,212,255,0.04);border:1px solid rgba(0,212,255,0.1);">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:8px;">// Ping & Traceroute Verification</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--green);">
+            > ping 192.168.5.100 from 192.168.3.100 → Success Rate: 100%<br>
+            > traceroute gmail.com &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 3 hops, all resolved<br>
+            > DNS query fpt.com &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 192.168.3.100 ✓<br>
+            > DNS query gmail.com &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 192.168.5.100 ✓
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QOS -->
+  <section class="qos-section">
+    <div class="section-title">QoS — Modular QoS CLI (MQC)</div>
+    <div class="qos-card">
+      <div class="qos-grid">
+        <div>
+          <div class="stat-item" style="margin-bottom:12px"><div class="stat-label">WAN Link Speed</div><div class="stat-value yellow">2 Mbps</div></div>
+          <div class="stat-item" style="margin-bottom:12px"><div class="stat-label">SMTP Guaranteed BW</div><div class="stat-value cyan">500 Kbps</div></div>
+          <div class="stat-item"><div class="stat-label">Packet Drop (SMTP)</div><div class="stat-value green">0%</div></div>
+        </div>
+        <div>
+          <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:8px;height:100%;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:12px;">Phân bổ băng thông WAN</div>
+            <div class="bandwidth-bar">
+              <div class="bw-label"><span>SMTP (port 25) — Ưu tiên cao</span><span style="color:var(--accent)">25%</span></div>
+              <div class="bw-track">
+                <div class="bw-fill bw-smtp" id="bw-smtp">500K</div>
+                <div class="bw-fill bw-other">75% - Other Traffic</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);line-height:1.8;">
+              <div style="color:var(--accent)">policy-map MAIL_QOS</div>
+              <div style="padding-left:12px;color:var(--text)">class SMTP_CLASS</div>
+              <div style="padding-left:24px;color:var(--green)">bandwidth percent 25</div>
+              <div style="padding-left:12px;color:var(--text)">class class-default</div>
+              <div style="padding-left:24px;color:var(--muted)">fair-queue</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>Enterprise Email System Visualization · Cisco Packet Tracer WAN Lab</div>
+    <div style="margin-top:6px;opacity:0.5">fpt.com (192.168.3.100) ←→ WAN Serial 2Mbps ←→ gmail.com (192.168.5.100)</div>
+  </footer>
+
+</div>
+
+<script>
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.flow-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+tab).classList.add('active');
+  }
+
+  let animating = false;
+  let allTimers = [];
+
+  function sched(fn, ms) { const id = setTimeout(fn, ms); allTimers.push(id); }
+  function clearAll() { allTimers.forEach(clearTimeout); allTimers = []; }
+
+  function showStatus(msg) { const s=document.getElementById('anim-status'); document.getElementById('anim-text').textContent=msg; s.classList.add('show'); }
+  function hideStatus() { document.getElementById('anim-status').classList.remove('show'); }
+
+  /* Build node cards */
+  function buildCards(nodes) {
+    const g = document.getElementById('process-grid');
+    g.innerHTML = '';
+    const cols = Math.min(nodes.length, 5);
+    g.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+    nodes.forEach(n => {
+      g.innerHTML += `<div class="node-proc ${n.cls||''}" id="np-${n.id}">
+        <div class="nph">
+          <span class="np-name">${n.icon} ${n.name}</span>
+          <span class="np-status" id="nps-${n.id}">IDLE</span>
+        </div>
+        <div class="np-task" id="npt-${n.id}">—</div>
+        <div class="np-sub" id="npd-${n.id}">${n.sub}</div>
+      </div>`;
+    });
+  }
+
+  function setNode(id, state, task, sub) {
+    const box=document.getElementById('np-'+id);
+    const st=document.getElementById('nps-'+id);
+    const tk=document.getElementById('npt-'+id);
+    const dt=document.getElementById('npd-'+id);
+    if (!box) return;
+    box.classList.remove('active-proc','done-proc');
+    st.classList.remove('processing','done','waiting');
+    if (state==='proc') {
+      box.classList.add('active-proc'); st.classList.add('processing'); st.textContent='PROCESSING';
+      tk.innerHTML=`<span class="spin"></span>${task}`;
+    } else if (state==='done') {
+      box.classList.add('done-proc'); st.classList.add('done'); st.textContent='DONE ✓'; tk.innerHTML=task;
+    } else if (state==='wait') {
+      st.classList.add('waiting'); st.textContent='WAITING'; tk.innerHTML=task;
+    } else { st.textContent='IDLE'; tk.innerHTML='—'; }
+    if (sub!==undefined && dt) dt.textContent=sub;
+  }
+
+  /* Add log line */
+  function log(delay, nodeClass, nodeLabel, msg, isOk, detail) {
+    sched(() => {
+      const el = document.getElementById('proc-log');
+      const ts = (delay/1000).toFixed(1);
+      const msgSpan = isOk ? `<span class="pl-ok">${msg}</span>` : `<span class="pl-msg">${msg}</span>`;
+      const det = detail ? ` <span class="pl-detail">· ${detail}</span>` : '';
+      const line = document.createElement('div');
+      line.className = 'proc-line';
+      line.innerHTML = `<span class="pl-time">+${ts}s</span><span class="pl-node ${nodeClass}">${nodeLabel}</span>${msgSpan}${det}`;
+      el.appendChild(line);
+      requestAnimationFrame(() => line.classList.add('visible'));
+      el.scrollTop = el.scrollHeight;
+    }, delay);
+  }
+
+  /* ══ INTERNAL SCENARIO ══ */
+  function animateInternal() {
+    if (animating) return;
+    animating = true;
+    resetUI();
+
+    buildCards([
+      { id:'c11', icon:'💻', name:'Client_1-1', sub:'192.168.3.x · @fpt.com' },
+      { id:'srv', icon:'🖥',  name:'FPT Mail Server', sub:'192.168.3.100 · fpt.com' },
+      { id:'c12', icon:'💻', name:'Client_1-2', sub:'192.168.3.x · @fpt.com' },
+    ]);
+    document.getElementById('live-panel').style.display = 'block';
+    document.getElementById('proc-title').textContent = 'INTERNAL MAIL: Client_1-1@fpt.com → Client_1-2@fpt.com';
+    showStatus('Đang gửi nội bộ: Client_1-1 → FPT Server → Client_1-2...');
+
+    const p = document.getElementById('packet-internal');
+    p.classList.add('active'); p.style.animation='none'; void p.offsetWidth; p.style.animation='';
+
+    sched(() => setNode('c11','proc','Soạn & gửi mail...'), 0);
+    log(0,   'cli','CLIENT_1-1', 'compose: To=Client_1-2@fpt.com  Subject="Test Email"');
+    log(280, 'cli','CLIENT_1-1', 'TCP SYN → 192.168.3.100:25', false, 'Mở SMTP connection');
+    log(520, 'cli','CLIENT_1-1', 'TCP 3-way handshake OK ✓', true);
+
+    sched(() => setNode('srv','proc','Nhận SMTP connection...','Lắng nghe tcp :25'), 560);
+    log(580, 'srv','FPT_SERVER', '220 fpt.com ESMTP Service Ready', false, 'Server chào kết nối');
+    log(780, 'cli','CLIENT_1-1', 'EHLO client1-1.fpt.com', false, 'Khai báo danh tính');
+    log(920, 'srv','FPT_SERVER', '250-fpt.com · AUTH LOGIN · 8BITMIME · SIZE');
+    log(1100,'cli','CLIENT_1-1', 'AUTH LOGIN  [username + password]', false, 'Xác thực người dùng');
+    log(1280,'srv','FPT_SERVER', '235 Authentication successful ✓', true);
+    log(1460,'cli','CLIENT_1-1', 'MAIL FROM: <Client_1-1@fpt.com>');
+    log(1600,'srv','FPT_SERVER', '250 OK · Sender accepted');
+    log(1760,'cli','CLIENT_1-1', 'RCPT TO: <Client_1-2@fpt.com>');
+
+    sched(() => setNode('srv','proc','Kiểm tra domain người nhận...','Check: fpt.com?'), 1800);
+    log(1820,'srv','FPT_SERVER', 'Check domain: Client_1-2 ∈ fpt.com? → YES ✓', true, 'Nội bộ — không cần WAN');
+    log(1980,'srv','FPT_SERVER', '250 OK · Recipient accepted · LOCAL delivery');
+    log(2140,'cli','CLIENT_1-1', 'DATA: [headers + body + MIME]', false, 'Truyền nội dung mail');
+    log(2340,'srv','FPT_SERVER', '250 OK: Message queued → mailbox[Client_1-2]', true);
+
+    sched(() => setNode('c11','done','✓ Mail đã gửi thành công','SMTP QUIT 221'), 2400);
+    sched(() => setNode('srv','proc','Ghi vào mailbox...','Writing: Client_1-2/inbox'), 2420);
+    log(2450,'srv','FPT_SERVER', 'Writing message to /mailbox/Client_1-2/inbox');
+    log(2600,'srv','FPT_SERVER', 'Message stored successfully ✓', true);
+    sched(() => setNode('srv','done','✓ Mail đã lưu vào inbox','Mailbox: Client_1-2 — 1 new'), 2650);
+
+    /* POP3 receive */
+    sched(() => setNode('c12','proc','Kiểm tra hộp thư...','POP3 → :110'), 2750);
+    log(2800,'cli2','CLIENT_1-2', 'TCP connect → 192.168.3.100:110 (POP3)');
+    log(2950,'srv', 'FPT_SERVER', '+OK POP3 server ready · fpt.com');
+    log(3100,'cli2','CLIENT_1-2', 'USER Client_1-2  PASS ****', false, 'Đăng nhập hộp thư');
+    log(3260,'srv', 'FPT_SERVER', '+OK logged in · 1 message(s) waiting ✓', true);
+    log(3420,'cli2','CLIENT_1-2', 'STAT  →  +OK 1 512', false, 'Đếm số mail');
+    log(3580,'cli2','CLIENT_1-2', 'RETR 1  →  Downloading message...');
+    log(3780,'srv', 'FPT_SERVER', '+OK 512 octets · Sending...');
+    log(3980,'cli2','CLIENT_1-2', '✓ Mail received!  Timestamp: Tue Mar 10 2026 13:28:56', true);
+    sched(() => setNode('c12','done','✓ Nhận mail thành công','Tue Mar 10 2026 13:28:56'), 4020);
+
+    sched(() => {
+      hideStatus();
+      showStatus('✓ INTERNAL: Gửi & nhận thành công · Tue Mar 10 2026 13:28:56');
+      animating = false;
+    }, 4200);
+  }
+
+  /* ══ CROSS-DOMAIN WAN SCENARIO ══ */
+  function animateCross() {
+    if (animating) return;
+    animating = true;
+    resetUI();
+
+    buildCards([
+      { id:'c11',  icon:'💻', name:'Client_1-1',   sub:'@fpt.com' },
+      { id:'srv',  icon:'🖥',  name:'FPT Server',   sub:'192.168.3.100' },
+      { id:'wan',  icon:'📡', name:'WAN+QoS',      sub:'Serial 2Mbps', cls:'wan-proc' },
+      { id:'gsrv', icon:'🖥',  name:'Gmail Server', sub:'192.168.5.100', cls:'gsrv-proc' },
+      { id:'c21',  icon:'💻', name:'Client_2-1',   sub:'@gmail.com', cls:'gsrv-proc' },
+    ]);
+    document.getElementById('live-panel').style.display = 'block';
+    document.getElementById('proc-title').textContent = 'CROSS-WAN: Client_1-1@fpt.com → Client_2-1@gmail.com';
+    showStatus('Đang gửi liên miền: fpt.com → WAN Serial → gmail.com...');
+
+    const p = document.getElementById('packet-cross');
+    p.classList.add('active'); p.style.animation='none'; void p.offsetWidth; p.style.animation='';
+
+    /* CLIENT → FPT SERVER */
+    sched(() => setNode('c11','proc','Soạn mail...'), 0);
+    log(0,   'cli','CLIENT_1-1', 'compose: To=Client_2-1@gmail.com  Subject="Cross-domain Test"');
+    log(260, 'cli','CLIENT_1-1', 'TCP SYN → 192.168.3.100:25', false, 'Kết nối SMTP Local');
+    log(500, 'cli','CLIENT_1-1', 'TCP handshake OK ✓', true);
+
+    sched(() => setNode('srv','proc','Nhận SMTP...','tcp :25 ← Client_1-1'), 540);
+    log(560, 'srv','FPT_SERVER', '220 fpt.com ESMTP Ready');
+    log(740, 'cli','CLIENT_1-1', 'EHLO + AUTH LOGIN → 235 OK ✓', true, 'Xác thực thành công');
+    log(940, 'cli','CLIENT_1-1', 'MAIL FROM: <Client_1-1@fpt.com>');
+    log(1080,'srv','FPT_SERVER', '250 OK');
+    log(1220,'cli','CLIENT_1-1', 'RCPT TO: <Client_2-1@gmail.com>');
+
+    /* DNS LOOKUP */
+    sched(() => setNode('srv','proc','Domain check → DNS lookup...','gmail.com ≠ fpt.com!'), 1300);
+    log(1320,'srv','FPT_SERVER', 'Domain check: gmail.com ≠ fpt.com → EXTERNAL route needed', false, '⚠ Cần relay WAN');
+    log(1500,'dns','DNS_SERVER', 'Query: MX record for gmail.com?', false, 'UDP :53');
+    log(1660,'dns','DNS_SERVER', 'Response: gmail.com A 192.168.5.100 · TTL=3600 ✓', true);
+    sched(() => setNode('srv','proc','DNS OK · Chuẩn bị relay...','Route to: 192.168.5.100'), 1720);
+
+    log(1860,'cli','CLIENT_1-1', 'DATA: [headers + body]');
+    log(2020,'srv','FPT_SERVER', '250 OK · Queued for WAN relay → gmail.com ✓', true);
+    sched(() => setNode('c11','done','✓ Đã gửi đến FPT Server','SMTP QUIT 221'), 2080);
+
+    /* WAN RELAY */
+    sched(() => setNode('wan','proc','Truyền qua WAN Serial...','Phân loại gói SMTP'), 2200);
+    log(2240,'srv','FPT_SERVER', 'Opening SMTP relay → 192.168.5.100:25 via WAN');
+    log(2400,'wan','WAN_SERIAL', 'Packet classified: port=25 → class SMTP_CLASS', false, 'QoS MQC matching');
+    log(2560,'wan','WAN_SERIAL', 'Priority queue: SMTP 25% = 500Kbps guaranteed', false, 'No DROP ✓');
+    log(2720,'wan','WAN_SERIAL', 'Forwarding: DHCP_Router → Serial0 → Internet_Router');
+    log(2880,'wan','WAN_SERIAL', 'Packet delivered · latency ~12ms ✓', true);
+    sched(() => setNode('wan','done','✓ QoS OK · 0 packet drop','Latency: ~12ms'), 2920);
+
+    /* GMAIL SERVER */
+    sched(() => setNode('gsrv','proc','Nhận SMTP relay...','tcp :25 ← FPT relay'), 3000);
+    log(3040,'gsrv','GMAIL_SRV', '220 gmail.com SMTP Ready');
+    log(3200,'gsrv','GMAIL_SRV', 'EHLO relay from fpt.com · AUTH accepted ✓', true);
+    log(3380,'gsrv','GMAIL_SRV', 'RCPT TO: Client_2-1@gmail.com → LOCAL user ✓', true);
+    log(3540,'gsrv','GMAIL_SRV', 'DATA received · writing mailbox[Client_2-1]');
+    log(3700,'gsrv','GMAIL_SRV', '250 OK · Message accepted for delivery ✓', true);
+    sched(() => setNode('srv','done','✓ Relay hoàn tất','250 OK from gmail.com'), 3740);
+    sched(() => setNode('gsrv','done','✓ Mail đã lưu','Mailbox: Client_2-1 — 1 new'), 3800);
+
+    /* POP3 */
+    sched(() => setNode('c21','proc','Kiểm tra hộp thư...','POP3 → :110'), 3900);
+    log(3940,'cli2','CLIENT_2-1', 'TCP connect → 192.168.5.100:110 (POP3)');
+    log(4100,'gsrv','GMAIL_SRV',  '+OK POP3 Ready · gmail.com');
+    log(4260,'cli2','CLIENT_2-1', 'USER Client_2-1  PASS ****  →  +OK ✓', true);
+    log(4420,'cli2','CLIENT_2-1', 'STAT  →  +OK 1 520', false, '1 mail chờ nhận');
+    log(4580,'cli2','CLIENT_2-1', 'RETR 1  →  Downloading message...');
+    log(4780,'gsrv','GMAIL_SRV',  '+OK 520 octets · Sending...');
+    log(4980,'cli2','CLIENT_2-1', '✓ Mail received!  Timestamp: Tue Mar 10 2026 13:30:02', true);
+    sched(() => setNode('c21','done','✓ Nhận mail thành công','Tue Mar 10 2026 13:30:02'), 5020);
+
+    sched(() => {
+      hideStatus();
+      showStatus('✓ CROSS-WAN: Gửi & nhận thành công · Tue Mar 10 2026 13:30:02');
+      animating = false;
+    }, 5200);
+  }
+
+  /* Reset */
+  function resetUI() {
+    clearAll();
+    document.getElementById('packet-internal').classList.remove('active');
+    document.getElementById('packet-cross').classList.remove('active');
+    document.getElementById('proc-log').innerHTML = '';
+    document.getElementById('live-panel').style.display = 'none';
+    hideStatus();
+    animating = false;
+  }
+  function resetAnim() { resetUI(); }
+
+  /* BW bar */
+  window.addEventListener('load', () => { setTimeout(() => { document.getElementById('bw-smtp').style.width='25%'; }, 600); });
+  new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) document.getElementById('bw-smtp').style.width='25%'; });
+  }, { threshold:0.3 }).observe(document.getElementById('bw-smtp'));
+</script>
+</body>
+</html>

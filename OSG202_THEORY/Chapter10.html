@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương 10: I/O System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .card-animate {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-animate:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; }
+        
+        .io-layer {
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+        }
+        .io-layer:hover {
+            background-color: #eff6ff;
+            transform: translateX(10px);
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-slate-400 hidden md:flex flex-col p-8 z-50 border-r border-slate-800">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <i data-lucide="monitor-speaker" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-extrabold text-xl tracking-tight">OS Hub</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Chương 10: I/O System</p>
+            </div>
+        </div>
+        
+        <nav class="space-y-2 flex-1 overflow-y-auto">
+            <p class="text-[10px] font-bold text-slate-600 uppercase mb-4 px-3">Phần cứng & Cơ chế</p>
+            <a href="#hardware" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition active">
+                <i data-lucide="cpu" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">1. Nguyên lý Phần cứng</span>
+            </a>
+            <a href="#software" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="code" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">2. Nguyên lý Phần mềm</span>
+            </a>
+            <a href="#layers" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="layers" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">3. Các lớp phần mềm</span>
+            </a>
+            <p class="text-[10px] font-bold text-slate-600 uppercase mt-6 mb-4 px-3">Ổ đĩa & RAID</p>
+            <a href="#raid" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="database" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">4.1. Công nghệ RAID</span>
+            </a>
+            <a href="#scheduling" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="navigation" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">4.2. Lập lịch đầu đọc</span>
+            </a>
+            <a href="#reliability" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">4.3. Độ tin cậy & Lỗi</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-72 min-h-screen">
+        
+        <!-- Header -->
+        <header class="sticky top-0 glass-header z-40 p-4 px-8 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Chapter 10: I/O Principles & Disks</span>
+            </div>
+            <div class="text-slate-500 text-xs font-semibold uppercase text-right">Tiếng Việt (Chính) | English (Keywords)</div>
+        </header>
+
+        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-24">
+
+            <!-- Section 1: I/O Hardware -->
+            <section id="hardware" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-blue-100 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 1</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Nguyên lý Phần cứng I/O</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">Sự kết hợp giữa thiết bị vật lý, bộ điều khiển và các cơ chế truyền dữ liệu thông minh.</p>
+                </div>
+
+                <!-- Device Categories -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="box"></i></div>
+                            <h3 class="text-xl font-bold">Thiết bị khối (Block Devices)</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">Lưu dữ liệu trong các khối kích thước cố định (512B – 32KB). Mỗi khối có địa chỉ riêng.</p>
+                        <div class="mt-4 flex gap-2">
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500">HDD/SSD</span>
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500">CD-ROM</span>
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500">USB</span>
+                        </div>
+                    </div>
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="keyboard"></i></div>
+                            <h3 class="text-xl font-bold">Thiết bị ký tự (Character Devices)</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed">Xử lý dòng dữ liệu liên tục, không có cấu trúc khối.</p>
+                        <div class="mt-4 flex gap-2">
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500">Bàn phím</span>
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500">Chuột</span>
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-500">Máy in</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controllers & Memory-mapped -->
+                <div class="grid lg:grid-cols-3 gap-6">
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i data-lucide="circuit-board" class="w-4 h-4 text-blue-600"></i> Bộ điều khiển (Device Controllers)</h4>
+                        <p class="text-xs text-slate-600">Chip hoặc bảng mạch kết nối CPU và thiết bị. Chuyển đổi luồng bit sang khối byte và kiểm tra lỗi. Hỗ trợ IDE, SATA, USB...</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-blue-100 shadow-sm col-span-2">
+                        <h4 class="font-bold text-slate-800 mb-4">Ánh xạ I/O (I/O Mapping)</h4>
+                        <div class="grid grid-cols-2 gap-4 text-xs">
+                            <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                                <span class="font-bold block mb-1">Cổng I/O (I/O Ports)</span>
+                                Tách biệt không gian địa chỉ. Cần lệnh Assembly đặc biệt.
+                            </div>
+                            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                                <span class="font-bold block mb-1 text-emerald-700">Memory-Mapped I/O</span>
+                                Ánh xạ vào RAM. Viết Driver bằng C. Truy cập trực tiếp qua lệnh bộ nhớ.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DMA Process Section -->
+                <div class="p-10 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-600/20 blur-3xl rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-8 flex items-center gap-2">
+                        <i data-lucide="zap" class="text-blue-400"></i> Truy cập bộ nhớ trực tiếp (DMA)
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-10">
+                        <div class="space-y-4">
+                            <p class="text-sm text-slate-300 italic">"Truyền dữ liệu trực tiếp giữa thiết bị và RAM mà không cần CPU can thiệp."</p>
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold">1</span> <p class="text-xs">CPU thiết lập các thanh ghi nguồn, đích, số lượng cho DMA.</p></div>
+                                <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold">2</span> <p class="text-xs">DMA yêu cầu và truyền dữ liệu trực tiếp vào bộ nhớ.</p></div>
+                                <div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold">3</span> <p class="text-xs">Gửi tín hiệu ngắt (Interrupt) cho CPU khi hoàn tất.</p></div>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 p-6 rounded-2xl border border-white/10 space-y-4">
+                            <h4 class="text-xs font-bold uppercase text-blue-400">Chế độ hoạt động (Modes)</h4>
+                            <div class="grid grid-cols-1 gap-2 text-[11px]">
+                                <div class="p-2 bg-white/5 rounded"><strong>Cycle Stealing:</strong> "Mượn" bus từ CPU trong thời gian ngắn.</div>
+                                <div class="p-2 bg-white/5 rounded"><strong>Burst Mode:</strong> Truyền một chuỗi dữ liệu liên tục (Hiệu quả cao).</div>
+                                <div class="p-2 bg-white/5 rounded"><strong>Fly-by Mode:</strong> Truyền trực tiếp thiết bị - bộ nhớ.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: I/O Software Principles -->
+            <section id="software" class="reveal space-y-12 scroll-mt-24">
+                <div class="border-l-4 border-blue-600 pl-6">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Nguyên lý Phần mềm I/O</h2>
+                    <p class="text-slate-500 mt-2">Mục tiêu là sự độc lập thiết bị, xử lý lỗi và tính nhất quán.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Method 1: Programmed I/O -->
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="timer"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Programmed I/O</h4>
+                        <p class="text-xs text-slate-500 italic mb-4">CPU làm tất cả bằng cách "thăm dò" (polling).</p>
+                        <p class="text-xs text-rose-600 font-bold">Nhược điểm: Lãng phí CPU do phải chờ đợi liên tục.</p>
+                    </div>
+                    <!-- Method 2: Interrupt-Driven -->
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="bell-ring"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Interrupt-Driven</h4>
+                        <p class="text-xs text-slate-500 italic mb-4">CPU rảnh để làm việc khác, thiết bị ngắt khi sẵn sàng.</p>
+                        <p class="text-xs text-emerald-600 font-bold">Ưu điểm: Tận dụng CPU tốt hơn.</p>
+                    </div>
+                    <!-- Method 3: DMA I/O -->
+                    <div class="p-8 bg-blue-600 text-white rounded-3xl shadow-xl card-animate">
+                        <div class="w-12 h-12 bg-white/20 text-white rounded-2xl flex items-center justify-center mb-6"><i data-lucide="zap"></i></div>
+                        <h4 class="font-bold mb-2">I/O Using DMA</h4>
+                        <p class="text-xs text-blue-100 italic mb-4">Kết hợp ngắt và truyền dữ liệu tự động qua phần cứng.</p>
+                        <p class="text-xs text-white font-bold">Hiệu quả nhất cho khối lượng dữ liệu lớn.</p>
+                    </div>
+                </div>
+
+                <!-- Software Goals & Buffering -->
+                <div class="p-10 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
+                    <div class="grid lg:grid-cols-2 gap-10">
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-bold italic">Mục tiêu & Đặc điểm</h3>
+                            <ul class="space-y-3 text-sm text-slate-600">
+                                <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="text-blue-500 w-5 h-5"></i> <strong>Device Independence:</strong> Độc lập thiết bị.</li>
+                                <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="text-blue-500 w-5 h-5"></i> <strong>Uniform Naming:</strong> Tên gọi thống nhất (path).</li>
+                                <li class="flex items-start gap-2"><i data-lucide="check-circle-2" class="text-blue-500 w-5 h-5"></i> <strong>Sync vs Async:</strong> Đồng bộ (chặn) vs Bất đồng bộ (không chặn).</li>
+                            </ul>
+                        </div>
+                        <div class="space-y-6">
+                            <h3 class="text-xl font-bold italic">Cơ chế Đệm (Buffering)</h3>
+                            <div class="grid grid-cols-2 gap-3 text-[11px]">
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100"><strong>Double Buffering:</strong> Luân phiên vùng đệm nhận/sao.</div>
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100"><strong>Circular Buffering:</strong> Hàng đợi xoay vòng cho luồng dữ liệu.</div>
+                            </div>
+                            <p class="text-xs text-slate-400 italic">⚠️ Đệm quá nhiều gây tốn chi phí sao chép dữ liệu thừa.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: I/O Software Layers -->
+            <section id="layers" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Các lớp phần mềm I/O</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">Cấu trúc 4 lớp từ phần cứng lên đến người dùng.</p>
+                </div>
+
+                <div class="space-y-4 max-w-3xl mx-auto">
+                    <div class="io-layer p-6 bg-white rounded-2xl shadow-sm">
+                        <h4 class="font-bold text-blue-600 uppercase text-xs tracking-widest mb-1">Layer 4: User-Space Software</h4>
+                        <p class="text-sm font-bold mb-1">Thư viện I/O & Spooling</p>
+                        <p class="text-xs text-slate-500 italic">Quản lý máy in qua tiến trình daemon và hàng đợi (spool directory).</p>
+                    </div>
+                    <div class="io-layer p-6 bg-blue-50 rounded-2xl shadow-sm border-blue-200">
+                        <h4 class="font-bold text-blue-700 uppercase text-xs tracking-widest mb-1">Layer 3: Device-Independent OS Software</h4>
+                        <p class="text-sm font-bold mb-1">Giao diện thống nhất, Buffering, Error Reporting</p>
+                        <p class="text-xs text-slate-500 italic">Ánh xạ tên thiết bị đến driver, quản lý hạn mức, kích thước khối logic.</p>
+                    </div>
+                    <div class="io-layer p-6 bg-slate-800 text-white rounded-2xl shadow-lg border-slate-700">
+                        <h4 class="font-bold text-blue-400 uppercase text-xs tracking-widest mb-1">Layer 2: Device Drivers</h4>
+                        <p class="text-sm font-bold mb-1">Mã điều khiển phần cứng chuyên biệt</p>
+                        <p class="text-xs text-slate-400 italic">Do nhà sản xuất viết, phân thành Driver thiết bị khối và ký tự.</p>
+                    </div>
+                    <div class="io-layer p-6 bg-slate-900 text-white rounded-2xl shadow-lg border-slate-800">
+                        <h4 class="font-bold text-indigo-400 uppercase text-xs tracking-widest mb-1">Layer 1: Interrupt Handlers</h4>
+                        <p class="text-sm font-bold mb-1">Trình xử lý ngắt (Kernel)</p>
+                        <p class="text-xs text-slate-400 italic">Lưu trạng thái CPU, xác nhận ngắt và nạp ngữ cảnh tiến trình tiếp theo.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4.1: RAID -->
+            <section id="raid" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-indigo-100 text-indigo-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Ổ đĩa & RAID</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Công nghệ RAID (Levels 0–6)</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">Tăng hiệu năng và độ tin cậy bằng cách kết hợp nhiều đĩa vật lý.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- RAID 0 -->
+                    <div class="p-7 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center"><i data-lucide="zap"></i></div>
+                            <span class="text-[10px] font-black text-slate-300 uppercase">Level 0</span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2 italic">Striping (Phân mảnh)</h3>
+                        <p class="text-xs text-slate-500 flex-1 leading-relaxed">Ghi song song dữ liệu trên nhiều đĩa. Hiệu năng cực cao nhưng <strong>không có sao lưu</strong>.</p>
+                    </div>
+                    <!-- RAID 1 -->
+                    <div class="p-7 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center"><i data-lucide="copy"></i></div>
+                            <span class="text-[10px] font-black text-slate-300 uppercase">Level 1</span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2 italic">Mirroring (Gương)</h3>
+                        <p class="text-xs text-slate-500 flex-1 leading-relaxed">Nhân bản dữ liệu. Độ tin cậy cao, đọc nhanh nhưng ghi chậm hơn.</p>
+                    </div>
+                    <!-- RAID 5 -->
+                    <div class="p-7 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center"><i data-lucide="share-2"></i></div>
+                            <span class="text-[10px] font-black text-slate-300 uppercase">Level 5</span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2 italic">Distributed Parity</h3>
+                        <p class="text-xs text-slate-500 flex-1 leading-relaxed">Phân bổ bit chẵn lẻ đều các ổ đĩa. Cân bằng tốt nhất giữa hiệu năng và an toàn.</p>
+                    </div>
+                </div>
+
+                <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="text-blue-400 border-b border-white/10">
+                            <tr>
+                                <th class="pb-4 pr-4">RAID Level</th>
+                                <th class="pb-4 pr-4">Cơ chế</th>
+                                <th class="pb-4">Đặc điểm chính</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-slate-300">
+                            <tr class="border-b border-white/5"><td class="py-3">Level 2</td><td class="py-3 italic">Hamming Code ECC</td><td>Sửa lỗi bit, yêu cầu đồng bộ cao. Ít dùng.</td></tr>
+                            <tr class="border-b border-white/5"><td class="py-3">Level 3</td><td class="py-3 italic">Bit-Level Parity</td><td>Dùng một ổ đĩa chẵn lẻ riêng. Tốc độ dữ liệu cao.</td></tr>
+                            <tr class="border-b border-white/5"><td class="py-3">Level 4</td><td class="py-3 italic">Block-Level Parity</td><td>Ổ đĩa chẵn lẻ là nút thắt cổ chai. Chậm khi ghi nhỏ.</td></tr>
+                            <tr><td class="py-3">Level 6</td><td class="py-3 italic">Dual Parity</td><td>Hai khối chẵn lẻ. An toàn ngay cả khi hỏng 2 ổ cùng lúc.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 4.2: Disk Scheduling -->
+            <section id="scheduling" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Thuật toán Lập lịch Đầu đọc Đĩa</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">Giảm thời gian di chuyển (seek time) để tối ưu hóa hiệu suất I/O.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- FCFS & SSF -->
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                            <h4 class="font-bold text-slate-800 mb-2 italic">FCFS (First-Come, First-Served)</h4>
+                            <p class="text-xs text-slate-600">Xử lý theo thứ tự đến. Công bằng nhưng kém hiệu quả nhất vì đầu đọc di chuyển xa.</p>
+                        </div>
+                        <div class="p-6 bg-blue-600 text-white rounded-3xl shadow-lg">
+                            <h4 class="font-bold mb-2 italic">SSF (Shortest Seek First)</h4>
+                            <p class="text-xs text-blue-100 mb-2">Chọn yêu cầu gần đầu đọc nhất. Giảm tối đa di chuyển nhưng có thể gây <strong>Starvation</strong> (bỏ đói các yêu cầu ở xa).</p>
+                        </div>
+                    </div>
+                    <!-- SCAN & C-SCAN -->
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                            <h4 class="font-bold text-slate-800 mb-2 italic">SCAN (Elevator Algorithm)</h4>
+                            <p class="text-xs text-slate-600">Di chuyển theo một hướng đến khi hết yêu cầu rồi đảo chiều. Cân bằng giữa công bằng và hiệu năng.</p>
+                        </div>
+                        <div class="p-6 bg-slate-900 text-white rounded-3xl shadow-lg">
+                            <h4 class="font-bold mb-2 italic">C-SCAN (Circular SCAN)</h4>
+                            <p class="text-xs text-slate-400">Chỉ di chuyển theo một hướng. Khi đến cuối đĩa thì quay lại đầu đĩa ngay. Đảm bảo thời gian chờ đồng đều hơn.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4.3 & 4.4: Error & Stable Storage -->
+            <section id="reliability" class="reveal space-y-12 scroll-mt-24 pb-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Độ tin cậy & Stable Storage</h2>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Error Handling -->
+                    <div class="group bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500">
+                        <div class="flex items-start gap-6 mb-8">
+                            <div class="w-16 h-16 bg-rose-500 text-white rounded-3xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
+                                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold">Xử lý lỗi (Error Handling)</h3>
+                                <p class="text-rose-600 text-xs font-bold uppercase tracking-widest mt-1 italic">Bad Sectors & Seek Errors</p>
+                            </div>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex gap-4 p-4 bg-rose-50 rounded-2xl">
+                                <p class="text-sm text-rose-800"><strong>Bad Sectors:</strong> Controller ánh xạ lại (remap) sang vùng dự phòng hoặc HĐH đánh dấu bỏ qua.</p>
+                            </li>
+                            <li class="flex gap-4 p-4 bg-slate-50 rounded-2xl">
+                                <p class="text-sm text-slate-600"><strong>Seek Errors:</strong> Sai lệch cơ học đầu đọc. Controller hiện đại tự động sửa lỗi.</p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Stable Storage -->
+                    <div class="group bg-emerald-900 p-10 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
+                        <div class="absolute -left-10 -top-10 w-40 h-40 bg-emerald-500/10 blur-3xl rounded-full"></div>
+                        <div class="flex items-start gap-6 mb-8">
+                            <div class="w-16 h-16 bg-white text-emerald-900 rounded-3xl flex items-center justify-center shadow-lg group-hover:-rotate-6 transition-transform">
+                                <i data-lucide="shield-check" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold">Stable Storage</h3>
+                                <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest mt-1 italic">Atomic Write Operations</p>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm space-y-4">
+                            <p class="text-sm leading-relaxed">
+                                Đảm bảo thao tác ghi hoặc hoàn tất đúng, hoặc không thay đổi gì. Dùng hai ổ đĩa gương đồng bộ tuyệt đối.
+                            </p>
+                            <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-emerald-400">
+                                <div class="p-2 bg-white/10 rounded"><strong>Stable Write:</strong> Ghi đĩa 1 -> Kiểm tra -> Ghi đĩa 2.</div>
+                                <div class="p-2 bg-white/10 rounded"><strong>Crash Recovery:</strong> So sánh 2 ổ, lấy bản tốt đè bản lỗi.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 py-12 px-8 text-center border-t border-slate-800">
+            <div class="flex flex-col items-center gap-4">
+                <p class="text-slate-500 text-sm">Hệ thống hóa Chương 10 • I/O System • 2024</p>
+                <div class="flex gap-4 text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                    <span>Hardware Principles</span>
+                    <span class="text-blue-600">•</span>
+                    <span>Software Layers</span>
+                    <span class="text-blue-600">•</span>
+                    <span>RAID & Reliability</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Sidebar highlight logic
+        const links = document.querySelectorAll('.sidebar-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if (pageYOffset >= s.offsetTop - 150) current = s.getAttribute('id');
+            });
+            links.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href').includes(current)) l.classList.add('active');
+            });
+        });
+
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
+        }, { threshold: 0.1 });
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

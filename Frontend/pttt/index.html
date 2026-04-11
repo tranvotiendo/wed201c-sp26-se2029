@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài Kiểm Tra: Phương Trình Tiếp Tuyến</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Your Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <header class="app-header">
+            <button class="back-btn"><i class="fa-solid fa-chevron-left"></i> Quay lại</button>
+            <div class="student-info">Thí sinh: Trần Võ Tiến Đô</div>
+            <div class="header-controls">
+                <button class="submit-all-btn"><i class="fa-solid fa-check-to-slot"></i> Nộp bài</button>
+            </div>
+        </header>
+        
+        <div class="app-container">
+            <!-- Main Content (Left Side) -->
+            <main class="main-content">
+                <div class="quiz-area">
+                    <h2>Phần I: Kiến Thức Về Phương Trình Tiếp Tuyến</h2>
+                    <div class="question-card">
+                        <h3 id="question-number">Câu 1</h3>
+                        <p id="question-text">Câu hỏi sẽ được hiển thị ở đây.</p>
+                        
+                        <div class="answer-area">
+                            <!-- Container cho câu hỏi tính toán -->
+                            <div id="calculation-answer-container">
+                                <p class="answer-prompt">
+                                    Viết phương trình tiếp tuyến dưới dạng <strong>y = mx + c</strong>. Vui lòng nhập đáp án.
+                                </p>
+                                <div class="answer-inputs">
+                                    <div class="input-group">
+                                        <label for="m-input">m =</label>
+                                        <input type="number" id="m-input" step="any" placeholder="Hệ số góc">
+                                    </div>
+                                    <div class="input-group">
+                                        <label for="c-input">c =</label>
+                                        <input type="number" id="c-input" step="any" placeholder="Hệ số tự do">
+                                    </div>
+                                </div>
+                                <button id="submit-calc-btn">Kiểm tra</button>
+                            </div>
+
+                            <!-- Container cho câu hỏi lý thuyết -->
+                            <div id="theory-answer-container" class="hidden">
+                                <!-- Các nút đáp án sẽ được tạo bằng JS -->
+                            </div>
+                        </div>
+
+                        <div id="feedback-container"></div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button id="prev-btn" disabled><i class="fa-solid fa-arrow-left"></i> Câu trước</button>
+                        <button id="next-btn">Câu sau <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Question List Sidebar (Right Side) -->
+            <aside class="question-sidebar">
+                <h3>Danh sách câu hỏi</h3>
+                <div id="question-grid" class="question-grid">
+                    <!-- Các nút số câu hỏi sẽ được tạo bằng JS -->
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Modal hiển thị kết quả -->
+    <div id="result-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Kết quả bài làm</h2>
+            <p id="score-text">Bạn đã trả lời đúng 0/15 câu.</p>
+            <button id="restart-btn">Làm lại từ đầu</button>
+        </div>
+    </div>
+
+    <!-- Âm thanh tương tác -->
+    <audio id="correct-sound" src="correct.mp3"></audio>
+    <audio id="incorrect-sound" src="wrong.mp3"></audio>
+
+    <!-- MathJax for rendering formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- Your Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>

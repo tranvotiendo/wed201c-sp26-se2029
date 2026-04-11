@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương 11: Clocks, UI & Power Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        .card-animate {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-animate:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; }
+        
+        .battery-level {
+            transition: width 1s ease-in-out, background-color 0.5s ease;
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-slate-400 hidden md:flex flex-col p-8 z-50 border-r border-slate-800">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <i data-lucide="clock" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-extrabold text-xl tracking-tight">OS Hub</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Chương 11: Clocks & UI</p>
+            </div>
+        </div>
+        
+        <nav class="space-y-2 flex-1 overflow-y-auto">
+            <p class="text-[10px] font-bold text-slate-600 uppercase mb-4 px-3">Thời gian & Hệ thống</p>
+            <a href="#clocks" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition active">
+                <i data-lucide="timer" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">1. Đồng hồ (Clocks)</span>
+            </a>
+            <a href="#ui" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="mouse-pointer-2" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">2. Giao diện (UI)</span>
+            </a>
+            <p class="text-[10px] font-bold text-slate-600 uppercase mt-6 mb-4 px-3">Máy trạm & Năng lượng</p>
+            <a href="#thin-clients" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="monitor" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">3. Máy trạm mỏng</span>
+            </a>
+            <a href="#power" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="battery-charging" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">4. Quản lý điện năng</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-72 min-h-screen">
+        
+        <!-- Header -->
+        <header class="sticky top-0 glass-header z-40 p-4 px-8 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-violet-600 uppercase tracking-widest bg-violet-50 px-3 py-1 rounded-full">Chapter 11: Clocks, UI & Thin Power</span>
+            </div>
+            <div class="text-slate-500 text-xs font-semibold uppercase text-right">Tiếng Việt (Chính) | English (Keywords)</div>
+        </header>
+
+        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-24">
+
+            <!-- Section 1: Clocks -->
+            <section id="clocks" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-violet-100 text-violet-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 1</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Đồng hồ (Clocks / Timers)</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">Thành phần thiết yếu để duy trì thời gian và quản lý đa chương trình.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Clock Hardware -->
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-violet-600">
+                            <i data-lucide="cpu"></i> Cấu tạo phần cứng
+                        </h3>
+                        <div class="flex flex-col items-center gap-4 mb-6">
+                            <div class="flex gap-2 w-full">
+                                <div class="flex-1 p-3 bg-violet-50 rounded-xl text-center border border-violet-100">
+                                    <p class="text-[10px] font-black uppercase text-violet-400">Oscillator</p>
+                                    <p class="text-xs font-bold">Bộ dao động</p>
+                                </div>
+                                <div class="flex-1 p-3 bg-violet-50 rounded-xl text-center border border-violet-100">
+                                    <p class="text-[10px] font-black uppercase text-violet-400">Counter</p>
+                                    <p class="text-xs font-bold">Bộ đếm</p>
+                                </div>
+                                <div class="flex-1 p-3 bg-violet-50 rounded-xl text-center border border-violet-100">
+                                    <p class="text-[10px] font-black uppercase text-violet-400">Register</p>
+                                    <p class="text-xs font-bold">Thanh ghi</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500 italic leading-relaxed">Tạo ngắt (Interrupt) tại 50-60 Hz hoặc hàng trăm MHz tùy hệ thống.</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-50 rounded-2xl">
+                                <span class="font-bold block text-sm mb-1 italic">One-shot mode</span>
+                                <p class="text-[11px] text-slate-500 italic">Dừng sau 1 lần ngắt cho đến khi kích hoạt lại.</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-2xl">
+                                <span class="font-bold block text-sm mb-1 italic">Square-wave mode</span>
+                                <p class="text-[11px] text-slate-500 italic">Tự động nạp lại và lặp lại liên tục.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clock Software Duties -->
+                    <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-violet-600/20 blur-3xl rounded-full"></div>
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i data-lucide="clipboard-list" class="text-violet-400"></i> Nhiệm vụ phần mềm
+                        </h3>
+                        <ul class="space-y-3 text-sm">
+                            <li class="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                                <i data-lucide="check" class="w-4 h-4 text-violet-400"></i>
+                                <span>Duy trì giờ hệ thống (Real-time clock).</span>
+                            </li>
+                            <li class="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                                <i data-lucide="check" class="w-4 h-4 text-violet-400"></i>
+                                <span>Ngăn chiếm CPU (Process overrun / Quantum).</span>
+                            </li>
+                            <li class="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                                <i data-lucide="check" class="w-4 h-4 text-violet-400"></i>
+                                <span>Xử lý báo thức (Alarms) & Watchdog timers.</span>
+                            </li>
+                            <li class="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10">
+                                <i data-lucide="check" class="w-4 h-4 text-violet-400"></i>
+                                <span>Thống kê hiệu năng (Profiling).</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Soft Timers -->
+                <div class="p-10 bg-violet-50 rounded-[2.5rem] border border-violet-100 flex flex-col md:flex-row gap-8 items-center">
+                    <div class="flex-1 space-y-4 text-center md:text-left">
+                        <h3 class="text-xl font-bold text-violet-900 italic">Bộ định thời mềm (Soft Timers)</h3>
+                        <p class="text-sm text-violet-800 leading-relaxed">
+                            Lập lịch sự kiện độ chính xác microgiây mà <strong>không cần ngắt thường xuyên</strong>. Kernel kiểm tra khi đang chạy (System calls / Page faults), tránh chuyển ngữ cảnh (context switches) thừa.
+                        </p>
+                    </div>
+                    <div class="w-full md:w-64 p-6 bg-white rounded-2xl shadow-sm border border-violet-200 text-center">
+                        <i data-lucide="zap" class="w-12 h-12 text-violet-500 mx-auto mb-4"></i>
+                        <p class="text-xs font-bold uppercase tracking-widest text-violet-400">Efficiency Gain</p>
+                        <p class="text-lg font-black text-violet-600">+ High Precision</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: User Interfaces -->
+            <section id="ui" class="reveal space-y-12 scroll-mt-24">
+                <div class="border-l-4 border-blue-600 pl-6">
+                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest">Giao tiếp</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Giao diện người dùng (User Interfaces)</h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Keyboard & Mouse -->
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                            <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2 italic"><i data-lucide="keyboard" class="text-blue-500"></i> Bàn phím (Keyboard Software)</h4>
+                            <p class="text-sm text-slate-500 mb-4">Nhận <strong>Scan codes</strong> và giải mã (hoa, thường, tổ hợp phím).</p>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-3 bg-blue-50 rounded-xl border border-blue-100">
+                                    <span class="font-bold block text-xs mb-1">Raw Mode</span>
+                                    <p class="text-[10px] text-blue-800">Gửi thẳng dữ liệu thô lên chương trình.</p>
+                                </div>
+                                <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+                                    <span class="font-bold block text-xs mb-1">Cooked Mode</span>
+                                    <p class="text-[10px] text-emerald-800">Hỗ trợ biên tập dòng (editing) trước khi gửi.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                            <h4 class="font-bold text-slate-800 mb-4 flex items-center gap-2 italic"><i data-lucide="mouse-pointer-2" class="text-indigo-500"></i> Chuột (Mouse Software)</h4>
+                            <p class="text-sm text-slate-500 leading-relaxed italic">
+                                Báo thay đổi tương đối (Δx, Δy) qua đơn vị <strong>Mickey</strong> (~0.1 mm). Tần suất ~40 Hz. Nhấn đúp được xử lý qua thời gian (software timing).
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Output & GUI -->
+                    <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-xl space-y-8">
+                        <div>
+                            <h4 class="text-xl font-bold mb-4 flex items-center gap-2 text-blue-400">Đồ họa & GUI (WIMP)</h4>
+                            <p class="text-sm text-slate-400 mb-4 italic leading-relaxed">
+                                Mô hình: <strong>W</strong>indows, <strong>I</strong>cons, <strong>M</strong>enus, <strong>P</strong>ointing device.
+                            </p>
+                            <div class="space-y-3">
+                                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-4">
+                                    <div class="p-2 bg-blue-500 rounded-lg"><i data-lucide="layout"></i></div>
+                                    <p class="text-xs italic"><strong>X Window System:</strong> Tách biệt X Server (Local) và X Client (Remote).</p>
+                                </div>
+                                <div class="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-4">
+                                    <div class="p-2 bg-emerald-500 rounded-lg"><i data-lucide="type"></i></div>
+                                    <p class="text-xs italic"><strong>Fonts:</strong> Bitmap (cố định) vs TrueType (Scalable outlines - Chất lượng cao).</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-blue-900/30 rounded-2xl border border-blue-500/30">
+                            <p class="text-xs text-blue-200">
+                                <strong>Termcap (UNIX):</strong> Dịch mã điều khiển chung sang lệnh thiết bị cụ thể.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Thin Clients -->
+            <section id="thin-clients" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Hệ thống Máy trạm mỏng (Thin Clients)</h2>
+                    <p class="text-slate-500 italic">"Chuyển mọi tính toán lên máy chủ, máy khách chỉ để hiển thị."</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+                        <div class="flex items-start gap-4">
+                            <i data-lucide="server" class="text-blue-600"></i>
+                            <div>
+                                <h4 class="font-bold">THINC System</h4>
+                                <p class="text-sm text-slate-500 leading-relaxed italic">Máy chủ chặn lệnh đồ họa, tối ưu và sắp xếp lại trước khi gửi qua mạng.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-emerald-50 text-emerald-800 rounded-2xl">
+                                <span class="font-bold block text-xs uppercase mb-1">Ưu điểm</span>
+                                <ul class="text-[10px] space-y-1">
+                                    <li>• Bảo trì dễ dàng.</li>
+                                    <li>• Chi phí thấp.</li>
+                                    <li>• Bảo mật cao.</li>
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-rose-50 text-rose-800 rounded-2xl">
+                                <span class="font-bold block text-xs uppercase mb-1">Nhược điểm</span>
+                                <ul class="text-[10px] space-y-1">
+                                    <li>• Cần mạng tốc độ cao.</li>
+                                    <li>• Phụ thuộc máy chủ.</li>
+                                    <li>• Không chạy offline.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative h-64 bg-slate-100 rounded-[2.5rem] border-2 border-dashed border-slate-300 flex items-center justify-center p-8 text-center">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-center gap-10">
+                                <div class="flex flex-col items-center"><i data-lucide="server" class="w-12 h-12 text-blue-500"></i><p class="text-[10px] font-bold">SERVER</p></div>
+                                <div class="flex-1 h-1 bg-gradient-to-r from-blue-500 to-indigo-400 relative">
+                                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-bold uppercase">Display Update Commands</div>
+                                </div>
+                                <div class="flex flex-col items-center"><i data-lucide="monitor" class="w-12 h-12 text-indigo-400"></i><p class="text-[10px] font-bold">CLIENT</p></div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 italic">Mô hình kiến trúc Thin Client</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Power Management -->
+            <section id="power" class="reveal space-y-12 scroll-mt-24 pb-20">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-emerald-100 text-emerald-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 4</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Quản lý điện năng (Power Management)</h2>
+                    <p class="text-slate-500 italic">"Cân bằng giữa hiệu năng và thời lượng pin."</p>
+                </div>
+
+                <!-- Interactive Battery Simulation -->
+                <div class="p-10 bg-emerald-900 text-white rounded-[2.5rem] shadow-2xl space-y-10">
+                    <div class="flex justify-between items-end">
+                        <div class="space-y-1">
+                            <h3 class="text-2xl font-bold italic">Bảng điều khiển năng lượng</h3>
+                            <p class="text-emerald-300 text-xs italic">Mô phỏng tác động của quản lý năng lượng hệ điều hành.</p>
+                        </div>
+                        <div class="w-20 h-10 border-2 border-emerald-400 rounded-lg p-1 relative">
+                            <div id="battery-bar" class="battery-level h-full bg-emerald-400 rounded-sm" style="width: 100%"></div>
+                            <div class="absolute -right-2 top-2 w-2 h-4 bg-emerald-400 rounded-r-sm"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition cursor-pointer" onclick="togglePower('screen')">
+                            <i data-lucide="monitor" class="mb-3 text-emerald-400"></i>
+                            <h4 class="font-bold text-sm">Màn hình</h4>
+                            <p class="text-[10px] text-slate-400 leading-relaxed italic">Tốn điện nhất. Làm mờ hoặc chia vùng sáng (Snap-to-zone).</p>
+                        </div>
+                        <div class="p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition cursor-pointer" onclick="togglePower('disk')">
+                            <i data-lucide="hard-drive" class="mb-3 text-emerald-400"></i>
+                            <h4 class="font-bold text-sm">Ổ đĩa</h4>
+                            <p class="text-[10px] text-slate-400 leading-relaxed italic">Dừng quay (spin down) khi idle. Dùng RAM cache giảm số lần bật.</p>
+                        </div>
+                        <div class="p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition cursor-pointer" onclick="togglePower('cpu')">
+                            <i data-lucide="zap" class="mb-3 text-emerald-400"></i>
+                            <h4 class="font-bold text-sm">CPU</h4>
+                            <p class="text-[10px] text-slate-400 leading-relaxed italic">Giảm điện áp (voltage²) & tốc độ xung nhịp (clock speed).</p>
+                        </div>
+                        <div class="p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition cursor-pointer" onclick="togglePower('radio')">
+                            <i data-lucide="wifi" class="mb-3 text-emerald-400"></i>
+                            <h4 class="font-bold text-sm">Wireless</h4>
+                            <p class="text-[10px] text-slate-400 leading-relaxed italic">Tắt bộ thu phát khi không dùng. Trạm gốc lưu tin nhắn tạm.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8 text-sm">
+                        <div class="p-6 bg-white/10 rounded-3xl space-y-3">
+                            <h4 class="font-bold flex items-center gap-2"><i data-lucide="info"></i> Trạng thái phần cứng</h4>
+                            <ul class="text-xs space-y-2 italic text-emerald-100">
+                                <li>• <strong>Sleep:</strong> Giảm điện năng cho nghỉ ngắn.</li>
+                                <li>• <strong>Hibernate:</strong> Lưu trạng thái xuống đĩa và tắt hẳn.</li>
+                                <li>• <strong>ACPI:</strong> Chuẩn HĐH điều khiển năng lượng driver.</li>
+                            </ul>
+                        </div>
+                        <div class="p-6 bg-emerald-800/50 rounded-3xl space-y-3 border border-emerald-700">
+                            <h4 class="font-bold flex items-center gap-2"><i data-lucide="thermometer"></i> Thermal Management</h4>
+                            <p class="text-[11px] leading-relaxed italic">
+                                Theo dõi nhiệt độ: Bật quạt, giảm độ sáng màn hình, hoặc làm chậm CPU để tránh quá nhiệt và tiết kiệm điện.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 py-12 px-8 text-center border-t border-slate-800">
+            <div class="flex flex-col items-center gap-4">
+                <p class="text-slate-500 text-sm">Hệ thống hóa Chương 11 • 2024</p>
+                <div class="flex gap-4 text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                    <span>Precision Timers</span>
+                    <span class="text-violet-600">•</span>
+                    <span>WIMP Interface</span>
+                    <span class="text-violet-600">•</span>
+                    <span>Energy Efficiency</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Battery Simulation Logic
+        let battery = 100;
+        const bar = document.getElementById('battery-bar');
+        
+        function togglePower(type) {
+            battery = Math.max(0, battery - 15);
+            bar.style.width = battery + '%';
+            if (battery < 20) bar.style.backgroundColor = '#f43f5e';
+            else if (battery < 50) bar.style.backgroundColor = '#f59e0b';
+            
+            if (battery === 0) {
+                setTimeout(() => {
+                    battery = 100;
+                    bar.style.width = '100%';
+                    bar.style.backgroundColor = '#34d399';
+                }, 2000);
+            }
+        }
+
+        // Sidebar highlight logic
+        const links = document.querySelectorAll('.sidebar-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if (pageYOffset >= s.offsetTop - 150) current = s.getAttribute('id');
+            });
+            links.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href').includes(current)) l.classList.add('active');
+            });
+        });
+
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
+        }, { threshold: 0.1 });
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Hình OSI & Từ Điển Mạng Máy Tính</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Animation utilities */
+        .layer-box { transition: all 0.3s ease; }
+        .layer-active { transform: scale(1.05); box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5); border-color: #3b82f6; background-color: #eff6ff; }
+        
+        .packet {
+            transition: all 0.8s ease-in-out;
+            position: absolute;
+            z-index: 50;
+        }
+
+        .device-active {
+            animation: pulse-glow 1s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            50% { box-shadow: 0 0 20px 5px rgba(59, 130, 246, 0); }
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <!-- Header & Navigation -->
+    <header class="bg-slate-900 text-white shadow-lg z-10">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-network-wired text-blue-400 text-2xl"></i>
+                <h1 class="text-xl font-bold uppercase tracking-wide">Computer Networks <span class="text-blue-400 font-light">OSI Simulator</span></h1>
+            </div>
+            <nav class="flex gap-2 bg-slate-800 p-1 rounded-lg">
+                <button onclick="switchTab('osi')" id="tab-osi" class="px-4 py-2 rounded-md font-medium text-sm transition-colors bg-blue-600 text-white">
+                    <i class="fas fa-layer-group mr-2"></i>Mô hình OSI & Hoạt ảnh
+                </button>
+                <button onclick="switchTab('terms')" id="tab-terms" class="px-4 py-2 rounded-md font-medium text-sm transition-colors text-slate-300 hover:text-white hover:bg-slate-700">
+                    <i class="fas fa-book mr-2"></i>Từ điển Thuật ngữ
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-hidden relative">
+        
+        <!-- ==================== TAB 1: OSI SIMULATOR ==================== -->
+        <section id="osi" class="tab-content active h-full p-6 overflow-y-auto">
+            <div class="container mx-auto max-w-7xl h-full flex flex-col gap-6">
+                
+                <!-- Controls -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Quá trình Đóng gói & Truyền tải (Encapsulation)</h2>
+                        <p class="text-sm text-slate-500">Mô phỏng dữ liệu đi từ Máy A (Nguồn) sang Máy B (Đích)</p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="startSimulation()" id="btn-start" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium shadow-md transition-colors flex items-center gap-2">
+                            <i class="fas fa-play"></i> Bắt đầu gửi dữ liệu
+                        </button>
+                        <button onclick="resetSimulation()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg font-medium transition-colors">
+                            <i class="fas fa-undo"></i> Làm lại
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Simulation Canvas -->
+                <div class="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex relative overflow-hidden min-h-[500px]">
+                    
+                    <!-- Left: PC A (Sender) -->
+                    <div class="w-1/4 flex flex-col justify-between items-center relative z-10">
+                        <div class="text-center mb-2">
+                            <i class="fas fa-desktop text-4xl text-slate-700"></i>
+                            <h3 class="font-bold mt-2">Máy A (Nguồn)</h3>
+                        </div>
+                        <div class="w-full flex flex-col-reverse gap-1" id="stack-A">
+                            <!-- Layers generated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Middle: Network Path -->
+                    <div class="w-2/4 flex items-end justify-center pb-8 relative z-0">
+                        <!-- Path Line -->
+                        <div class="absolute bottom-12 w-full h-1 bg-slate-300"></div>
+                        
+                        <!-- Network Devices -->
+                        <div class="w-full flex justify-around absolute bottom-8">
+                            <div class="flex flex-col items-center" id="device-sw1">
+                                <div class="w-12 h-8 bg-slate-700 rounded flex items-center justify-center text-white text-xs mb-1"><i class="fas fa-exchange-alt"></i></div>
+                                <span class="text-xs font-bold text-slate-600">Switch 1</span>
+                                <span class="text-[10px] text-slate-400">Lớp 2 (MAC)</span>
+                            </div>
+                            <div class="flex flex-col items-center" id="device-router">
+                                <div class="w-10 h-10 bg-blue-800 rounded-full flex items-center justify-center text-white text-sm mb-1"><i class="fas fa-arrows-alt"></i></div>
+                                <span class="text-xs font-bold text-slate-600">Router</span>
+                                <span class="text-[10px] text-slate-400">Lớp 3 (IP)</span>
+                            </div>
+                            <div class="flex flex-col items-center" id="device-sw2">
+                                <div class="w-12 h-8 bg-slate-700 rounded flex items-center justify-center text-white text-xs mb-1"><i class="fas fa-exchange-alt"></i></div>
+                                <span class="text-xs font-bold text-slate-600">Switch 2</span>
+                                <span class="text-[10px] text-slate-400">Lớp 2 (MAC)</span>
+                            </div>
+                        </div>
+
+                        <!-- The Packet (Moving Object) -->
+                        <div id="the-packet" class="packet hidden flex items-center justify-center bg-blue-100 border-2 border-blue-500 rounded px-3 py-2 shadow-lg text-xs font-mono font-bold text-blue-800">
+                            DATA
+                        </div>
+                    </div>
+
+                    <!-- Right: PC B (Receiver) -->
+                    <div class="w-1/4 flex flex-col justify-between items-center relative z-10">
+                        <div class="text-center mb-2">
+                            <i class="fas fa-server text-4xl text-slate-700"></i>
+                            <h3 class="font-bold mt-2">Máy B (Đích)</h3>
+                        </div>
+                        <div class="w-full flex flex-col-reverse gap-1" id="stack-B">
+                            <!-- Layers generated by JS -->
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- Info Panel -->
+                <div class="bg-blue-50 p-5 rounded-xl border border-blue-100 shadow-inner min-h-[120px]">
+                    <h3 class="font-bold text-blue-800 mb-2" id="info-title">Trạng thái hệ thống</h3>
+                    <p class="text-slate-700 text-sm leading-relaxed" id="info-desc">Nhấn "Bắt đầu gửi dữ liệu" để xem quá trình Encapsulation (đóng gói) từ Tầng 7 xuống Tầng 1, truyền qua các thiết bị mạng, và De-encapsulation (mở gói) tại máy đích.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: TERMINOLOGY ==================== -->
+        <section id="terms" class="tab-content h-full bg-white">
+            <div class="flex h-full">
+                <!-- Sidebar Chapters -->
+                <div class="w-1/4 border-r border-slate-200 bg-slate-50 overflow-y-auto p-4">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 px-2">Danh mục Chương</h2>
+                    <ul class="space-y-1" id="chapter-list">
+                        <!-- Chapters generated by JS -->
+                    </ul>
+                </div>
+                <!-- Term Content -->
+                <div class="w-3/4 p-8 overflow-y-auto bg-white" id="term-content">
+                    <div class="text-center mt-20 text-slate-400">
+                        <i class="fas fa-book-open text-6xl mb-4 text-slate-200"></i>
+                        <h2 class="text-2xl font-medium text-slate-500">Chọn một chương bên trái để xem thuật ngữ</h2>
+                        <p class="mt-2 text-sm">Toàn bộ thuật ngữ được trích xuất từ tài liệu lý thuyết.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // ==========================================
+        // DATA DEFINITIONS (From Provided Documents)
+        // ==========================================
+
+        const osiLayers = [
+            { id: 1, name: "Physical", vi: "Vật lý", pdu: "Bits", 
+              desc: "Truyền bit nhị phân (0, 1) qua môi trường vật lý (cáp đồng, cáp quang, sóng vô tuyến). Quy định đầu nối, điện áp. Thiết bị: Hub, Cáp." },
+            { id: 2, name: "Data Link", vi: "Liên kết dữ liệu", pdu: "Frame", 
+              desc: "Đóng gói dữ liệu thành Khung (Frame), gán địa chỉ MAC nguồn/đích, kiểm soát truy cập môi trường (CSMA/CD) và phát hiện lỗi (FCS). Thiết bị: Switch L2." },
+            { id: 3, name: "Network", vi: "Mạng", pdu: "Packet", 
+              desc: "Định địa chỉ logic (IP) và định tuyến (Routing) chọn đường đi tốt nhất cho gói tin (Packet) từ nguồn đến đích qua nhiều mạng. Thiết bị: Router." },
+            { id: 4, name: "Transport", vi: "Vận chuyển", pdu: "Segment", 
+              desc: "Vận chuyển dữ liệu, cung cấp độ tin cậy bằng TCP (có kết nối, bắt tay 3 bước, ACK) hoặc tốc độ bằng UDP. Sử dụng Port number để phân biệt ứng dụng." },
+            { id: 5, name: "Session", vi: "Phiên", pdu: "Data", 
+              desc: "Quản lý phiên làm việc giữa các ứng dụng (thiết lập, duy trì, đồng bộ và kết thúc phiên giao tiếp)." },
+            { id: 6, name: "Presentation", vi: "Trình bày", pdu: "Data", 
+              desc: "Đảm bảo dữ liệu có thể đọc được cho ứng dụng. Chịu trách nhiệm định dạng, mã hóa (TLS/SSL) và nén dữ liệu." },
+            { id: 7, name: "Application", vi: "Ứng dụng", pdu: "Data", 
+              desc: "Cung cấp giao diện mạng cho các ứng dụng của người dùng. Các giao thức: HTTP, HTTPS, FTP, SMTP, DNS." }
+        ];
+
+        const termsData = {
+            "Chương 1: Mạng máy tính ngày nay": [
+                { term: "Thiết bị đầu cuối (End Device)", desc: "Điểm tạo ra hoặc tiêu thụ dữ liệu trên mạng, ví dụ: PC, laptop, smartphone. Đóng vai trò Máy khách (Client) hoặc Máy chủ (Server)." },
+                { term: "Thiết bị trung gian (Intermediary Device)", desc: "Thiết bị chuyển tiếp, điều khiển hoặc lọc lưu lượng giữa các host/mạng: switch, router, firewall." },
+                { term: "Phương tiện truyền (Network Media)", desc: "Con đường vật lý/vô tuyến để dữ liệu di chuyển: cáp đồng xoắn đôi (UTP), cáp quang, sóng vô tuyến." },
+                { term: "Mạng LAN / WAN", desc: "LAN (Local Area Network): mạng cục bộ băng thông cao. WAN (Wide Area Network): kết nối các LAN cách xa địa lý qua nhà cung cấp dịch vụ." },
+                { term: "Intranet / Extranet", desc: "Intranet: mạng riêng nội bộ tổ chức. Extranet: mạng cho phép đối tác/nhà cung cấp truy cập an toàn." },
+                { term: "Băng thông (Bandwidth)", desc: "Dung lượng mang dữ liệu tối đa lý thuyết của đường truyền (bit/s)." },
+                { term: "Thông lượng (Throughput) & Goodput", desc: "Throughput: Lượng dữ liệu thực tế truyền thành công. Goodput: Lượng dữ liệu hữu ích (trừ overhead và gói lỗi)." },
+                { term: "QoS (Quality of Service)", desc: "Cơ chế ưu tiên và đảm bảo hiệu năng cho lưu lượng quan trọng (thoại/video)." },
+                { term: "Khả năng chịu lỗi (Fault Tolerance)", desc: "Tính chất mạng tiếp tục hoạt động khi một phần hạ tầng gặp sự cố nhờ cấu trúc dự phòng." }
+            ],
+            "Chương 2: Cấu hình cơ bản": [
+                { term: "Cisco IOS", desc: "Hệ điều hành mạng của thiết bị Cisco. Truy cập qua Console (cáp trực tiếp) hoặc VTY (từ xa qua SSH/Telnet)." },
+                { term: "User EXEC / Privileged EXEC", desc: "Chế độ User (>) xem cơ bản. Chế độ Privileged (#) dùng để xem chi tiết, lưu cấu hình. Truy cập bằng lệnh 'enable'." },
+                { term: "Global Configuration Mode", desc: "Chế độ cấu hình toàn cục (config)# để thiết lập các thông số thay đổi toàn thiết bị." },
+                { term: "Running-config / Startup-config", desc: "Running: Cấu hình đang chạy trên RAM (mất khi tắt). Startup: Cấu hình lưu trong NVRAM (giữ lại khi khởi động)." },
+                { term: "SVI (Switch Virtual Interface)", desc: "Giao diện ảo (thường là VLAN 1) được gán IP để quản trị switch từ xa." }
+            ],
+            "Chương 3: Giao thức & Mô hình": [
+                { term: "Protocol (Giao thức)", desc: "Bộ quy tắc xác định cách thức dữ liệu được định dạng, truyền tải và xử lý (cú pháp, ngữ nghĩa, thời gian)." },
+                { term: "PDU (Protocol Data Unit)", desc: "Đơn vị dữ liệu ở mỗi tầng. Tầng 7-5: Data, Tầng 4: Segment/Datagram, Tầng 3: Packet, Tầng 2: Frame, Tầng 1: Bits." },
+                { term: "Mô hình TCP/IP", desc: "Mô hình thực tế của Internet gồm 4 tầng: Application, Transport, Internet, Network Access." },
+                { term: "Đóng gói (Encapsulation)", desc: "Quá trình thêm header/trailer vào dữ liệu khi đi từ tầng trên xuống tầng dưới." },
+                { term: "Tổ chức chuẩn hóa", desc: "IETF (chuẩn TCP/IP), IEEE (chuẩn Ethernet/Wifi 802.x), ISO (mô hình OSI), ITU-T." }
+            ],
+            "Chương 4: Tầng Vật lý": [
+                { term: "Mã hóa tín hiệu (Encoding)", desc: "Chuyển đổi dãy bit thành tín hiệu cụ thể (điện áp, ánh sáng, sóng) để truyền." },
+                { term: "UTP / STP Cable", desc: "Cáp đồng xoắn đôi. UTP không bọc chống nhiễu (phổ biến nhất). STP có bọc kim loại chống nhiễu." },
+                { term: "Cáp quang (Fiber-optic)", desc: "Truyền dữ liệu bằng xung ánh sáng. SMF (Single-mode) truyền xa. MMF (Multimode) truyền ngắn, băng thông lớn." },
+                { term: "EMI / RFI", desc: "Nhiễu điện từ (EMI) và Nhiễu tần số vô tuyến (RFI) gây ảnh hưởng tín hiệu trên cáp đồng." }
+            ],
+            "Chương 5: Hệ thống số": [
+                { term: "Hệ nhị phân (Binary)", desc: "Cơ số 2 (0,1). Máy tính xử lý dữ liệu nhị phân. 1 Byte = 8 bits." },
+                { term: "Hệ thập lục phân (Hexadecimal)", desc: "Cơ số 16 (0-9, A-F). Dùng để biểu diễn địa chỉ MAC (48 bit) và IPv6 (128 bit) cho gọn." }
+            ],
+            "Chương 6: Tầng Liên kết dữ liệu": [
+                { term: "Địa chỉ MAC", desc: "Địa chỉ vật lý 48 bit (6 byte) gán cố định cho Card mạng (NIC). Nửa đầu là OUI của nhà sản xuất." },
+                { term: "CSMA/CD & CSMA/CA", desc: "CSMA/CD: Kiểm soát truy cập phát hiện va chạm (Ethernet cũ). CSMA/CA: Tránh va chạm (Wi-Fi)." },
+                { term: "Half-duplex / Full-duplex", desc: "Half: Truyền/nhận luân phiên (Hub). Full: Truyền/nhận đồng thời không va chạm (Switch)." },
+                { term: "LLC và MAC sublayers", desc: "LLC xác định giao thức lớp mạng (IP). MAC xác định địa chỉ vật lý và truy cập môi trường." }
+            ],
+            "Chương 7: Chuyển mạch Ethernet": [
+                { term: "Bảng địa chỉ MAC (MAC Table)", desc: "Switch học địa chỉ MAC nguồn từ khung đi vào và lưu ánh xạ MAC - Cổng để chuyển tiếp." },
+                { term: "Collision Domain", desc: "Miền va chạm. Switch phân chia collision domain trên mỗi cổng, loại bỏ va chạm (full-duplex)." },
+                { term: "Broadcast Domain", desc: "Miền quảng bá. Toàn bộ thiết bị nhận khung Broadcast (FF:FF:FF:FF:FF:FF). Router dùng để chia cắt miền này." },
+                { term: "Flooding", desc: "Hành động Switch gửi khung ra tất cả các cổng (trừ cổng nhận) khi không biết địa chỉ MAC đích." }
+            ],
+            "Chương 8: Tầng Mạng": [
+                { term: "IPv4 / IPv6 Address", desc: "IPv4: 32 bit (dạng thập phân chấm). IPv6: 128 bit (dạng Hexa, giải quyết cạn kiệt IP)." },
+                { term: "Connectionless / Best-effort", desc: "Đặc tính của IP: Không thiết lập kết nối trước, không đảm bảo dữ liệu đến đích." },
+                { term: "Bảng định tuyến (Routing Table)", desc: "Cơ sở dữ liệu trên Router chứa các mạng đích và hướng đi (next-hop/interface)." },
+                { term: "Default Gateway", desc: "Địa chỉ Router cục bộ mà PC gửi dữ liệu tới khi đích nằm ở một mạng khác." }
+            ],
+            "Chương 9: Phân giải địa chỉ": [
+                { term: "ARP (Address Resolution Protocol)", desc: "Giao thức tìm địa chỉ MAC khi đã biết địa chỉ IPv4 trong cùng mạng LAN." },
+                { term: "NDP (Neighbor Discovery Protocol)", desc: "Giao thức thay thế ARP trong IPv6, dùng ICMPv6 để phân giải MAC, tự động cấu hình (SLAAC)." },
+                { term: "DNS (Domain Name System)", desc: "Hệ thống phân giải tên miền (VD: google.com) thành địa chỉ IP." },
+                { term: "DHCP", desc: "Cấp phát IP động tự động cho các thiết bị." }
+            ],
+            "Chương 14: Tầng Vận chuyển": [
+                { term: "TCP (Transmission Control Protocol)", desc: "Hướng kết nối, tin cậy, có xác nhận (ACK), truyền lại khi mất, đảm bảo thứ tự. Dùng cho Web, Email, File." },
+                { term: "UDP (User Datagram Protocol)", desc: "Không kết nối, không tin cậy, overhead thấp, cực nhanh. Dùng cho Video streaming, VoIP, Game online." },
+                { term: "Port Number", desc: "Định danh ứng dụng. Well-known (0-1023): HTTP 80, HTTPS 443, FTP 21, DNS 53, SSH 22." },
+                { term: "Bắt tay 3 bước (3-way handshake)", desc: "Quy trình thiết lập kết nối TCP: SYN -> SYN-ACK -> ACK." }
+            ],
+            "Chương 15: Tầng Ứng dụng": [
+                { term: "Client-Server / P2P", desc: "Client-Server: Máy khách yêu cầu, máy chủ phục vụ. P2P: Thiết bị vừa là khách vừa là chủ (Torrent)." },
+                { term: "HTTP / HTTPS", desc: "Giao thức truyền tải web. HTTPS an toàn hơn vì có mã hóa TLS/SSL." },
+                { term: "Giao thức Email", desc: "SMTP: Gửi email đi. POP3: Tải email về và xóa trên server. IMAP: Đồng bộ email đa thiết bị." }
+            ]
+        };
+
+        // ==========================================
+        // UI & ANIMATION LOGIC
+        // ==========================================
+
+        // Initialize UI
+        function init() {
+            renderOsiStacks();
+            renderTermsSidebar();
+            // Default select first chapter
+            if(Object.keys(termsData).length > 0) {
+                showChapterTerms(Object.keys(termsData)[0]);
+            }
+        }
+
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white');
+                el.classList.add('text-slate-300');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            const btn = document.getElementById('tab-' + tabId);
+            btn.classList.remove('text-slate-300');
+            btn.classList.add('bg-blue-600', 'text-white');
+        }
+
+        // Render OSI Layers
+        function renderOsiStacks() {
+            const stackA = document.getElementById('stack-A');
+            const stackB = document.getElementById('stack-B');
+            
+            let htmlA = '';
+            let htmlB = '';
+            
+            // Loop from layer 7 down to 1
+            for (let i = osiLayers.length - 1; i >= 0; i--) {
+                const layer = osiLayers[i];
+                const boxHtml = `
+                    <div id="L${layer.id}-{side}" class="layer-box w-full border border-slate-300 bg-slate-50 p-2 rounded text-center cursor-pointer hover:bg-slate-100" onclick="showLayerInfo(${layer.id})">
+                        <div class="text-xs text-slate-400 font-bold text-left">L${layer.id}</div>
+                        <div class="font-bold text-sm text-slate-700">${layer.name}</div>
+                        <div class="text-[10px] text-slate-500">${layer.vi}</div>
+                    </div>
+                `;
+                htmlA += boxHtml.replace('{side}', 'A');
+                htmlB += boxHtml.replace('{side}', 'B');
+            }
+            
+            stackA.innerHTML = htmlA;
+            stackB.innerHTML = htmlB;
+        }
+
+        // Show Layer Info
+        function showLayerInfo(layerId) {
+            const layer = osiLayers.find(l => l.id === layerId);
+            document.getElementById('info-title').innerHTML = `<span class="bg-blue-600 text-white px-2 py-1 rounded text-sm mr-2">Layer ${layer.id}</span> ${layer.name} (${layer.vi})`;
+            document.getElementById('info-desc').innerHTML = `
+                <p class="mb-2 text-slate-700">${layer.desc}</p>
+                <div class="mt-2 text-sm font-semibold text-blue-800">
+                    <i class="fas fa-box mr-1"></i> Tên gói tin (PDU): <span class="bg-blue-100 px-2 py-0.5 rounded">${layer.pdu}</span>
+                </div>
+            `;
+            
+            // Highlight
+            document.querySelectorAll('.layer-box').forEach(el => el.classList.remove('layer-active'));
+            document.getElementById(`L${layer.id}-A`).classList.add('layer-active');
+            document.getElementById(`L${layer.id}-B`).classList.add('layer-active');
+        }
+
+        // Terminology Logic
+        function renderTermsSidebar() {
+            const list = document.getElementById('chapter-list');
+            let html = '';
+            for (const chapter in termsData) {
+                html += `
+                    <li>
+                        <button onclick="showChapterTerms('${chapter}')" id="btn-chap-${chapter.replace(/[^a-zA-Z0-9]/g, '')}" class="w-full text-left px-4 py-3 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200 hover:text-blue-600 transition-colors">
+                            ${chapter}
+                        </button>
+                    </li>
+                `;
+            }
+            list.innerHTML = html;
+        }
+
+        function showChapterTerms(chapterName) {
+            // Update sidebar active state
+            document.querySelectorAll('#chapter-list button').forEach(el => {
+                el.classList.remove('bg-blue-100', 'text-blue-700', 'font-bold');
+                el.classList.add('text-slate-600');
+            });
+            const btnId = 'btn-chap-' + chapterName.replace(/[^a-zA-Z0-9]/g, '');
+            document.getElementById(btnId).classList.add('bg-blue-100', 'text-blue-700', 'font-bold');
+
+            // Render content
+            const terms = termsData[chapterName];
+            let html = `
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 pb-2 border-b-2 border-slate-100">${chapterName}</h2>
+                <div class="grid grid-cols-1 gap-4">
+            `;
+            
+            terms.forEach(t => {
+                html += `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-blue-700 text-lg mb-1">${t.term}</h3>
+                        <p class="text-slate-700 leading-relaxed text-sm">${t.desc}</p>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            document.getElementById('term-content').innerHTML = html;
+        }
+
+        // ==========================================
+        // SIMULATION ENGINE
+        // ==========================================
+        
+        let isSimulating = false;
+        const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        function resetSimulation() {
+            isSimulating = false;
+            document.querySelectorAll('.layer-box').forEach(el => el.classList.remove('layer-active'));
+            document.querySelectorAll('.device-active').forEach(el => el.classList.remove('device-active'));
+            
+            const pkt = document.getElementById('the-packet');
+            pkt.classList.add('hidden');
+            pkt.style.left = '0px';
+            pkt.style.bottom = '0px';
+            pkt.innerHTML = 'DATA';
+            
+            document.getElementById('btn-start').disabled = false;
+            document.getElementById('btn-start').classList.remove('opacity-50', 'cursor-not-allowed');
+            showLayerInfo(7); // Reset info box to Layer 7
+        }
+
+        async function startSimulation() {
+            if (isSimulating) return;
+            isSimulating = true;
+            
+            const btn = document.getElementById('btn-start');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const pkt = document.getElementById('the-packet');
+            pkt.classList.remove('hidden');
+            
+            // Get positions dynamically
+            const colA = document.getElementById('stack-A').getBoundingClientRect();
+            const colB = document.getElementById('stack-B').getBoundingClientRect();
+            const pathArea = pkt.parentElement.getBoundingClientRect();
+            
+            // Initialize packet at Layer 7 PC A
+            const startX = 50; // relative to middle area
+            let payloadText = "DATA";
+            
+            // --- STAGE 1: ENCAPSULATION (Machine A Down) ---
+            for(let i = 7; i >= 1; i--) {
+                if(!isSimulating) return;
+                showLayerInfo(i);
+                
+                // Position packet next to current layer
+                const layerElem = document.getElementById(`L${i}-A`);
+                const lRect = layerElem.getBoundingClientRect();
+                const relativeY = lRect.top - pathArea.top;
+                
+                pkt.style.left = `10px`;
+                pkt.style.top = `${relativeY}px`;
+                pkt.style.bottom = 'auto';
+
+                // Update payload text based on PDU
+                if(i === 4) payloadText = `<span class="bg-orange-200 px-1 rounded text-[10px] mr-1">TCP</span>` + payloadText; // Segment
+                if(i === 3) payloadText = `<span class="bg-green-200 px-1 rounded text-[10px] mr-1">IP</span>` + payloadText;   // Packet
+                if(i === 2) {
+                    payloadText = `<span class="bg-purple-200 px-1 rounded text-[10px] mr-1">MAC</span>` + payloadText + `<span class="bg-purple-200 px-1 rounded text-[10px] ml-1">FCS</span>`; // Frame
+                }
+                if(i === 1) {
+                    pkt.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-800');
+                    pkt.classList.add('bg-slate-800', 'border-slate-900', 'text-green-400');
+                    payloadText = "10101100101..."; // Bits
+                }
+                
+                pkt.innerHTML = payloadText;
+                await sleep(1000);
+            }
+
+            // --- STAGE 2: TRANSMISSION ---
+            if(!isSimulating) return;
+            document.getElementById(`L1-A`).classList.remove('layer-active');
+            
+            // Move to wire level
+            pkt.style.top = 'auto';
+            pkt.style.bottom = '30px'; // Align with cable
+            await sleep(500);
+
+            // Move to Switch 1
+            document.getElementById('info-title').innerHTML = "Truyền dẫn -> Switch 1";
+            document.getElementById('info-desc').innerHTML = "Chuyển thành tín hiệu vật lý. <b>Switch 1</b> đọc địa chỉ MAC (Lớp 2) để chuyển tiếp (Forward) Frame.";
+            pkt.style.left = '15%';
+            await sleep(1000);
+            document.getElementById('device-sw1').classList.add('device-active');
+            await sleep(800);
+            document.getElementById('device-sw1').classList.remove('device-active');
+
+            // Move to Router
+            document.getElementById('info-title').innerHTML = "Truyền dẫn -> Router";
+            document.getElementById('info-desc').innerHTML = "<b>Router</b> tháo vỏ Frame (Lớp 2), đọc IP đích (Lớp 3), tra Bảng định tuyến (Routing Table) và đóng gói lại MAC mới để đi tiếp.";
+            pkt.style.left = '45%';
+            await sleep(1000);
+            document.getElementById('device-router').classList.add('device-active');
+            // Show router action (temporarily show packet)
+            pkt.classList.remove('bg-slate-800', 'text-green-400');
+            pkt.classList.add('bg-blue-100', 'text-blue-800');
+            pkt.innerHTML = `<span class="bg-green-200 px-1 rounded text-[10px] mr-1">IP</span>DATA`; // See IP
+            await sleep(1000);
+            pkt.innerHTML = "10101100101..."; // Back to bits
+            pkt.classList.add('bg-slate-800', 'text-green-400');
+            pkt.classList.remove('bg-blue-100', 'text-blue-800');
+            document.getElementById('device-router').classList.remove('device-active');
+
+            // Move to Switch 2
+            document.getElementById('info-title').innerHTML = "Truyền dẫn -> Switch 2";
+            document.getElementById('info-desc').innerHTML = "<b>Switch 2</b> tiếp nhận và chuyển khung dữ liệu dựa trên địa chỉ MAC đến Máy B.";
+            pkt.style.left = '75%';
+            await sleep(1000);
+            document.getElementById('device-sw2').classList.add('device-active');
+            await sleep(800);
+            document.getElementById('device-sw2').classList.remove('device-active');
+
+            // Move to PC B base
+            pkt.style.left = '90%';
+            await sleep(800);
+
+            // --- STAGE 3: DE-ENCAPSULATION (Machine B Up) ---
+            // Revert packet style to data block format for climbing up
+            pkt.classList.remove('bg-slate-800', 'border-slate-900', 'text-green-400');
+            pkt.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-800');
+            payloadText = `<span class="bg-purple-200 px-1 rounded text-[10px] mr-1">MAC</span><span class="bg-green-200 px-1 rounded text-[10px] mr-1">IP</span><span class="bg-orange-200 px-1 rounded text-[10px] mr-1">TCP</span>DATA<span class="bg-purple-200 px-1 rounded text-[10px] ml-1">FCS</span>`;
+            
+            for(let i = 1; i <= 7; i++) {
+                if(!isSimulating) return;
+                showLayerInfo(i);
+                
+                const layerElem = document.getElementById(`L${i}-B`);
+                const lRect = layerElem.getBoundingClientRect();
+                const relativeY = lRect.top - pathArea.top;
+                
+                pkt.style.bottom = 'auto';
+                pkt.style.top = `${relativeY}px`;
+                pkt.style.left = `calc(100% - 80px)`; // Align right near PC B
+
+                // Strip headers based on layer
+                if(i === 1) pkt.innerHTML = payloadText; // L1 passes Frame to L2
+                if(i === 2) {
+                    // L2 removes MAC and FCS
+                    payloadText = `<span class="bg-green-200 px-1 rounded text-[10px] mr-1">IP</span><span class="bg-orange-200 px-1 rounded text-[10px] mr-1">TCP</span>DATA`;
+                    pkt.innerHTML = payloadText;
+                }
+                if(i === 3) {
+                    // L3 removes IP
+                    payloadText = `<span class="bg-orange-200 px-1 rounded text-[10px] mr-1">TCP</span>DATA`;
+                    pkt.innerHTML = payloadText;
+                }
+                if(i === 4) {
+                    // L4 removes TCP
+                    payloadText = "DATA";
+                    pkt.innerHTML = payloadText;
+                }
+                
+                await sleep(1000);
+            }
+
+            document.getElementById('info-title').innerHTML = "Hoàn tất truyền dữ liệu!";
+            document.getElementById('info-desc').innerHTML = "Dữ liệu đã đi qua 7 lớp tại máy gửi (thêm thông tin), truyền qua môi trường mạng, và đi ngược 7 lớp tại máy nhận (gỡ bỏ thông tin) để ứng dụng có thể đọc được.";
+            
+            // Cleanup
+            isSimulating = false;
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        // Run Init
+        window.onload = init;
+    </script>
+</body>
+</html>

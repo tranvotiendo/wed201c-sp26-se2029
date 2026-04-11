@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương 2: System Calls & Structure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .card-animate {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-animate:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-slate-400 hidden md:flex flex-col p-8 z-50 border-r border-slate-800">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <i data-lucide="layers" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-extrabold text-xl tracking-tight">OS Hub</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Chương 2: System Calls</p>
+            </div>
+        </div>
+        
+        <nav class="space-y-3 flex-1 overflow-y-auto">
+            <p class="text-[10px] font-bold text-slate-600 uppercase mb-4 px-3">Nội dung bài học</p>
+            <a href="#definition" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="help-circle" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">1.1. Định nghĩa</span>
+            </a>
+            <a href="#steps" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="list-ordered" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">1.2. Các bước thực hiện</span>
+            </a>
+            <a href="#types" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="grid" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">1.4. Phân loại System Calls</span>
+            </a>
+            <a href="#structures" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="cpu" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">2. Cấu trúc Hệ điều hành</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 text-xs text-slate-400 text-center italic">
+            "The bridge between User and Kernel"
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-72 min-h-screen">
+        
+        <!-- Header -->
+        <header class="sticky top-0 glass-header z-40 p-4 px-8 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Chapter 2: Structure</span>
+            </div>
+            <div class="flex items-center gap-4 text-slate-500 text-xs font-semibold uppercase">
+                Tiếng Việt (Chính) | English (Keywords)
+            </div>
+        </header>
+
+        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-20">
+
+            <!-- Section 1: System Calls Definition -->
+            <section id="definition" class="reveal space-y-10 scroll-mt-24">
+                <div class="space-y-4">
+                    <span class="px-4 py-1.5 bg-blue-100 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Section 1.1</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Lời gọi hệ thống (System Calls)</h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm card-animate">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="network"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-4">Định nghĩa (Definition)</h3>
+                        <ul class="space-y-4 text-sm text-slate-600">
+                            <li class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"></i>
+                                <span>Giao diện (Interface) giữa chương trình người dùng và hệ điều hành.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"></i>
+                                <span>Cho phép ứng dụng truy cập tài nguyên hệ thống được bảo vệ (protected resources) một cách an toàn.</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"></i>
+                                <span>Giống như gọi một thủ tục đặc biệt (special procedure) trong nhân (kernel).</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Steps of System Call -->
+                    <div id="steps" class="bg-slate-900 text-white p-8 rounded-[2rem] shadow-2xl relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 w-32 h-32 bg-blue-600/20 blur-3xl rounded-full"></div>
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i data-lucide="activity" class="text-blue-400"></i> Các bước thực hiện (Steps)
+                        </h3>
+                        <div class="space-y-5 relative">
+                            <div class="flex gap-4">
+                                <span class="step-number bg-white text-slate-900">1</span>
+                                <p class="text-sm text-slate-300">Chương trình đặt tham số (arguments) vào thanh ghi hoặc ngăn xếp (stack).</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <span class="step-number">2</span>
+                                <p class="text-sm text-slate-300">Thực hiện lệnh <span class="text-blue-400 font-bold">trap</span> để chuyển từ User Mode sang Kernel Mode.</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <span class="step-number">3</span>
+                                <p class="text-sm text-slate-300">Nhân OS điều phối đến hàm xử lý (handler) phù hợp.</p>
+                            </div>
+                            <div class="flex gap-4">
+                                <span class="step-number">4</span>
+                                <p class="text-sm text-slate-300">Hoàn tất, chuyển lại User Mode và trả quyền điều khiển cho chương trình.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example Section -->
+                <div class="p-8 bg-blue-50 rounded-[2rem] border border-blue-100">
+                    <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="code"></i> Ví dụ: Lệnh read(fd, buffer, nbytes)
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-8 text-sm text-blue-800">
+                        <div class="space-y-3">
+                            <p>• Bao gồm <strong>11 bước</strong> để tương tác với OS.</p>
+                            <p>• Bắt đầu tại <strong>User Mode</strong>, trap sang <strong>Kernel</strong>, sau đó quay lại.</p>
+                        </div>
+                        <div class="space-y-3 p-4 bg-white/50 rounded-xl border border-blue-200">
+                            <p><strong>Cơ chế:</strong> Code Segment và Stack Segment tham gia trực tiếp vào việc truyền dữ liệu và điều khiển.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 1.4: Types of System Calls -->
+            <section id="types" class="reveal space-y-10 scroll-mt-24">
+                <div class="flex items-end justify-between border-l-4 border-indigo-600 pl-6">
+                    <div>
+                        <span class="text-indigo-600 font-bold text-xs uppercase tracking-widest">Classification</span>
+                        <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Phân loại System Calls (Types)</h2>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <i data-lucide="user-cog" class="text-indigo-600 mb-4"></i>
+                        <h4 class="font-bold text-slate-800 mb-2 italic">Process management</h4>
+                        <p class="text-[10px] text-slate-400 uppercase font-black mb-3 leading-none">Quản lý tiến trình</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">fork()</code>
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">exec()</code>
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">wait()</code>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <i data-lucide="file-text" class="text-blue-600 mb-4"></i>
+                        <h4 class="font-bold text-slate-800 mb-2 italic">File management</h4>
+                        <p class="text-[10px] text-slate-400 uppercase font-black mb-3 leading-none">Quản lý tệp</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">open()</code>
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">read()</code>
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">write()</code>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <i data-lucide="folder-tree" class="text-emerald-600 mb-4"></i>
+                        <h4 class="font-bold text-slate-800 mb-2 italic">File system</h4>
+                        <p class="text-[10px] text-slate-400 uppercase font-black mb-3 leading-none">Thư mục & Tệp hệ thống</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">mkdir()</code>
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">mount()</code>
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">link()</code>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <i data-lucide="more-horizontal" class="text-rose-600 mb-4"></i>
+                        <h4 class="font-bold text-slate-800 mb-2 italic">Miscellaneous</h4>
+                        <p class="text-[10px] text-slate-400 uppercase font-black mb-3 leading-none">Các lệnh khác</p>
+                        <div class="flex flex-wrap gap-1.5">
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">chmod()</code>
+                            <code class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-600">time()</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-slate-400 bg-white inline-block px-4 py-2 rounded-full border border-slate-100">
+                        <i data-lucide="windows" class="w-3 h-3 inline-block mr-1"></i> Windows sử dụng <strong>Win32 API</strong> cho các chức năng tương tự.
+                    </p>
+                </div>
+            </section>
+
+            <!-- Section 2: OS Structures -->
+            <section id="structures" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-emerald-100 text-emerald-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Module 2.0</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Cấu trúc Hệ điều hành (OS Structures)</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    
+                    <!-- Monolithic Systems -->
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center">
+                                <i data-lucide="box"></i>
+                            </div>
+                            <h3 class="text-xl font-bold italic">Monolithic Systems</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-6">Toàn bộ OS chạy như một chương trình lớn duy nhất trong chế độ nhân (Kernel Mode).</p>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                    <p class="text-xs font-bold text-emerald-700 mb-1">Ưu điểm</p>
+                                    <p class="text-[11px] text-emerald-800">Đơn giản, nhanh (VD: MS-DOS).</p>
+                                </div>
+                                <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                                    <p class="text-xs font-bold text-rose-700 mb-1">Nhược điểm</p>
+                                    <p class="text-[11px] text-rose-800">Khó bảo trì, không có tính mô-đun.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layered Systems -->
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center">
+                                <i data-lucide="layers-3"></i>
+                            </div>
+                            <h3 class="text-xl font-bold italic">Layered Systems</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-6">OS được chia thành nhiều lớp. Lớp dưới cùng là phần cứng, lớp trên cùng là giao diện người dùng.</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                <p class="text-xs font-bold text-emerald-700 mb-1">Ưu điểm</p>
+                                <p class="text-[11px] text-emerald-800">Dễ bảo trì, mô-đun hóa tốt.</p>
+                            </div>
+                            <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                                <p class="text-xs font-bold text-rose-700 mb-1">Nhược điểm</p>
+                                <p class="text-[11px] text-rose-800">Hiệu năng giảm do qua nhiều lớp.</p>
+                            </div>
+                        </div>
+                        <p class="text-[10px] mt-4 text-slate-400 font-bold uppercase">Ex: Windows NT, UNIX, OS/2</p>
+                    </div>
+
+                    <!-- Microkernels -->
+                    <div class="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-xl card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                                <i data-lucide="microscope"></i>
+                            </div>
+                            <h3 class="text-xl font-bold italic">Microkernels</h3>
+                        </div>
+                        <p class="text-sm text-slate-300 mb-6 italic text-sm">Chuyển các phần không thiết yếu từ nhân sang chế độ người dùng (User Mode), chỉ giữ lại nhân tối thiểu.</p>
+                        <div class="space-y-4">
+                            <ul class="text-[11px] space-y-2 text-slate-400">
+                                <li class="flex items-center gap-2"><i data-lucide="plus" class="w-3 h-3 text-blue-500"></i> Dễ mở rộng, bảo mật cao.</li>
+                                <li class="flex items-center gap-2"><i data-lucide="minus" class="w-3 h-3 text-rose-500"></i> Overhead do giao tiếp User-Kernel.</li>
+                            </ul>
+                            <p class="text-[10px] font-bold text-blue-400">Ex: Symbian, macOS X Server.</p>
+                        </div>
+                    </div>
+
+                    <!-- Client–Server Model -->
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <h3 class="text-xl font-bold italic">Client–Server Model</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-4">Máy chủ (Server) cung cấp dịch vụ cho khách hàng (Client) yêu cầu.</p>
+                        <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100">
+                            <p class="text-[11px] text-amber-900 leading-relaxed font-medium">
+                                <i data-lucide="message-square" class="w-3 h-3 inline mr-1"></i> 
+                                Giao tiếp diễn ra thông qua truyền thông điệp (Message Passing). Client/Server có thể chạy trên cùng hoặc khác máy.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Virtual Machines -->
+                    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-purple-600 text-white rounded-2xl flex items-center justify-center">
+                                <i data-lucide="monitor"></i>
+                            </div>
+                            <h3 class="text-xl font-bold italic">Virtual Machines (VM)</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 mb-4">Cung cấp bản sao chính xác của máy thật, cho phép chạy nhiều OS song song.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-[9px] font-bold bg-slate-100 px-2 py-1 rounded">Hypervisor</span>
+                            <span class="text-[9px] font-bold bg-slate-100 px-2 py-1 rounded">Isolation</span>
+                            <span class="text-[9px] font-bold bg-slate-100 px-2 py-1 rounded">Compatibility</span>
+                        </div>
+                        <ul class="text-[11px] text-slate-500 space-y-1 italic">
+                            <li>• Nhược điểm: Không thể cấp toàn bộ tài nguyên cho 1 VM đơn lẻ.</li>
+                            <li>• VD: VMware, VirtualBox, JVM.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Exokernels -->
+                    <div class="bg-emerald-900 text-white p-8 rounded-[2.5rem] shadow-xl card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center">
+                                <i data-lucide="zap"></i>
+                            </div>
+                            <h3 class="text-xl font-bold italic">Exokernels</h3>
+                        </div>
+                        <p class="text-sm text-emerald-100 mb-6">Cấp phát tài nguyên phần cứng trực tiếp cho các máy ảo, giảm tầng ánh xạ.</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <h5 class="text-[10px] font-bold uppercase text-emerald-400">Hiệu năng</h5>
+                                <p class="text-[11px]">Cao hơn, kiểm soát tài nguyên tốt.</p>
+                            </div>
+                            <div>
+                                <h5 class="text-[10px] font-bold uppercase text-emerald-400">Hạn chế</h5>
+                                <p class="text-[11px]">Quản lý tài nguyên cực kỳ phức tạp.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 py-12 px-8 text-center border-t border-slate-800">
+            <div class="flex flex-col items-center gap-4">
+                <div class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center">
+                    <i data-lucide="terminal" class="text-slate-400"></i>
+                </div>
+                <p class="text-slate-500 text-sm">Hệ thống hóa kiến thức Chương 2 • 2024</p>
+                <div class="flex gap-4 text-xs text-slate-600 font-bold uppercase tracking-widest">
+                    <span>Efficiency</span>
+                    <span class="text-blue-600">•</span>
+                    <span>Modularity</span>
+                    <span class="text-blue-600">•</span>
+                    <span>Stability</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Scroll highlight
+        const links = document.querySelectorAll('.sidebar-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if (pageYOffset >= s.offsetTop - 150) current = s.getAttribute('id');
+            });
+            links.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href').includes(current)) l.classList.add('active');
+            });
+        });
+
+        // Intersection Observer
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
+        }, { threshold: 0.1 });
+        sections.forEach(s => obs.observe(s));
+    </script>
+</body>
+</html>

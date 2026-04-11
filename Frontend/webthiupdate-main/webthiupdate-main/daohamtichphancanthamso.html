@@ -1,0 +1,700 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài giảng tương tác - MAE101 FPTU</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* [CẢI TIẾN] Sử dụng biến CSS để quản lý giao diện Sáng/Tối */
+        :root {
+            --bg-color: #0d1117;
+            --card-color: #161b22;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --text-title: #f0f6fc;
+            --accent-color: #58a6ff;
+            --accent-bg: rgba(88, 166, 255, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --focus-shadow: rgba(88, 166, 255, 0.2);
+        }
+
+        body.light-mode {
+            --bg-color: #ffffff;
+            --card-color: #f6f8fa;
+            --border-color: #d0d7de;
+            --text-primary: #24292f;
+            --text-secondary: #57606a;
+            --text-title: #1f2328;
+            --accent-color: #0969da;
+            --accent-bg: rgba(9, 105, 218, 0.1);
+            --shadow-color: rgba(140, 149, 159, 0.3);
+            --focus-shadow: rgba(9, 105, 218, 0.2);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body {
+            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* [CẢI TIẾN] Nút chuyển đổi giao diện */
+        #theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            z-index: 1000;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        #theme-toggle:hover {
+            color: var(--accent-color);
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 2rem; margin-bottom: 2rem; }
+        .repo-title { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 1rem; margin-bottom: 1rem; }
+        .repo-title svg { fill: var(--text-secondary); }
+        .repo-title a { color: var(--accent-color); text-decoration: none; }
+        .repo-title a:hover { text-decoration: underline; }
+        h1 { font-size: 2.5rem; color: var(--text-title); margin: 0.5rem 0; }
+        .subtitle { font-size: 1.1rem; color: var(--text-secondary); }
+        .controls { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+        #search-box { background-color: var(--card-color); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.75rem; border-radius: 6px; font-size: 1rem; flex-grow: 1; min-width: 250px; }
+        #search-box:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px var(--focus-shadow); }
+        #filter-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .filter-btn { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: 24px; cursor: pointer; transition: background-color 0.2s, border-color 0.2s, color 0.2s; font-weight: bold; }
+        .filter-btn:hover { background-color: var(--card-color); border-color: var(--text-secondary); }
+        .filter-btn.active { background-color: var(--accent-color); color: var(--bg-color); border-color: var(--accent-color); }
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+        .project-card { background-color: var(--card-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; text-decoration: none; color: var(--text-primary); transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s; display: flex; flex-direction: column; text-align: left; opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
+        .project-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px var(--shadow-color); border-color: var(--text-secondary); }
+        .no-results { grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
+        .no-results i { font-size: 3rem; margin-bottom: 1rem; }
+        .no-results p { font-size: 1.2rem; }
+        .card-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .card-header .icon { font-size: 1.5rem; color: var(--text-secondary); width: 24px; text-align: center; }
+        .card-title { font-size: 1.2rem; font-weight: bold; color: var(--text-title); }
+        .card-description { font-size: 0.95rem; color: var(--text-secondary); flex-grow: 1; margin-bottom: 1rem; }
+        .card-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .tag { background-color: var(--accent-bg); color: var(--accent-color); padding: 0.25rem 0.75rem; border-radius: 16px; font-size: 0.8rem; font-weight: bold; }
+        footer { text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <div id="theme-toggle" title="Chuyển đổi giao diện">
+        <i class="fas fa-sun" id="sun-icon"></i>
+        <i class="fas fa-moon" id="moon-icon"></i>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="repo-title">
+                <svg aria-hidden="true" height="20" viewBox="0 0 16 16" version="1.1" width="20"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.71.29L2 11.71v-9.21A1 1 0 0 1 2.5 1.5H4a.75.75 0 0 1 0 1.5H2.5v9.21l1.22-1.22a2.5 2.5 0 0 1 1.77-.73h8.26v-2H7.5a.75.75 0 0 1 0-1.5h5.25v-2H4.5a1 1 0 0 0-1 1v1.51L2 8.71V2.5Z"></path></svg>
+                <a href="https://github.com/an2404-lab/webthiupdate" target="_blank">an2404-lab / webthiupdate</a>
+            </div>
+            <h1>Bài giảng tương tác - MAE101</h1>
+            <p class="subtitle">Danh sách các bài giảng tương tác cho môn Toán cao cấp.</p>
+        </header>
+
+        <main>
+            <div class="controls">
+                <input type="text" id="search-box" placeholder="🔎 Tìm kiếm bài giảng...">
+                <div id="filter-buttons"></div>
+            </div>
+
+            <div id="project-list" class="project-grid"></div>
+        </main>
+
+        <footer>
+            <p>© 2025 - Tạo bởi an2404-lab, triển khai qua GitHub Pages.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // [CẢI TIẾN] Dữ liệu bài giảng đã được tinh gọn danh mục
+            const lecturesData = [
+              {
+                "title": "Phương pháp Newton",
+                "description": "Khám phá cách tìm nghiệm xấp xỉ cho các phương trình phức tạp mà không thể giải theo cách thông thường.",
+                "url": "https://an2404-lab.github.io/webthiupdate/newton_method",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-chart-line"
+              },
+              {
+                "title": "Tổng Riemann & Tích phân",
+                "description": "Hiểu bản chất của tích phân xác định thông qua việc xấp xỉ diện tích dưới đồ thị.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Limit",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-chart-area"
+              },
+              {
+                "title": "Phương trình đường tiếp tuyến",
+                "description": "Ứng dụng cốt lõi của đạo hàm để tìm đường thẳng tiếp xúc với đồ thị hàm số tại một điểm cho trước.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Tangent_line",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-pen-ruler"
+              },
+              {
+                "title": "Điểm gần nhất (Closest Point)",
+                "description": "Bài toán tối ưu hóa: tìm điểm trên một đường cong hoặc mặt phẳng có khoảng cách ngắn nhất đến một điểm cho trước.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Closet_point_1",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-compress-arrows-alt"
+              },
+              {
+                "title": "Quy Tắc L'Hôpital",
+                "description": "Công cụ mạnh mẽ để tính giới hạn của các dạng vô định như 0/0 hoặc ∞/∞.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Limits",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-infinity"
+              },
+              {
+                "title": "Vị trí tương đối hai đường thẳng",
+                "description": "Xét các trường hợp song song, cắt nhau, chéo nhau của hai đường thẳng trong không gian Oxyz.",
+                "url": "https://an2404-lab.github.io/webthiupdate/vtcp",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-road"
+              },
+              {
+                "title": "Độc lập & Phụ thuộc tuyến tính",
+                "description": "Kiểm tra xem một tập hợp các vector có thể được biểu diễn qua các vector khác hay không - một khái niệm nền tảng.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Independent",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-vector-square"
+              },
+              {
+                "title": "Định Lý Kẹp (Sandwich Theorem)",
+                "description": "Một phương pháp độc đáo để tìm giới hạn của hàm số bằng cách 'kẹp' nó giữa hai hàm số khác.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Sandwich",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-layer-group"
+              },
+              {
+                "title": "Giá trị riêng & Vector riêng",
+                "description": "Khám phá 'ADN' của ma trận: các giá trị và vector không đổi hướng sau phép biến đổi tuyến tính.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Eigenvalue",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-fingerprint"
+              },
+              {
+                "title": "Xấp xỉ Tích phân",
+                "description": "Sử dụng các quy tắc Hình thang (Trapezoidal) và Simpson để tính gần đúng giá trị tích phân xác định.",
+                "url": "https://an2404-lab.github.io/webthiupdate/approximate2",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-draw-polygon"
+              },
+              {
+                "title": "Related Rate Of Change",
+                "description": "Ứng dụng của đạo hàm để giải quyết các bài toán thực tế về mối liên hệ tốc độ thay đổi giữa các đại lượng.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Relatedrateofchange2",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-tachometer-alt"
+              },
+              {
+                "title": "Hệ phương trình tuyến tính thuần nhất",
+                "description": "Tìm hiểu về không gian nghiệm (Null Space) của hệ phương trình Ax = 0.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Nullspace5",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-equals"
+              },
+              {
+                "title": "Trực giao & Trực chuẩn",
+                "description": "Xây dựng một cơ sở gồm các vector vuông góc và có độ dài bằng 1 từ một cơ sở cho trước (Quá trình Gram-Schmidt).",
+                "url": "https://an2404-lab.github.io/webthiupdate/Orthonormal2",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-th"
+              },
+              {
+                "title": "Phép Quay & Phản xạ",
+                "description": "Biểu diễn các phép biến đổi hình học trong không gian 2D dưới dạng các ma trận nhân.",
+                "url": "https://an2404-lab.github.io/webthiupdate/RotationUpdate2",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-sync-alt"
+              },
+              {
+                "title": "Vết ma trận (Trace)",
+                "description": "Tìm hiểu về tổng các phần tử trên đường chéo chính và mối liên hệ với đa thức đặc trưng.",
+                "url": "https://maitheduy.github.io/MAE101/Dathucdactrung_Quiz2",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-route"
+              }
+            ];
+
+            const projectList = document.getElementById('project-list');
+            const searchBox = document.getElementById('search-box');
+            const filterButtonsContainer = document.getElementById('filter-buttons');
+            const allLectures = lecturesData;
+
+            // --- [CẢI TIẾN] Logic cho nút chuyển đổi giao diện ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            const userTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    document.body.classList.remove('light-mode');
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                } else {
+                    document.body.classList.add('light-mode');
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                }
+            };
+
+            // Áp dụng theme đã lưu hoặc theme hệ thống khi tải trang
+            if (userTheme === 'dark' || (!userTheme && systemTheme)) {
+                applyTheme('dark');
+            } else {
+                applyTheme('light');
+            }
+
+            themeToggle.addEventListener('click', () => {
+                const isLight = document.body.classList.contains('light-mode');
+                if (isLight) {
+                    localStorage.setItem('theme', 'dark');
+                    applyTheme('dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    applyTheme('light');
+                }
+            });
+
+            // --- Logic hiển thị danh sách (giữ nguyên từ bản trước) ---
+            const allTags = new Set();
+            allLectures.forEach(lecture => lecture.tags.forEach(tag => allTags.add(tag)));
+
+            const renderLectures = (lectures) => {
+                projectList.innerHTML = '';
+                if (lectures.length === 0) {
+                    projectList.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><p>Không tìm thấy bài giảng phù hợp.</p></div>`;
+                    return;
+                }
+                lectures.forEach((lecture, index) => {
+                    const card = document.createElement('a');
+                    card.href = lecture.url;
+                    card.className = 'project-card';
+                    card.target = '_blank';
+                    card.style.animationDelay = `${index * 50}ms`;
+                    const tagsHTML = lecture.tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <i class="${lecture.icon || 'fas fa-book'} icon"></i>
+                            <h3 class="card-title">${lecture.title}</h3>
+                        </div>
+                        <p class="card-description">${lecture.description}</p>
+                        <div class="card-tags">${tagsHTML}</div>`;
+                    projectList.appendChild(card);
+                });
+            };
+
+            const renderFilterButtons = () => {
+                let buttonsHTML = '<button class="filter-btn active" data-tag="all">Tất cả</button>';
+                Array.from(allTags).sort().forEach(tag => {
+                    buttonsHTML += `<button class="filter-btn" data-tag="${tag}">${tag}</button>`;
+                });
+                filterButtonsContainer.innerHTML = buttonsHTML;
+                document.querySelectorAll('.filter-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        document.querySelector('.filter-btn.active').classList.remove('active');
+                        button.classList.add('active');
+                        filterAndRender(searchBox.value, button.dataset.tag);
+                    });
+                });
+            };
+            
+            const filterAndRender = (searchTerm, activeTag) => {
+                let filteredLectures = allLectures;
+                if (activeTag !== 'all') {<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài giảng tương tác - MAE101 FPTU</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* [CẢI TIẾN] Sử dụng biến CSS để quản lý giao diện Sáng/Tối */
+        :root {
+            --bg-color: #0d1117;
+            --card-color: #161b22;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --text-title: #f0f6fc;
+            --accent-color: #58a6ff;
+            --accent-bg: rgba(88, 166, 255, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --focus-shadow: rgba(88, 166, 255, 0.2);
+        }
+
+        body.light-mode {
+            --bg-color: #ffffff;
+            --card-color: #f6f8fa;
+            --border-color: #d0d7de;
+            --text-primary: #24292f;
+            --text-secondary: #57606a;
+            --text-title: #1f2328;
+            --accent-color: #0969da;
+            --accent-bg: rgba(9, 105, 218, 0.1);
+            --shadow-color: rgba(140, 149, 159, 0.3);
+            --focus-shadow: rgba(9, 105, 218, 0.2);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        body {
+            font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* [CẢI TIẾN] Nút chuyển đổi giao diện */
+        #theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            z-index: 1000;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        #theme-toggle:hover {
+            color: var(--accent-color);
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; border-bottom: 1px solid var(--border-color); padding-bottom: 2rem; margin-bottom: 2rem; }
+        .repo-title { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 1rem; margin-bottom: 1rem; }
+        .repo-title svg { fill: var(--text-secondary); }
+        .repo-title a { color: var(--accent-color); text-decoration: none; }
+        .repo-title a:hover { text-decoration: underline; }
+        h1 { font-size: 2.5rem; color: var(--text-title); margin: 0.5rem 0; }
+        .subtitle { font-size: 1.1rem; color: var(--text-secondary); }
+        .controls { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+        #search-box { background-color: var(--card-color); border: 1px solid var(--border-color); color: var(--text-primary); padding: 0.75rem; border-radius: 6px; font-size: 1rem; flex-grow: 1; min-width: 250px; }
+        #search-box:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 3px var(--focus-shadow); }
+        #filter-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .filter-btn { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: 24px; cursor: pointer; transition: background-color 0.2s, border-color 0.2s, color 0.2s; font-weight: bold; }
+        .filter-btn:hover { background-color: var(--card-color); border-color: var(--text-secondary); }
+        .filter-btn.active { background-color: var(--accent-color); color: var(--bg-color); border-color: var(--accent-color); }
+        .project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+        .project-card { background-color: var(--card-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; text-decoration: none; color: var(--text-primary); transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s; display: flex; flex-direction: column; text-align: left; opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
+        .project-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px var(--shadow-color); border-color: var(--text-secondary); }
+        .no-results { grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-secondary); }
+        .no-results i { font-size: 3rem; margin-bottom: 1rem; }
+        .no-results p { font-size: 1.2rem; }
+        .card-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .card-header .icon { font-size: 1.5rem; color: var(--text-secondary); width: 24px; text-align: center; }
+        .card-title { font-size: 1.2rem; font-weight: bold; color: var(--text-title); }
+        .card-description { font-size: 0.95rem; color: var(--text-secondary); flex-grow: 1; margin-bottom: 1rem; }
+        .card-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .tag { background-color: var(--accent-bg); color: var(--accent-color); padding: 0.25rem 0.75rem; border-radius: 16px; font-size: 0.8rem; font-weight: bold; }
+        footer { text-align: center; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <div id="theme-toggle" title="Chuyển đổi giao diện">
+        <i class="fas fa-sun" id="sun-icon"></i>
+        <i class="fas fa-moon" id="moon-icon"></i>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="repo-title">
+                <svg aria-hidden="true" height="20" viewBox="0 0 16 16" version="1.1" width="20"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.71.29L2 11.71v-9.21A1 1 0 0 1 2.5 1.5H4a.75.75 0 0 1 0 1.5H2.5v9.21l1.22-1.22a2.5 2.5 0 0 1 1.77-.73h8.26v-2H7.5a.75.75 0 0 1 0-1.5h5.25v-2H4.5a1 1 0 0 0-1 1v1.51L2 8.71V2.5Z"></path></svg>
+                <a href="https://github.com/an2404-lab/webthiupdate" target="_blank">an2404-lab / webthiupdate</a>
+            </div>
+            <h1>Bài giảng tương tác - MAE101</h1>
+            <p class="subtitle">Danh sách các bài giảng tương tác cho môn Toán cao cấp.</p>
+        </header>
+
+        <main>
+            <div class="controls">
+                <input type="text" id="search-box" placeholder="🔎 Tìm kiếm bài giảng...">
+                <div id="filter-buttons"></div>
+            </div>
+
+            <div id="project-list" class="project-grid"></div>
+        </main>
+
+        <footer>
+            <p>© 2025 - Tạo bởi an2404-lab, triển khai qua GitHub Pages.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // [CẢI TIẾN] Dữ liệu bài giảng đã được tinh gọn danh mục
+            const lecturesData = [
+              {
+                "title": "Phương pháp Newton",
+                "description": "Khám phá cách tìm nghiệm xấp xỉ cho các phương trình phức tạp mà không thể giải theo cách thông thường.",
+                "url": "https://an2404-lab.github.io/webthiupdate/newton_method",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-chart-line"
+              },
+              {
+                "title": "Tổng Riemann & Tích phân",
+                "description": "Hiểu bản chất của tích phân xác định thông qua việc xấp xỉ diện tích dưới đồ thị.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Limit",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-chart-area"
+              },
+              {
+                "title": "Phương trình đường tiếp tuyến",
+                "description": "Ứng dụng cốt lõi của đạo hàm để tìm đường thẳng tiếp xúc với đồ thị hàm số tại một điểm cho trước.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Tangent_line",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-pen-ruler"
+              },
+              {
+                "title": "Điểm gần nhất (Closest Point)",
+                "description": "Bài toán tối ưu hóa: tìm điểm trên một đường cong hoặc mặt phẳng có khoảng cách ngắn nhất đến một điểm cho trước.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Closet_point_1",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-compress-arrows-alt"
+              },
+              {
+                "title": "Quy Tắc L'Hôpital",
+                "description": "Công cụ mạnh mẽ để tính giới hạn của các dạng vô định như 0/0 hoặc ∞/∞.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Limits",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-infinity"
+              },
+              {
+                "title": "Vị trí tương đối hai đường thẳng",
+                "description": "Xét các trường hợp song song, cắt nhau, chéo nhau của hai đường thẳng trong không gian Oxyz.",
+                "url": "https://an2404-lab.github.io/webthiupdate/vtcp",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-road"
+              },
+              {
+                "title": "Độc lập & Phụ thuộc tuyến tính",
+                "description": "Kiểm tra xem một tập hợp các vector có thể được biểu diễn qua các vector khác hay không - một khái niệm nền tảng.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Independent",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-vector-square"
+              },
+              {
+                "title": "Định Lý Kẹp (Sandwich Theorem)",
+                "description": "Một phương pháp độc đáo để tìm giới hạn của hàm số bằng cách 'kẹp' nó giữa hai hàm số khác.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Sandwich",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-layer-group"
+              },
+              {
+                "title": "Giá trị riêng & Vector riêng",
+                "description": "Khám phá 'ADN' của ma trận: các giá trị và vector không đổi hướng sau phép biến đổi tuyến tính.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Eigenvalue",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-fingerprint"
+              },
+              {
+                "title": "Xấp xỉ Tích phân",
+                "description": "Sử dụng các quy tắc Hình thang (Trapezoidal) và Simpson để tính gần đúng giá trị tích phân xác định.",
+                "url": "https://an2404-lab.github.io/webthiupdate/approximate2",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-draw-polygon"
+              },
+              {
+                "title": "Related Rate Of Change",
+                "description": "Ứng dụng của đạo hàm để giải quyết các bài toán thực tế về mối liên hệ tốc độ thay đổi giữa các đại lượng.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Relatedrateofchange2",
+                "tags": ["Giải Tích"],
+                "icon": "fas fa-tachometer-alt"
+              },
+              {
+                "title": "Hệ phương trình tuyến tính thuần nhất",
+                "description": "Tìm hiểu về không gian nghiệm (Null Space) của hệ phương trình Ax = 0.",
+                "url": "https://an2404-lab.github.io/webthiupdate/Nullspace5",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-equals"
+              },
+              {
+                "title": "Trực giao & Trực chuẩn",
+                "description": "Xây dựng một cơ sở gồm các vector vuông góc và có độ dài bằng 1 từ một cơ sở cho trước (Quá trình Gram-Schmidt).",
+                "url": "https://an2404-lab.github.io/webthiupdate/Orthonormal2",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-th"
+              },
+              {
+                "title": "Phép Quay & Phản xạ",
+                "description": "Biểu diễn các phép biến đổi hình học trong không gian 2D dưới dạng các ma trận nhân.",
+                "url": "https://an2404-lab.github.io/webthiupdate/RotationUpdate2",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-sync-alt"
+              },
+              {
+                "title": "Vết ma trận (Trace)",
+                "description": "Tìm hiểu về tổng các phần tử trên đường chéo chính và mối liên hệ với đa thức đặc trưng.",
+                "url": "https://maitheduy.github.io/MAE101/Dathucdactrung_Quiz2",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-route"
+              },
+			  {
+                "title": "Đạo hàm tích phân có cận là tham số ",
+                "description": "",
+                "url": "https://maitheduy.github.io/MAE101/Dathucdactrung_Quiz2",
+                "tags": ["Đại số tuyến tính"],
+                "icon": "fas fa-route"
+              }
+            ];
+
+            const projectList = document.getElementById('project-list');
+            const searchBox = document.getElementById('search-box');
+            const filterButtonsContainer = document.getElementById('filter-buttons');
+            const allLectures = lecturesData;
+
+            // --- [CẢI TIẾN] Logic cho nút chuyển đổi giao diện ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            const userTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            const applyTheme = (theme) => {
+                if (theme === 'dark') {
+                    document.body.classList.remove('light-mode');
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                } else {
+                    document.body.classList.add('light-mode');
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                }
+            };
+
+            // Áp dụng theme đã lưu hoặc theme hệ thống khi tải trang
+            if (userTheme === 'dark' || (!userTheme && systemTheme)) {
+                applyTheme('dark');
+            } else {
+                applyTheme('light');
+            }
+
+            themeToggle.addEventListener('click', () => {
+                const isLight = document.body.classList.contains('light-mode');
+                if (isLight) {
+                    localStorage.setItem('theme', 'dark');
+                    applyTheme('dark');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    applyTheme('light');
+                }
+            });
+
+            // --- Logic hiển thị danh sách (giữ nguyên từ bản trước) ---
+            const allTags = new Set();
+            allLectures.forEach(lecture => lecture.tags.forEach(tag => allTags.add(tag)));
+
+            const renderLectures = (lectures) => {
+                projectList.innerHTML = '';
+                if (lectures.length === 0) {
+                    projectList.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><p>Không tìm thấy bài giảng phù hợp.</p></div>`;
+                    return;
+                }
+                lectures.forEach((lecture, index) => {
+                    const card = document.createElement('a');
+                    card.href = lecture.url;
+                    card.className = 'project-card';
+                    card.target = '_blank';
+                    card.style.animationDelay = `${index * 50}ms`;
+                    const tagsHTML = lecture.tags.map(tag => `<span class="tag">${tag}</span>`).join('');
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <i class="${lecture.icon || 'fas fa-book'} icon"></i>
+                            <h3 class="card-title">${lecture.title}</h3>
+                        </div>
+                        <p class="card-description">${lecture.description}</p>
+                        <div class="card-tags">${tagsHTML}</div>`;
+                    projectList.appendChild(card);
+                });
+            };
+
+            const renderFilterButtons = () => {
+                let buttonsHTML = '<button class="filter-btn active" data-tag="all">Tất cả</button>';
+                Array.from(allTags).sort().forEach(tag => {
+                    buttonsHTML += `<button class="filter-btn" data-tag="${tag}">${tag}</button>`;
+                });
+                filterButtonsContainer.innerHTML = buttonsHTML;
+                document.querySelectorAll('.filter-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        document.querySelector('.filter-btn.active').classList.remove('active');
+                        button.classList.add('active');
+                        filterAndRender(searchBox.value, button.dataset.tag);
+                    });
+                });
+            };
+            
+            const filterAndRender = (searchTerm, activeTag) => {
+                let filteredLectures = allLectures;
+                if (activeTag !== 'all') {
+                    filteredLectures = filteredLectures.filter(l => l.tags.includes(activeTag));
+                }
+                if (searchTerm) {
+                    const term = searchTerm.toLowerCase();
+                    filteredLectures = filteredLectures.filter(l => 
+                        l.title.toLowerCase().includes(term) ||
+                        l.description.toLowerCase().includes(term) ||
+                        l.tags.some(tag => tag.toLowerCase().includes(term))
+                    );
+                }
+                renderLectures(filteredLectures);
+            };
+
+            searchBox.addEventListener('input', e => filterAndRender(e.target.value, document.querySelector('.filter-btn.active').dataset.tag));
+
+            renderFilterButtons();
+            renderLectures(allLectures);
+        });
+    </script>
+</body>
+</html>

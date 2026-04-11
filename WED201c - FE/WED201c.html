@@ -1,0 +1,2005 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WED201c Learning Hub - FPTU HCM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fpt-orange {
+            color: #F27123;
+        }
+
+        .bg-fpt-orange {
+            background-color: #F27123;
+        }
+
+        .border-fpt-orange {
+            border-color: #F27123;
+        }
+
+        /* Code block styling */
+        pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border: 1px solid #334155;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Demo classes for CSS Tab */
+        .demo-box {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            border-radius: 8px;
+        }
+
+        .demo-static {
+            position: static;
+            background-color: #3b82f6;
+        }
+
+        .demo-relative {
+            position: relative;
+            top: 10px;
+            left: 10px;
+            background-color: #ef4444;
+            z-index: 10;
+        }
+
+        .demo-absolute {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #f59e0b;
+        }
+
+        .wrapper-relative {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 antialiased">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-fpt-orange p-2 rounded-lg text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m18 16 4-4-4-4" />
+                        <path d="m6 8-4 4 4 4" />
+                        <path d="m14.5 4-5 16" />
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">WED201c <span class="text-gray-400 font-medium">|
+                        FPTU-HCM</span></h1>
+            </div>
+            <!-- Navigation Tabs -->
+            <nav class="hidden md:flex space-x-1 bg-gray-100 p-1 rounded-xl overflow-x-auto">
+                <button onclick="switchTab('intro')" id="btn-intro"
+                    class="tab-btn px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-gray-500 hover:text-gray-700">Giới
+                    thiệu</button>
+                <button onclick="switchTab('html')" id="btn-html"
+                    class="tab-btn px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-gray-500 hover:text-gray-700">HTML</button>
+                <button onclick="switchTab('css')" id="btn-css"
+                    class="tab-btn px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-gray-500 hover:text-gray-700">CSS</button>
+                <button onclick="switchTab('js')" id="btn-js"
+                    class="tab-btn px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-gray-500 hover:text-gray-700">JavaScript</button>
+                <button onclick="switchTab('bootstrap')" id="btn-bootstrap"
+                    class="tab-btn px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-gray-500 hover:text-gray-700">Bootstrap</button>
+                <button onclick="switchTab('practice')" id="btn-practice"
+                    class="tab-btn px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-gray-500 hover:text-gray-700">Practice</button>
+                <button onclick="switchTab('pe')" id="btn-pe"
+                    class="tab-btn px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 text-gray-500 hover:text-gray-700">Practical
+                    Exam</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- Tab: Giới Thiệu (Phần 1) -->
+        <section id="intro" class="tab-content active space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-orange-500 to-fpt-orange px-8 py-10 text-white">
+                    <h2 class="text-3xl font-extrabold mb-2">1. Giới thiệu chung về môn học WED201c</h2>
+                    <p class="text-orange-100 max-w-2xl">Nền tảng quan trọng nhất để trở thành một Front-end Developer
+                        chuyên nghiệp.</p>
+                </div>
+
+                <div class="p-8 space-y-10">
+                    <!-- 1.1 Mục tiêu môn học -->
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1">
+                            <div class="sticky top-24">
+                                <h3 class="text-xl font-bold flex items-center gap-2 text-gray-900">
+                                    <span class="bg-orange-100 text-fpt-orange p-1.5 rounded-md">1.1</span>
+                                    Mục tiêu môn học
+                                </h3>
+                                <p class="mt-2 text-sm text-gray-500">Những gì bạn sẽ đạt được sau 30 slot học tại
+                                    trường.</p>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 space-y-4">
+                            <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-fpt-orange">
+                                <p class="text-gray-700 leading-relaxed">
+                                    Môn học WED201c nhằm trang bị cho sinh viên kiến thức nền tảng và kỹ năng cơ bản về
+                                    thiết kế và phát triển giao diện web front-end. Nội dung bao gồm: hiểu biết về HTML,
+                                    CSS, JavaScript, responsive design và các framework như Bootstrap để xây dựng
+                                    website đạt chuẩn, tương tác tốt và thân thiện với người dùng.
+                                </p>
+                            </div>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div class="p-4 border border-gray-200 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <h4 class="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-fpt-orange"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Kiến thức
+                                    </h4>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        <li>• Nắm vững cấu trúc và cú pháp HTML/CSS/JS.</li>
+                                        <li>• Thiết kế giao diện tương tác, responsive cho các loại thiết bị.</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 border border-gray-200 rounded-xl hover:bg-orange-50 transition-colors">
+                                    <h4 class="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-fpt-orange"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                        Kỹ năng
+                                    </h4>
+                                    <ul class="text-sm text-gray-600 space-y-1">
+                                        <li>• Áp dụng framework Bootstrap để tăng tốc phát triển giao diện.</li>
+                                        <li>• Xây dựng dự án website hoàn chỉnh theo yêu cầu đề bài.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 1.2 Phương pháp học và đánh giá -->
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1">
+                            <h3 class="text-xl font-bold flex items-center gap-2 text-gray-900">
+                                <span class="bg-orange-100 text-fpt-orange p-1.5 rounded-md">1.2</span>
+                                Phương pháp & Đánh giá
+                            </h3>
+                            <p class="mt-2 text-sm text-gray-500">Lộ trình tính điểm để "Pass" môn một cách an toàn.</p>
+                        </div>
+                        <div class="md:col-span-2 space-y-6">
+                            <p class="text-gray-700">Môn học kết hợp học lý thuyết qua video bài giảng, tài liệu, thực
+                                hành qua bài tập và dự án cuối kỳ.</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center">
+                                    <span class="block text-2xl font-bold text-blue-600">20%</span>
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-blue-400">Progress
+                                        Tests</span>
+                                </div>
+                                <div
+                                    class="bg-orange-50 p-4 rounded-xl border border-orange-100 text-center relative overflow-hidden">
+                                    <div
+                                        class="absolute top-0 right-0 bg-fpt-orange text-white text-[10px] px-2 py-0.5 rounded-bl-lg font-bold">
+                                        QUAN TRỌNG</div>
+                                    <span class="block text-2xl font-bold text-fpt-orange">40%</span>
+                                    <span
+                                        class="text-xs font-semibold uppercase tracking-wider text-orange-400">Practical
+                                        Exam (PE)</span>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-xl border border-green-100 text-center">
+                                    <span class="block text-2xl font-bold text-green-600">40%</span>
+                                    <span class="text-xs font-semibold uppercase tracking-wider text-green-400">Final
+                                        Exam (FE)</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-yellow-50 p-5 rounded-xl border border-yellow-200 flex gap-4">
+                                <div class="text-yellow-600 pt-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-yellow-800">Điểm Bonus & Khuyến khích</h5>
+                                    <p class="text-sm text-yellow-700 mt-1">Ngoài ra, có điểm bonus nếu hoàn thành khóa
+                                        Coursera liên quan đúng hạn. Sinh viên được khuyến khích thực hành nhiều, tham
+                                        khảo nguồn mở, sử dụng công cụ hỗ trợ như VS Code, Live Server.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 1.3 Công cụ và môi trường -->
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="md:col-span-1">
+                            <h3 class="text-xl font-bold flex items-center gap-2 text-gray-900">
+                                <span class="bg-orange-100 text-fpt-orange p-1.5 rounded-md">1.3</span>
+                                Công cụ phát triển
+                            </h3>
+                            <p class="mt-2 text-sm text-gray-500">Vũ khí của các Web Developers.</p>
+                        </div>
+                        <div class="md:col-span-2 grid sm:grid-cols-2 gap-4">
+                            <div
+                                class="flex items-start gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect width="18" height="18" x="3" y="3" rx="2" />
+                                        <path d="M10 10l4 4m-4 0l4-4" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h6 class="font-bold text-gray-900 text-sm">VS Code Extensions</h6>
+                                    <p class="text-xs text-gray-500 mt-1">Live Server, Prettier để viết và xem kết quả
+                                        ngay lập tức.</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-start gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                                <div class="bg-red-500 text-white p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <path d="M12 16v-4" />
+                                        <path d="M12 8h.01" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h6 class="font-bold text-gray-900 text-sm">Browsers & Debug</h6>
+                                    <p class="text-xs text-gray-500 mt-1">Chrome, Firefox DevTools để chỉnh sửa, gỡ lỗi
+                                        frontend.</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-start gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                                <div class="bg-indigo-500 text-white p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                        <path d="M2 17l10 5 10-5" />
+                                        <path d="M2 12l10 5 10-5" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h6 class="font-bold text-gray-900 text-sm">Resources (CDN)</h6>
+                                    <p class="text-xs text-gray-500 mt-1">Bootstrap, Font Awesome để dùng component và
+                                        icon nhanh.</p>
+                                </div>
+                            </div>
+                            <div
+                                class="flex items-start gap-3 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                                <div class="bg-gray-800 text-white p-2 rounded-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path
+                                            d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h6 class="font-bold text-gray-900 text-sm">Management</h6>
+                                    <p class="text-xs text-gray-500 mt-1">GitHub hoặc tương tự để quản lý source code và
+                                        nộp bài.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: HTML Cơ bản (Phần 2) -->
+        <section id="html" class="tab-content space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-orange-400 to-orange-600 px-8 py-10 text-white">
+                    <h2 class="text-3xl font-extrabold mb-2">2. HTML Cơ bản</h2>
+                    <p class="text-orange-100">Xây dựng cấu trúc vững chắc cho website của bạn.</p>
+                </div>
+
+                <div class="p-8 space-y-12">
+
+                    <!-- 2.1 Khái niệm và cấu trúc -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-orange-500 pl-4">2.1 Khái niệm và
+                            cấu trúc tài liệu HTML</h3>
+
+                        <!-- Table Thuộc tính (Keep original content) -->
+                        <div class="overflow-x-auto rounded-xl border border-gray-200">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Thuộc tính</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            Định nghĩa dễ hiểu</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-orange-600">
+                                            background-image</td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">Dùng để đặt hình ảnh làm nền cho
+                                            phần tử, thường dùng với hàm url() để trỏ tới file ảnh (hoặc none nếu không
+                                            dùng ảnh nền).</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-orange-600">
+                                            background-clip</td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">Quy định phần nào của phần tử sẽ
+                                            hiển thị nền (màu hoặc ảnh): chỉ bên trong content-box, đến padding-box, hay
+                                            phủ luôn cả border-box, và có thể dùng cho cả chữ với giá trị text.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-orange-600">
+                                            background-size</td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">Xác định kích thước hiển thị của ảnh
+                                            nền, có thể là giá trị cụ thể (px, %) hoặc từ khóa như cover, contain để tự
+                                            co giãn ảnh cho vừa phần tử.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-orange-600">
+                                            background-origin</td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">Xác định gốc tọa độ bắt đầu vẽ ảnh
+                                            nền: tính từ mép padding-box, border-box hay content-box, ảnh hưởng đến vị
+                                            trí ảnh khi có padding và border.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-sm text-orange-600">
+                                            background-position</td>
+                                        <td class="px-6 py-4 text-sm text-gray-600">Xác định vị trí đặt ảnh nền bên
+                                            trong phần tử, có thể dùng từ khóa (top, center, bottom, left, right), đơn
+                                            vị px hoặc % theo trục ngang và dọc.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <p class="text-gray-700 mt-4 italic">HTML (HyperText Markup Language) là ngôn ngữ đánh dấu chuẩn
+                            để tạo cấu trúc nội dung web. HTML5 là phiên bản hiện tại, hỗ trợ semantic tags, multimedia,
+                            và responsive design.</p>
+
+                        <!-- Boilerplate Code -->
+                        <div class="space-y-2">
+                            <span class="text-sm font-bold text-gray-400 uppercase tracking-widest">Cấu trúc tài liệu
+                                HTML chuẩn:</span>
+                            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="vi"&gt;
+&lt;head&gt;
+   &lt;meta charset="UTF-8"&gt;
+   &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+   &lt;meta name="description" content="Mô tả trang web"&gt;
+   &lt;title&gt;Tiêu đề trang - WED201c&lt;/title&gt;
+   &lt;link rel="icon" href="favicon.ico"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+   &lt;header&gt;&lt;!-- Header content --&gt;&lt;/header&gt;
+   &lt;main&gt;&lt;!-- Main content --&gt;&lt;/main&gt;
+   &lt;footer&gt;&lt;!-- Footer content --&gt;&lt;/footer&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                        </div>
+
+                        <!-- Required Tags Table -->
+                        <div class="overflow-x-auto rounded-xl border border-gray-200 mt-6">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th
+                                            class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">
+                                            Thẻ</th>
+                                        <th
+                                            class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">
+                                            Chức năng</th>
+                                        <th
+                                            class="px-6 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">
+                                            Bắt buộc</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-3 font-mono text-orange-600">&lt;!DOCTYPE html&gt;</td>
+                                        <td class="px-6 py-3">Khai báo HTML5</td>
+                                        <td class="px-6 py-3 text-green-600 font-bold">Có</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-3 font-mono text-orange-600">&lt;html lang="vi"&gt;</td>
+                                        <td class="px-6 py-3">Ngôn ngữ trang (SEO)</td>
+                                        <td class="px-6 py-3 text-green-600 font-bold">Có</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-3 font-mono text-orange-600">&lt;meta charset="UTF-8"&gt;
+                                        </td>
+                                        <td class="px-6 py-3">Mã hóa ký tự tiếng Việt</td>
+                                        <td class="px-6 py-3 text-green-600 font-bold">Có</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-3 font-mono text-orange-600">&lt;meta name="viewport"...&gt;
+                                        </td>
+                                        <td class="px-6 py-3">Responsive mobile</td>
+                                        <td class="px-6 py-3 text-green-600 font-bold">Có</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-3 font-mono text-orange-600">&lt;title&gt;</td>
+                                        <td class="px-6 py-3">Tiêu đề tab trình duyệt</td>
+                                        <td class="px-6 py-3 text-green-600 font-bold">Có</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 2.2 Các thẻ HTML cơ bản -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-orange-500 pl-4">2.2 Các thẻ HTML
+                            cơ bản</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-bold text-gray-700 mb-2">Tiêu đề và văn bản:</h4>
+                                <pre><code>&lt;h1&gt;Tiêu đề chính (H1 - chỉ 1 thẻ/page)&lt;/h1&gt;
+&lt;h2&gt;Tiêu đề phụ&lt;/h2&gt;
+&lt;h3&gt;H3&lt;/h3&gt;
+&lt;p&gt;Đoạn văn bản thông thường. Sử dụng &lt;strong&gt;đậm&lt;/strong&gt; và &lt;em&gt;nghiêng&lt;/em&gt;.&lt;/p&gt;
+&lt;br&gt; &lt;!-- Ngắt dòng --&gt;
+&lt;hr&gt; &lt;!-- Đường kẻ ngang --&gt;</code></pre>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-700 mb-2">Semantic HTML5:</h4>
+                                <div class="bg-gray-50 p-4 rounded-xl grid grid-cols-2 gap-2 text-xs font-mono">
+                                    <div class="text-orange-700">&lt;article&gt; <!-- Bài viết độc lập --></div>
+                                    <div class="text-orange-700">&lt;section&gt; <!-- Phần trong trang --></div>
+                                    <div class="text-orange-700">&lt;nav&gt; <!-- Menu điều hướng --></div>
+                                    <div class="text-orange-700">&lt;aside&gt; <!-- Sidebar --></div>
+                                    <div class="text-orange-700">&lt;header&gt; <!-- Phần đầu trang --></div>
+                                    <div class="text-orange-700">&lt;footer&gt; <!-- Phần chân trang --></div>
+                                    <div class="text-orange-700">&lt;main&gt; <!-- Nội dung chính --></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 2.3 Danh sách, liên kết, hình ảnh -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-orange-500 pl-4">2.3 Thẻ đoạn văn,
+                            danh sách, liên kết, hình ảnh</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                                <h4 class="font-bold text-orange-600 mb-3 uppercase text-xs">Danh sách</h4>
+                                <pre class="text-[10px]"><code class="whitespace-pre-wrap">&lt;!-- Unordered List --&gt;
+&lt;ul&gt;
+   &lt;li&gt;Mục 1&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- Ordered List --&gt;
+&lt;ol type="1" start="1"&gt;
+   &lt;li&gt;Bước 1&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;!-- Description List --&gt;
+&lt;dl&gt;
+   &lt;dt&gt;HTML&lt;/dt&gt;
+   &lt;dd&gt;HyperText Markup Language&lt;/dd&gt;
+&lt;/dl&gt;</code></pre>
+                            </div>
+                            <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                                <h4 class="font-bold text-orange-600 mb-3 uppercase text-xs">Liên kết</h4>
+                                <pre class="text-[10px]"><code class="whitespace-pre-wrap">&lt;a href="https://fpt.edu.vn" target="_blank" rel="noopener"&gt;FPT University&lt;/a&gt;
+&lt;a href="#section1" class="smooth-scroll"&gt;Đi đến Section 1&lt;/a&gt;
+&lt;a href="mailto:email@fpt.edu.vn"&gt;Gửi email&lt;/a&gt;
+&lt;a href="tel:+84999999999"&gt;Gọi điện&lt;/a&gt;</code></pre>
+                            </div>
+                            <div class="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+                                <h4 class="font-bold text-orange-600 mb-3 uppercase text-xs">Hình ảnh</h4>
+                                <pre class="text-[10px]"><code class="whitespace-pre-wrap">&lt;img src="images/photo.jpg" alt="Mô tả" width="300" height="200"&gt;
+&lt;img src="logo.png" alt="Logo FPT" loading="lazy"&gt;
+&lt;figure&gt;
+   &lt;img src="chart.png" alt="Biểu đồ"&gt;
+   &lt;figcaption&gt;Hình 1: Biểu đồ doanh thu&lt;/figcaption&gt;
+&lt;/figure&gt;</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 2.4 Biểu mẫu (Forms) -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-orange-500 pl-4">2.4 Biểu mẫu HTML
+                            (Forms)</h3>
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-4">Form cơ bản:</h4>
+                            <pre><code>&lt;form action="/submit" method="POST" novalidate&gt;
+   &lt;fieldset&gt;
+       &lt;legend&gt;Thông tin cá nhân&lt;/legend&gt;
+       &lt;label for="fullname"&gt;Họ tên:&lt;/label&gt;
+       &lt;input type="text" id="fullname" name="fullname" required placeholder="Nhập họ tên" maxlength="50"&gt;
+       
+       &lt;label&gt;Email:&lt;/label&gt;
+       &lt;input type="email" name="email" required&gt;
+       
+       &lt;label&gt;Giới tính:&lt;/label&gt;
+       &lt;input type="radio" name="gender" value="male" checked&gt; Nam
+       &lt;input type="radio" name="gender" value="female"&gt; Nữ
+       
+       &lt;label&gt;Sở thích:&lt;/label&gt;
+       &lt;input type="checkbox" name="hobby" value="football"&gt; Bóng đá
+       &lt;input type="checkbox" name="hobby" value="coding"&gt; Lập trình
+       
+       &lt;label&gt;Điểm số:&lt;/label&gt;
+       &lt;input type="range" name="score" min="0" max="10" value="7"&gt;
+       
+       &lt;label&gt;Tỉnh thành:&lt;/label&gt;
+       &lt;select name="province" required&gt;
+           &lt;optgroup label="Miền Trung"&gt;
+               &lt;option value="danang"&gt;Đà Nẵng&lt;/option&gt;
+               &lt;option value="hanoi"&gt;Hà Nội&lt;/option&gt;
+           &lt;/optgroup&gt;
+       &lt;/select&gt;
+       
+       &lt;label&gt;Nhận xét:&lt;/label&gt;
+       &lt;textarea name="comment" rows="4" cols="50" placeholder="Nhập nhận xét..."&gt;&lt;/textarea&gt;
+       
+       &lt;button type="submit"&gt;Gửi form&lt;/button&gt;
+       &lt;button type="reset"&gt;Reset&lt;/button&gt;
+   &lt;/fieldset&gt;
+&lt;/form&gt;</code></pre>
+                        </div>
+
+                        <h4 class="font-bold text-gray-800 mt-6">Input types phổ biến trong thi PE:</h4>
+                        <div class="overflow-x-auto rounded-xl border border-gray-200">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-2 text-left font-bold text-gray-600">Type</th>
+                                        <th class="px-6 py-2 text-left font-bold text-gray-600">Mô tả</th>
+                                        <th class="px-6 py-2 text-left font-bold text-gray-600">Ví dụ</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-2 font-mono text-orange-600 font-bold">text</td>
+                                        <td class="px-6 py-2">Văn bản</td>
+                                        <td class="px-6 py-2">Tên, username</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-2 font-mono text-orange-600 font-bold">email</td>
+                                        <td class="px-6 py-2">Email</td>
+                                        <td class="px-6 py-2 text-blue-500 italic">email@domain.com</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-2 font-mono text-orange-600 font-bold">password</td>
+                                        <td class="px-6 py-2">Mật khẩu</td>
+                                        <td class="px-6 py-2">****</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-2 font-mono text-orange-600 font-bold">number</td>
+                                        <td class="px-6 py-2">Số</td>
+                                        <td class="px-6 py-2">1-100</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-2 font-mono text-orange-600 font-bold">date</td>
+                                        <td class="px-6 py-2">Ngày tháng</td>
+                                        <td class="px-6 py-2">2025-11-28</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-2 font-mono text-orange-600 font-bold">radio</td>
+                                        <td class="px-6 py-2">Lựa chọn 1</td>
+                                        <td class="px-6 py-2 text-gray-500">Nam/Nữ</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-2 font-mono text-orange-600 font-bold">checkbox</td>
+                                        <td class="px-6 py-2">Đa lựa chọn</td>
+                                        <td class="px-6 py-2 text-gray-500">Sở thích</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-2 font-mono text-orange-600 font-bold">file</td>
+                                        <td class="px-6 py-2">Upload file</td>
+                                        <td class="px-6 py-2 text-gray-500">Ảnh, PDF</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-2 font-mono text-orange-600 font-bold">range</td>
+                                        <td class="px-6 py-2">Thanh trượt</td>
+                                        <td class="px-6 py-2 text-gray-500">Điểm 1-10</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 2.5 Các thẻ nâng cao -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-orange-500 pl-4">2.5 Các thẻ nâng
+                            cao</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-gray-800">Multimedia:</h4>
+                                <pre class="text-xs"><code>&lt;video width="400" controls poster="thumbnail.jpg"&gt;
+   &lt;source src="video.mp4" type="video/mp4"&gt;
+   Trình duyệt không hỗ trợ video.
+&lt;/video&gt;
+
+&lt;audio controls loop&gt;
+   &lt;source src="music.mp3" type="audio/mpeg"&gt;
+&lt;/audio&gt;</code></pre>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-gray-800">Iframe và Meta tags:</h4>
+                                <pre class="text-xs"><code>&lt;!-- Iframe --&gt;
+&lt;iframe src="demo.html" width="100%" height="300px"&gt;&lt;/iframe&gt;
+
+&lt;!-- Meta SEO --&gt;
+&lt;meta name="description" content="Mô tả trang web WED201c"&gt;
+&lt;meta name="keywords" content="HTML, CSS, JavaScript, FPT"&gt;
+&lt;meta property="og:title" content="WED201c - Thiết kế Web"&gt;</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- ID vs Class -->
+                    <div class="bg-orange-50 p-8 rounded-3xl border border-orange-200">
+                        <h3 class="text-2xl font-bold text-orange-800 mb-6 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                            Phân biệt ID và Class
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-8 text-gray-700">
+                            <div class="space-y-4">
+                                <p>Trong HTML, thuộc tính <strong class="text-orange-600">"id"</strong> được dùng để xác
+                                    định một định danh duy nhất cho mỗi phần tử trên trang web. Mỗi phần tử chỉ được
+                                    phép có một "id" và giá trị này phải là duy nhất trong toàn bộ tài liệu HTML. Thuộc
+                                    tính id thường được sử dụng trong CSS hoặc JavaScript để thao tác hoặc định dạng
+                                    riêng cho phần tử đó một cách chính xác.</p>
+                                <p>Ngược lại, thuộc tính <strong class="text-orange-600">"class"</strong> dùng để nhóm
+                                    nhiều phần tử HTML lại với nhau, giúp chúng có thể chung một kiểu dáng hoặc hành vi.
+                                    Nhiều phần tử có thể được gán chung một hoặc nhiều class, cho phép áp dụng định dạng
+                                    CSS hay thao tác JavaScript trên tất cả những phần tử này cùng lúc. Một phần tử HTML
+                                    có thể có nhiều class khác nhau.</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-2xl shadow-sm space-y-4">
+                                <h4 class="font-bold text-gray-900 border-b pb-2">Điểm khác biệt chính:</h4>
+                                <ul class="space-y-3 text-sm">
+                                    <li class="flex gap-2">
+                                        <span class="text-orange-500 font-bold">ID:</span>
+                                        <span>Dùng để định danh <strong>duy nhất</strong>; một trang chỉ có thể có một
+                                            phần tử mang một ID cụ thể.</span>
+                                    </li>
+                                    <li class="flex gap-2">
+                                        <span class="text-orange-500 font-bold">Class:</span>
+                                        <span>Dùng để <strong>nhóm nhiều phần tử</strong> có cùng tính chất; nhiều phần
+                                            tử có thể cùng mang một class và một phần tử có thể có nhiều class.</span>
+                                    </li>
+                                </ul>
+                                <div class="pt-4">
+                                    <span class="text-xs font-bold text-gray-400 uppercase">Ví dụ:</span>
+                                    <pre class="mt-2 text-[10px]"><code>&lt;div id="header"&gt;Đây là phần đầu trang&lt;/div&gt;
+&lt;p class="text-highlight"&gt;Đoạn văn có định dạng đặc biệt&lt;/p&gt;
+&lt;p class="text-highlight"&gt;Một đoạn văn khác cũng dùng class này&lt;/p&gt;</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Placeholder for other tabs -->
+        <!-- Tab: CSS Thiết kế (Phần 3) - CẬP NHẬT MỚI -->
+        <section id="css" class="tab-content active space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <!-- Header tab CSS -->
+                <div class="bg-gradient-to-r from-blue-500 to-blue-700 px-8 py-10 text-white">
+                    <h2 class="text-3xl font-extrabold mb-2">3. CSS Thiết kế giao diện</h2>
+                    <div class="mt-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-4 inline-block">
+                        <p class="text-blue-50 font-medium italic">"Trông các bạn nữ hơi bị nhiều CSS trên khuôn mặt đấy
+                            :D"</p>
+                    </div>
+                </div>
+
+                <div class="p-8 space-y-12">
+
+                    <!-- 3.1 Giới thiệu và cách nhúng -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-blue-500 pl-4">3.1 Giới thiệu CSS
+                            và cách nhúng</h3>
+                        <p class="text-gray-700">CSS (Cascading Style Sheets) dùng để định dạng giao diện web: màu sắc,
+                            font chữ, khoảng cách, bố cục…</p>
+
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <h4 class="font-bold text-blue-600 mb-2">1. Inline</h4>
+                                <p class="text-xs text-gray-500 mb-3">Trực tiếp trong thẻ (chỉ dùng cho style nhỏ).</p>
+                                <pre
+                                    class="text-[11px]"><code>&lt;p style="color: red;"&gt;Văn bản đỏ&lt;/p&gt;</code></pre>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <h4 class="font-bold text-blue-600 mb-2">2. Internal</h4>
+                                <p class="text-xs text-gray-500 mb-3">Trong thẻ &lt;style&gt; ở phần &lt;head&gt;.</p>
+                                <pre class="text-[11px]"><code>&lt;style&gt;
+  p { color: blue; }
+&lt;/style&gt;</code></pre>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <h4 class="font-bold text-blue-600 mb-2">3. External</h4>
+                                <p class="text-xs text-gray-500 mb-3">File .css riêng (Khuyên dùng).</p>
+                                <pre class="text-[11px]"><code>&lt;link rel="stylesheet" 
+      href="styles.css"&gt;</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 3.2 Selectors -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-blue-500 pl-4">3.2 Selector trong
+                            CSS</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left font-bold text-gray-500">Loại Selector</th>
+                                        <th class="px-6 py-3 text-left font-bold text-gray-500">Ví dụ</th>
+                                        <th class="px-6 py-3 text-left font-bold text-gray-500">Mô tả</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-3 font-medium">Element selector</td>
+                                        <td class="px-6 py-3 font-mono text-blue-600">p { ... }</td>
+                                        <td class="px-6 py-3">Chọn theo tên thẻ HTML.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-3 font-medium">Class selector</td>
+                                        <td class="px-6 py-3 font-mono text-blue-600">.highlight { ... }</td>
+                                        <td class="px-6 py-3">Chọn theo class (có thể chọn nhiều phần tử).</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-3 font-medium">ID selector</td>
+                                        <td class="px-6 py-3 font-mono text-blue-600">#header { ... }</td>
+                                        <td class="px-6 py-3">Chọn phần tử cụ thể duy nhất.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-3 font-medium">Attribute selector</td>
+                                        <td class="px-6 py-3 font-mono text-blue-600">input[type="text"]</td>
+                                        <td class="px-6 py-3">Chọn theo thuộc tính.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-3 font-medium">Pseudo-classes</td>
+                                        <td class="px-6 py-3 font-mono text-blue-600">a:hover { ... }</td>
+                                        <td class="px-6 py-3">Chọn trạng thái phần tử (di chuột, focus...).</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 3.3 Text Formatting -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-blue-500 pl-4">3.3 Thuộc tính định
+                            dạng văn bản</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div class="p-4 border rounded-xl">
+                                <span class="text-xs font-bold text-blue-400 block mb-1">FONT FAMILY</span>
+                                <p class="text-sm font-medium">Arial, Verdana, Sans-serif...</p>
+                            </div>
+                            <div class="p-4 border rounded-xl">
+                                <span class="text-xs font-bold text-blue-400 block mb-1">FONT SIZE</span>
+                                <p class="text-sm font-medium">px, em, rem, %</p>
+                            </div>
+                            <div class="p-4 border rounded-xl">
+                                <span class="text-xs font-bold text-blue-400 block mb-1">FONT WEIGHT</span>
+                                <p class="text-sm font-medium">normal, bold, 700</p>
+                            </div>
+                            <div class="p-4 border rounded-xl">
+                                <span class="text-xs font-bold text-blue-400 block mb-1">COLOR</span>
+                                <p class="text-sm font-medium">Tên màu hoặc mã Hex (#FFF)</p>
+                            </div>
+                            <div class="p-4 border rounded-xl">
+                                <span class="text-xs font-bold text-blue-400 block mb-1">TEXT ALIGN</span>
+                                <p class="text-sm font-medium">left, center, right, justify</p>
+                            </div>
+                            <div class="p-4 border rounded-xl">
+                                <span class="text-xs font-bold text-blue-400 block mb-1">LINE HEIGHT</span>
+                                <p class="text-sm font-medium">Độ cao dòng, khoảng cách dòng</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 3.4 Box Model -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-blue-500 pl-4">3.4 Box model</h3>
+                        <p class="text-gray-700 italic">Mọi phần tử HTML đều được bao quanh bởi box gồm 4 thành phần:
+                        </p>
+
+                        <div
+                            class="relative max-w-md mx-auto p-12 bg-orange-400 rounded-lg text-center font-bold text-white text-xs border-4 border-white shadow-lg">
+                            MARGIN
+                            <div class="mt-4 p-8 bg-yellow-400 rounded-lg border-4 border-white">
+                                BORDER
+                                <div class="mt-4 p-6 bg-green-400 rounded-lg border-4 border-white">
+                                    PADDING
+                                    <div class="mt-4 p-4 bg-blue-400 rounded-lg border-4 border-white">
+                                        CONTENT
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800 p-6 rounded-2xl">
+                            <pre class="!border-0"><code>.box {
+  width: 300px;           /* Chiều rộng content box */
+  padding: 10px;          /* Khoảng cách bên trong */
+  border: 2px solid #000; /* Viền */
+  margin: 20px;           /* Khoảng cách với phần tử khác */
+  box-sizing: border-box; /* Bao gồm padding và border trong width */
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 3.5 Layout & Flexbox -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-blue-500 pl-4">3.5 Layout cơ bản
+                            và Flexbox</h3>
+
+                        <div class="space-y-8">
+                            <!-- Position Demos -->
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div class="space-y-4">
+                                    <h4 class="font-bold text-blue-700 flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                        position: static & relative
+                                    </h4>
+                                    <div class="bg-white p-4 border rounded-xl space-y-4">
+                                        <div class="flex gap-4">
+                                            <div class="demo-box demo-static">Static (Default)</div>
+                                            <div class="demo-box demo-relative">Relative (Moved)</div>
+                                        </div>
+                                        <p class="text-xs text-gray-500"><b>Static:</b> Luồng bình thường, bỏ qua
+                                            top/left. <br><b>Relative:</b> Dịch chuyển so với vị trí gốc nhưng vẫn giữ
+                                            chỗ.</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <h4 class="font-bold text-blue-700 flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                        position: absolute
+                                    </h4>
+                                    <div class="wrapper-relative p-4">
+                                        <div class="demo-box demo-absolute">Absolute</div>
+                                        <span class="text-[10px] text-gray-400">Parent (Relative)</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500"><b>Absolute:</b> Đặt tuyệt đối theo cha gần nhất có
+                                        position (không bám luồng).</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-black text-white rounded-xl border-l-4 border-red-500">
+                                <p class="text-sm"><b>position: fixed</b> - Luôn dính trên đầu màn hình, kể cả khi bạn
+                                    cuộn trang (hay dùng làm navbar cố định).</p>
+                            </div>
+
+                            <!-- Flexbox Theory -->
+                            <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100 space-y-4">
+                                <h4 class="text-xl font-bold text-blue-800">Flexbox linh hoạt</h4>
+                                <div class="grid md:grid-cols-2 gap-6 text-sm text-gray-700">
+                                    <div class="space-y-2">
+                                        <p><strong>Flex container:</strong> Phần tử cha (display: flex). Quản lý việc
+                                            sắp xếp, căn chỉnh các con.</p>
+                                        <p><strong>Flex items:</strong> Các con trực tiếp. Có thể co giãn (grow/shrink)
+                                            theo quy tắc.</p>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <p><strong>Main axis (Trục chính):</strong> Hướng sắp xếp (ngang nếu row, dọc
+                                            nếu column).</p>
+                                        <p><strong>Cross axis (Trục chéo):</strong> Trục vuông góc với trục chính.</p>
+                                    </div>
+                                </div>
+                                <pre class="!bg-blue-900"><code>.container {
+  display: flex;
+  flex-direction: row; /* hoặc column */
+  justify-content: space-between; /* Căn trục chính */
+  align-items: center; /* Căn trục chéo */
+  flex-wrap: wrap; /* Cho phép xuống dòng */
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 3.6 Hiệu ứng -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-blue-500 pl-4">3.6 Hiệu ứng CSS và
+                            Pseudo-classes</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-gray-800">Tạo hiệu ứng hover:</h4>
+                                <pre><code>button:hover {
+  background-color: #f00;
+  color: #fff;
+  transition: 0.3s ease;
+}</code></pre>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-gray-800">Pseudo-classes thường dùng:</h4>
+                                <ul class="grid grid-cols-2 gap-2 text-sm">
+                                    <li class="p-2 bg-gray-100 rounded font-mono">:hover</li>
+                                    <li class="p-2 bg-gray-100 rounded font-mono">:active</li>
+                                    <li class="p-2 bg-gray-100 rounded font-mono">:focus</li>
+                                    <li class="p-2 bg-gray-100 rounded font-mono">:first-child</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 3.7 Responsive Design -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-blue-500 pl-4">3.7 Responsive
+                            design với media queries</h3>
+                        <p class="text-gray-700">Cho phép thay đổi kiểu dáng phù hợp với màn hình thiết bị khác nhau
+                            (mobile, tablet, desktop).</p>
+
+                        <div class="bg-indigo-900 p-6 rounded-2xl text-indigo-100">
+                            <pre class="!bg-indigo-950 !border-indigo-800"><code>@media screen and (max-width: 768px) {
+  .container {
+    flex-direction: column; /* Chuyển sang dọc trên Mobile */
+  }
+}</code></pre>
+                            <p class="mt-4 text-xs font-bold flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-yellow-400"
+                                    viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                QUAN TRỌNG: Luôn khai báo &lt;meta name="viewport" content="width=device-width,
+                                initial-scale=1.0"&gt; trong thẻ &lt;head&gt;.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: JS Tương tác (Phần 4) - CẬP NHẬT MỚI -->
+        <section id="js" class="tab-content active space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-yellow-400 to-yellow-600 px-8 py-10 text-white">
+                    <h2 class="text-3xl font-extrabold mb-2 text-gray-900">4. JavaScript Tương tác Web</h2>
+                    <p class="text-yellow-900 font-medium">Làm cho trang web của bạn trở nên sống động và thông minh.
+                    </p>
+                </div>
+
+                <div class="p-8 space-y-12">
+
+                    <!-- 4.1 Giới thiệu -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-yellow-500 pl-4">4.1 Giới thiệu
+                            JavaScript và tích hợp HTML</h3>
+                        <p class="text-gray-700">JavaScript (JS) là ngôn ngữ lập trình phía client dùng để tạo tương tác
+                            trên web.</p>
+                        <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-4">Nhúng JS vào HTML:</h4>
+                            <p class="text-sm text-gray-500 mb-2">Sử dụng thẻ &lt;script&gt;, trong head hoặc cuối body:
+                            </p>
+                            <pre><code>&lt;script src="script.js"&gt;&lt;/script&gt; <!-- External file -->
+&lt;script&gt;
+  alert('Chào mừng đến WED201c!');
+&lt;/script&gt;</code></pre>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 4.2 Biến và kiểu dữ liệu -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-yellow-500 pl-4">4.2 Biến và kiểu
+                            dữ liệu cơ bản</h3>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-yellow-700">Khai báo biến:</h4>
+                                <ul class="space-y-2">
+                                    <li class="flex items-center gap-2"><code
+                                            class="bg-yellow-100 px-2 py-1 rounded text-yellow-800">var</code> Cách cũ,
+                                        scope rộng.</li>
+                                    <li class="flex items-center gap-2"><code
+                                            class="bg-yellow-100 px-2 py-1 rounded text-yellow-800">let</code> Block
+                                        scope (Khuyên dùng).</li>
+                                    <li class="flex items-center gap-2"><code
+                                            class="bg-yellow-100 px-2 py-1 rounded text-yellow-800">const</code> Hằng
+                                        số, không thể thay đổi.</li>
+                                </ul>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-yellow-700">Kiểu dữ liệu:</h4>
+                                <p class="text-sm text-gray-600">number, string, boolean, object, array, null, undefined
+                                </p>
+                                <pre class="text-xs"><code>let name = "FPT";
+const PI = 3.14;
+var isActive = true;</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 4.3 Cấu trúc điều khiển -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-yellow-500 pl-4">4.3 Cấu trúc điều
+                            khiển</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <h4 class="font-bold text-gray-800">Câu điều kiện:</h4>
+                                <pre><code>if (age >= 18) {
+  console.log("Người lớn");
+} else {
+  console.log("Trẻ em");
+}</code></pre>
+                            </div>
+                            <div class="space-y-2">
+                                <h4 class="font-bold text-gray-800">Vòng lặp:</h4>
+                                <pre><code>for (let i = 0; i < 5; i++) {
+  console.log(i);
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 4.4 Hàm và sự kiện -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-yellow-500 pl-4">4.4 Hàm và sự
+                            kiện</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-yellow-700">Định nghĩa hàm:</h4>
+                                <pre><code>function greet(name) {
+  alert("Chào " + name);
+}
+greet("Sinh viên");</code></pre>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-yellow-700">Sự kiện (Events):</h4>
+                                <p class="text-xs text-gray-500">Bắt sự kiện onclick, onload, onchange:</p>
+                                <div class="bg-white p-4 border rounded-xl shadow-sm">
+                                    <button onclick="alert('Hello WED201c!')"
+                                        class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-yellow-600 transition-colors">Click
+                                        me Demo</button>
+                                </div>
+                                <pre class="text-xs"><code>&lt;button onclick="sayHello()"&gt;Click me&lt;/button&gt;
+&lt;script&gt;
+function sayHello() {
+  alert("Hello WED201c!");
+}
+&lt;/script&gt;</code></pre>
+                            </div>
+                        </div>
+                        <div class="mt-6 bg-yellow-50 p-6 rounded-2xl border border-yellow-200">
+                            <h4 class="font-bold text-yellow-800 mb-2">Event listener hiện đại:</h4>
+                            <pre class="!bg-yellow-900"><code>document.getElementById('btn').addEventListener('click', function() {
+  console.log('Button clicked!');
+});</code></pre>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 4.5 DOM Manipulation -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-yellow-500 pl-4">4.5 DOM
+                            Manipulation</h3>
+                        <p class="text-gray-700">DOM (Document Object Model) là mô hình cấu trúc cây của trang HTML.</p>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <h4 class="font-bold text-gray-800 uppercase text-xs tracking-widest">Truy xuất & Nội
+                                    dung</h4>
+                                <pre class="text-xs"><code>// Truy cập phần tử
+const title = document.getElementById('header');
+const items = document.querySelectorAll('.item');
+
+// Thay đổi nội dung
+title.textContent = "Tiêu đề mới";
+title.style.color = "red";</code></pre>
+                            </div>
+                            <div class="space-y-2">
+                                <h4 class="font-bold text-gray-800 uppercase text-xs tracking-widest">Class & Phần tử
+                                    mới</h4>
+                                <pre class="text-xs"><code>// Thêm/xóa class CSS
+title.classList.add('highlight');
+title.classList.remove('hidden');
+
+// Tạo phần tử mới
+const newDiv = document.createElement('div');
+newDiv.textContent = "Nội dung mới";
+document.body.appendChild(newDiv);</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-100">
+
+                    <!-- 4.6 Form Validation -->
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-yellow-500 pl-4">4.6 Xử lý form và
+                            validation</h3>
+                        <p class="text-gray-700">Kiểm tra dữ liệu người dùng nhập vào form trước khi gửi:</p>
+
+                        <div class="bg-gray-900 p-8 rounded-3xl border border-gray-700">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                <span class="text-gray-400 text-xs font-mono ml-2">validation.js</span>
+                            </div>
+                            <pre class="!border-0"><code>function validateForm() {
+  const email = document.getElementById('email').value;
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (!regex.test(email)) {
+    alert('Email không hợp lệ!');
+    return false;
+  }
+  return true;
+}</code></pre>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl flex gap-3 items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-sm text-blue-700 italic">Mẹo thi PE: Hãy luôn dùng RegEx để kiểm tra định
+                                dạng email hoặc số điện thoại để lấy điểm tối đa phần validation!</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: Bootstrap (New) -->
+        <section id="bootstrap" class="tab-content space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500 to-purple-700 px-8 py-10 text-white">
+                    <h2 class="text-3xl font-extrabold mb-2">5. Bootstrap Framework</h2>
+                    <p class="text-purple-100">Tăng tốc phát triển giao diện với thư viện CSS lớn nhất thế giới.</p>
+                </div>
+                <div class="p-8 space-y-8">
+                    <div class="space-y-4">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-purple-500 pl-4">5.1 Cách nhúng
+                            Bootstrap (CDN)</h3>
+                        <pre><code>&lt;!-- CSS --&gt;
+&lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+
+&lt;!-- JavaScript Bundle --&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"&gt;&lt;/script&gt;</code></pre>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-purple-500 pl-4">5.2 Hệ thống Grid
+                            System</h3>
+                        <p class="text-gray-700">Bootstrap chia màn hình thành **12 cột**. Sử dụng
+                            <code>.container</code>, <code>.row</code>, và <code>.col-*</code>.</p>
+                        <pre><code>&lt;div class="container"&gt;
+  &lt;div class="row"&gt;
+    &lt;div class="col-md-6"&gt;Cột 1 (Nửa màn hình trên desktop)&lt;/div&gt;
+    &lt;div class="col-md-6"&gt;Cột 2&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-purple-500 pl-4">5.3 Các Component
+                            phổ biến</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="p-3 border rounded text-center font-bold bg-purple-50">Navbar</div>
+                            <div class="p-3 border rounded text-center font-bold bg-purple-50">Buttons</div>
+                            <div class="p-3 border rounded text-center font-bold bg-purple-50">Cards</div>
+                            <div class="p-3 border rounded text-center font-bold bg-purple-50">Modals</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-8 space-y-12">
+                <!-- 5.1 Nguyên lý -->
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-purple-500 pl-4">5.1 Nguyên lý
+                        responsive, mobile-first</h3>
+                    <p class="text-gray-700">Responsive Web Design là kỹ thuật giúp giao diện tự thích ứng với nhiều
+                        kích thước màn hình (mobile, tablet, desktop) mà không cần làm nhiều phiên bản trang khác nhau.
+                    </p>
+                    <p class="text-gray-700 italic">Triết lý “mobile-first”: thiết kế và viết CSS cho màn hình nhỏ trước
+                        (mobile), sau đó dùng media queries để mở rộng dần cho tablet, desktop; giúp tối ưu hiệu năng và
+                        trải nghiệm trên thiết bị di động.</p>
+
+                    <div class="bg-purple-50 p-6 rounded-xl border border-purple-100 space-y-4">
+                        <h4 class="font-bold text-purple-800">Các thành phần cốt lõi của responsive:</h4>
+                        <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600">
+                            <li><strong>Viewport meta:</strong>
+                                <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code>
+                                để trình duyệt hiểu đúng chiều rộng thiết bị.</li>
+                            <li><strong>Layout fluid:</strong> Dùng đơn vị %, vw, flex, grid thay vì cố định px cho
+                                chiều rộng chính.</li>
+                            <li><strong>Breakpoints:</strong> Đặt các “ngưỡng” để đổi layout khi vượt qua size đó.</li>
+                        </ul>
+                    </div>
+                    <pre><code>/* Ví dụ media query cơ bản (mobile-first) */
+/* Base: mobile */
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tablet trở lên (>= 768px) */
+@media (min-width: 768px) {
+  .container {
+    flex-direction: row;
+  }
+}</code></pre>
+                </div>
+
+                <!-- 5.2 Viewport & Breakpoints -->
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-purple-500 pl-4">5.2 Viewport,
+                        breakpoints, grid responsive “tay”</h3>
+                    <p class="text-gray-700 text-sm">Breakpoints phổ biến trong giáo trình WED201c:</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs font-mono">
+                        <div class="p-2 bg-gray-100 border rounded">Mobile: &lt; 576px</div>
+                        <div class="p-2 bg-gray-100 border rounded">Tablet: 576px - 768px</div>
+                        <div class="p-2 bg-gray-100 border rounded">Small laptop: 768px - 992px</div>
+                        <div class="p-2 bg-gray-100 border rounded">Desktop: ≥ 992px</div>
+                    </div>
+                    <pre><code>/* Ví dụ chia 3 cột desktop, xuống mobile thành 1 cột */
+.columns { display: flex; flex-direction: column; }
+.col { flex: 1; }
+
+@media (min-width: 992px) {
+  .columns { flex-direction: row; }
+}</code></pre>
+                </div>
+
+                <!-- 5.3 Giới thiệu Bootstrap -->
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-purple-500 pl-4">5.3 Giới thiệu
+                        Bootstrap & cách nhúng</h3>
+                    <p class="text-gray-700">Bootstrap là framework CSS/JS giúp xây dựng giao diện responsive nhanh với
+                        hệ thống grid 12 cột. Cách nhúng qua CDN:</p>
+                    <pre><code>&lt;!-- CSS --&gt;
+&lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+&lt;!-- JS Bundle --&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"&gt;&lt;/script&gt;</code></pre>
+                </div>
+
+                <!-- 5.4 Grid System -->
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-purple-500 pl-4">5.4 Grid system 12
+                        cột trong Bootstrap</h3>
+                    <p class="text-gray-700">Sử dụng “container” chứa “row”, mỗi “row” chứa các “col-*” và tổng các col
+                        ≤ 12.</p>
+                    <pre><code>&lt;!-- Ví dụ 3 cột bằng nhau trên md trở lên, mobile thì xếp chồng --&gt;
+&lt;div class="container"&gt;
+  &lt;div class="row"&gt;
+    &lt;div class="col-md-4"&gt;Cột 1&lt;/div&gt;
+    &lt;div class="col-md-4"&gt;Cột 2&lt;/div&gt;
+    &lt;div class="col-md-4"&gt;Cột 3&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Ví dụ layout 3-6-3 trên desktop --&gt;
+&lt;div class="row"&gt;
+  &lt;div class="col-md-3"&gt;Sidebar trái&lt;/div&gt;
+  &lt;div class="col-md-6"&gt;Nội dung chính&lt;/div&gt;
+  &lt;div class="col-md-3"&gt;Sidebar phải&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+
+                <!-- 5.5 Components -->
+                <div class="space-y-4">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-purple-500 pl-4">5.5 Component cơ bản:
+                        navbar, button, card</h3>
+                    <p class="text-sm font-bold text-gray-500 uppercase">Navbar Responsive:</p>
+                    <pre class="text-xs"><code>&lt;nav class="navbar navbar-expand-lg navbar-light bg-light"&gt;
+  &lt;div class="container"&gt;
+    &lt;a class="navbar-brand" href="#"&gt;WED201c&lt;/a&gt;
+    &lt;button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"&gt;
+      &lt;span class="navbar-toggler-icon"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;div class="collapse navbar-collapse" id="mainNav"&gt;
+      &lt;ul class="navbar-nav ms-auto"&gt;
+        &lt;li class="nav-item"&gt;&lt;a class="nav-link" href="#"&gt;Trang chủ&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</code></pre>
+                    <p class="text-sm font-bold text-gray-500 uppercase mt-4">Card Component:</p>
+                    <pre class="text-xs"><code>&lt;div class="card" style="width: 18rem;"&gt;
+  &lt;img src="img.jpg" class="card-img-top" alt="Ảnh"&gt;
+  &lt;div class="card-body"&gt;
+    &lt;h5 class="card-title"&gt;Tiêu đề&lt;/h5&gt;
+    &lt;a href="#" class="btn btn-primary"&gt;Xem thêm&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                </div>
+
+                <!-- 5.6 PE Practical Advice -->
+                <div class="bg-gray-800 p-8 rounded-3xl text-white">
+                    <h3 class="text-2xl font-bold border-l-4 border-yellow-500 pl-4 mb-4">5.6 Thực hành responsive & lưu
+                        ý khi thi PE</h3>
+                    <ul class="space-y-4 text-sm text-gray-300">
+                        <li class="flex gap-3"><span class="text-yellow-500">✔</span> <span>Thiết kế grid 2–3 cột trên
+                                desktop, 1 cột trên mobile.</span></li>
+                        <li class="flex gap-3"><span class="text-yellow-500">✔</span> <span>Sử dụng container, row,
+                                col-* đúng chuẩn, không dùng table để layout.</span></li>
+                        <li class="flex gap-3"><span class="text-yellow-500">✔</span> <span>Đảm bảo có viewport meta để
+                                không bị trừ điểm nặng.</span></li>
+                        <li class="flex gap-3"><span class="text-yellow-500">✔</span> <span>Text không bị quá nhỏ trên
+                                mobile, không phải zoom tay.</span></li>
+                        <li class="flex gap-3"><span class="text-yellow-500">✔</span> <span>Menu trên mobile dễ bấm
+                                (navbar collapse hoặc menu đơn giản).</span></li>
+                    </ul>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <!-- Tab: Practice (New) -->
+        <section id="practice" class="tab-content space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-green-500 to-green-700 px-8 py-10 text-white">
+                    <h2 class="text-3xl font-extrabold mb-2">6. Practice Labs</h2>
+                    <p class="text-green-100">Bài tập thực hành để rèn luyện kỹ năng code tay.</p>
+                </div>
+                <div class="p-8 space-y-8">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                            <h4 class="font-bold text-green-700 mb-2">Lab 1: HTML/CSS Basic</h4>
+                            <p class="text-sm text-gray-600 mb-4">Tạo một trang Profile Card đơn giản có ảnh đại diện,
+                                tên, và các nút mạng xã hội.</p>
+                            <span class="text-xs bg-green-200 text-green-800 px-2 py-1 rounded">Dễ</span>
+                        </div>
+                        <div class="p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                            <h4 class="font-bold text-green-700 mb-2">Lab 2: Responsive Menu</h4>
+                            <p class="text-sm text-gray-600 mb-4">Xây dựng thanh menu điều hướng (Navigation Bar) có thể
+                                co giãn trên mobile (sử dụng Flexbox hoặc Media Queries).</p>
+                            <span class="text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded">Trung bình</span>
+                        </div>
+                        <div class="p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                            <h4 class="font-bold text-green-700 mb-2">Lab 3: Form Validation</h4>
+                            <p class="text-sm text-gray-600 mb-4">Tạo form đăng ký thành viên và dùng JavaScript để kiểm
+                                tra email, mật khẩu không được để trống.</p>
+                            <span class="text-xs bg-red-200 text-red-800 px-2 py-1 rounded">Khó</span>
+                        </div>
+                        <div class="p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                            <h4 class="font-bold text-green-700 mb-2">Lab 4: Bootstrap Layout</h4>
+                            <p class="text-sm text-gray-600 mb-4">Sử dụng Bootstrap để dựng lại giao diện một trang tin
+                                tức (Landing Page).</p>
+                            <span class="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded">Nâng cao</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="p-8 space-y-12">
+                <!-- 6.1 Hướng dẫn thực hành -->
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-green-500 pl-4">6.1 Hướng dẫn thực
+                        hành các bài tập HTML/CSS/JS</h3>
+
+                    <div class="grid gap-6">
+                        <!-- Bài 1 -->
+                        <div class="bg-white border rounded-xl p-6 shadow-sm">
+                            <h4 class="font-bold text-green-700 flex justify-between items-center">
+                                <span>Bài tập 1: Trang cá nhân cơ bản (Tuần 1-2)</span>
+                                <span class="text-xs font-normal text-gray-400 italic">Mục tiêu: HTML/CSS Basic</span>
+                            </h4>
+                            <div class="mt-4 space-y-2 text-sm text-gray-600">
+                                <p class="font-bold">Yêu cầu:</p>
+                                <ul class="list-disc pl-5">
+                                    <li>Header với tên + avatar</li>
+                                    <li>Section "Giới thiệu" (h1, p, ul skills)</li>
+                                    <li>Section "Dự án" (3 cards với hình, title, description)</li>
+                                    <li>Footer với liên hệ (email, phone)</li>
+                                </ul>
+                                <p class="mt-3 p-2 bg-green-50 rounded border border-green-100 text-[12px]"><strong>Tiêu
+                                        chí chấm:</strong> Semantic HTML, viewport meta, CSS box model đúng, responsive
+                                    mobile (text readable).</p>
+                            </div>
+                        </div>
+
+                        <!-- Bài 2 -->
+                        <div class="bg-white border rounded-xl p-6 shadow-sm">
+                            <h4 class="font-bold text-green-700 flex justify-between items-center">
+                                <span>Bài tập 2: Form đăng ký responsive (Tuần 3)</span>
+                                <span class="text-xs font-normal text-gray-400 italic">Mục tiêu: Form &
+                                    Validation</span>
+                            </h4>
+                            <div class="mt-4 space-y-2 text-sm text-gray-600">
+                                <p class="font-bold">Yêu cầu:</p>
+                                <ul class="list-disc pl-5">
+                                    <li>Thẻ <code>&lt;form&gt;</code> với: fullname, email, password, gender(radio), sở
+                                        thích(checkbox), ngày sinh(date), tỉnh thành(select), avatar upload(file),
+                                        submit button</li>
+                                    <li><strong>Validation JS:</strong> Email format, password ≥8 ký tự, required
+                                        fields.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Bài 3 -->
+                        <div class="bg-white border rounded-xl p-6 shadow-sm">
+                            <h4 class="font-bold text-green-700 flex justify-between items-center">
+                                <span>Bài tập 3: Portfolio với JS interaction (Tuần 4-5)</span>
+                                <span class="text-xs font-normal text-gray-400 italic">Mục tiêu: JS Advanced</span>
+                            </h4>
+                            <div class="mt-4 space-y-2 text-sm text-gray-600">
+                                <p class="font-bold">Thêm vào Bài 1:</p>
+                                <ul class="list-disc pl-5">
+                                    <li>Counter skills (JS tăng dần số khi scroll)</li>
+                                    <li>Form liên hệ với validation real-time</li>
+                                    <li>Dark mode toggle (localStorage)</li>
+                                    <li>Smooth scroll cho anchor links</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6.2 Dự án cuối khóa -->
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-green-500 pl-4">6.2 Dự án cuối khóa:
+                        Xây dựng website hoàn chỉnh</h3>
+                    <div class="bg-gray-50 p-6 rounded-2xl border border-gray-200">
+                        <p class="font-bold text-gray-800 mb-4">Yêu cầu Capstone (tương đương PE nâng cao): Website công
+                            ty 5 trang</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="space-y-3">
+                                <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Trang bắt buộc:
+                                </h5>
+                                <ul class="text-sm space-y-1 text-gray-600">
+                                    <li>1. <strong>Trang chủ:</strong> hero banner, services grid, testimonials</li>
+                                    <li>2. <strong>Giới thiệu:</strong> timeline, team cards</li>
+                                    <li>3. <strong>Sản phẩm/Dịch vụ:</strong> filter/search JS, responsive grid</li>
+                                    <li>4. <strong>Blog:</strong> pagination, search</li>
+                                    <li>5. <strong>Liên hệ:</strong> Google Map iframe, form validation</li>
+                                </ul>
+                            </div>
+                            <div class="space-y-3">
+                                <h5 class="text-xs font-bold text-gray-400 uppercase tracking-widest">Kỹ thuật bắt buộc:
+                                </h5>
+                                <ul class="text-sm space-y-1 text-gray-600">
+                                    <li>• Bootstrap navbar responsive</li>
+                                    <li>• Hero section full-width</li>
+                                    <li>• Cards responsive (col-md-4 → col-12 mobile)</li>
+                                    <li>• JS: form validation, image gallery, smooth scroll</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h5 class="text-xs font-bold text-gray-400 uppercase mb-2">Structure folder chuẩn:</h5>
+                            <pre class="text-xs !bg-gray-800"><code>project/
+├── index.html
+├── css/
+│   └── style.css
+├── js/
+│   └── script.js
+├── images/
+└── bootstrap/ (hoặc CDN)</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6.4 Timeline -->
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-green-500 pl-4">6.4 Timeline học tập &
+                        milestone</h3>
+                    <div
+                        class="relative pl-8 space-y-6 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-green-100">
+                        <div class="relative">
+                            <div
+                                class="absolute -left-[28px] top-1.5 w-4 h-4 rounded-full bg-green-500 border-4 border-white">
+                            </div>
+                            <p class="text-sm"><strong>Tuần 1-2:</strong> HTML + CSS cơ bản → Bài tập 1</p>
+                        </div>
+                        <div class="relative">
+                            <div
+                                class="absolute -left-[28px] top-1.5 w-4 h-4 rounded-full bg-green-500 border-4 border-white">
+                            </div>
+                            <p class="text-sm"><strong>Tuần 3:</strong> Forms + JS DOM → Bài tập 2</p>
+                        </div>
+                        <div class="relative">
+                            <div
+                                class="absolute -left-[28px] top-1.5 w-4 h-4 rounded-full bg-green-500 border-4 border-white">
+                            </div>
+                            <p class="text-sm"><strong>Tuần 4:</strong> Flexbox + Responsive → Bài tập 3</p>
+                        </div>
+                        <div class="relative">
+                            <div
+                                class="absolute -left-[28px] top-1.5 w-4 h-4 rounded-full bg-green-500 border-4 border-white">
+                            </div>
+                            <p class="text-sm"><strong>Tuần 5-6:</strong> Bootstrap + JS advanced → Capstone project</p>
+                        </div>
+                        <div class="relative">
+                            <div
+                                class="absolute -left-[28px] top-1.5 w-4 h-4 rounded-full bg-orange-500 border-4 border-white">
+                            </div>
+                            <p class="text-sm"><strong>Tuần 7:</strong> Ôn PE + thi PE</p>
+                        </div>
+                        <div class="relative">
+                            <div
+                                class="absolute -left-[28px] top-1.5 w-4 h-4 rounded-full bg-blue-500 border-4 border-white">
+                            </div>
+                            <p class="text-sm"><strong>Tuần 8-12:</strong> FE preparation + bonus Coursera</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <!-- Tab: Practical Exam (New) -->
+        <section id="pe" class="tab-content space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-red-500 to-red-700 px-8 py-10 text-white">
+                    <h2 class="text-3xl font-extrabold mb-2">7. Practical Exam (PE)</h2>
+                    <p class="text-red-100">Bí kíp để vượt qua kỳ thi thực hành 40% của môn học.</p>
+                </div>
+                <div class="p-8 space-y-8 text-gray-700">
+                    <div class="bg-red-50 p-6 rounded-2xl border border-red-200">
+                        <h4 class="font-bold text-red-800 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Cấu trúc đề thi PE chuẩn (90-120 phút)
+                        </h4>
+                        <ul class="space-y-3">
+                            <li>• <strong>Câu 1:</strong> Tạo cấu trúc thư mục, file HTML/CSS/Images chuẩn (1.0đ)</li>
+                            <li>• <strong>Câu 2:</strong> Dựng header, navigation bar (2.0đ)</li>
+                            <li>• <strong>Câu 3:</strong> Layout nội dung chính (Grid/Flexbox) (3.0đ)</li>
+                            <li>• <strong>Câu 4:</strong> Sidebar và Footer (1.5đ)</li>
+                            <li>• <strong>Câu 5:</strong> JavaScript tương tác (Search/Validation) (2.5đ)</li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-gray-900">Checklist trước khi nộp bài:</h4>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="flex items-center gap-2 border p-3 rounded-lg bg-white">
+                                <input type="checkbox" checked class="accent-red-500">
+                                <span>Kiểm tra đường dẫn ảnh (Image path)</span>
+                            </div>
+                            <div class="flex items-center gap-2 border p-3 rounded-lg bg-white">
+                                <input type="checkbox" checked class="accent-red-500">
+                                <span>Kiểm tra link CSS đã ăn chưa</span>
+                            </div>
+                            <div class="flex items-center gap-2 border p-3 rounded-lg bg-white">
+                                <input type="checkbox" checked class="accent-red-500">
+                                <span>Responsive (Co dãn trình duyệt)</span>
+                            </div>
+                            <div class="flex items-center gap-2 border p-3 rounded-lg bg-white">
+                                <input type="checkbox" checked class="accent-red-500">
+                                <span>JS không bị lỗi đỏ ở Console</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-800 p-6 rounded-2xl text-white">
+                        <h4 class="text-yellow-400 font-bold mb-2">Mẹo "ăn điểm":</h4>
+                        <p class="text-sm italic">"Đừng cố làm quá đẹp, hãy làm ĐÚNG và ĐỦ yêu cầu đề bài trước.
+                            Validation form bằng JS là phần dễ lấy điểm nhưng cũng dễ sai logic nhất, hãy test kỹ!"</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Checklist & Tips -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <h4 class="font-bold text-gray-900 flex items-center gap-2">Checklist trước khi submit PE:</h4>
+                    <div class="space-y-2">
+                        <label
+                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-white transition-colors border border-transparent hover:border-red-100">
+                            <input type="checkbox" class="w-4 h-4 accent-red-600" checked>
+                            <span class="text-sm text-gray-600">Viewport meta có sẵn</span>
+                        </label>
+                        <label
+                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-white transition-colors border border-transparent hover:border-red-100">
+                            <input type="checkbox" class="w-4 h-4 accent-red-600" checked>
+                            <span class="text-sm text-gray-600">F12 → Responsive mode → test mobile/tablet</span>
+                        </label>
+                        <label
+                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-white transition-colors border border-transparent hover:border-red-100">
+                            <input type="checkbox" class="w-4 h-4 accent-red-600" checked>
+                            <span class="text-sm text-gray-600">Console không lỗi JS</span>
+                        </label>
+                        <label
+                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-white transition-colors border border-transparent hover:border-red-100">
+                            <input type="checkbox" class="w-4 h-4 accent-red-600" checked>
+                            <span class="text-sm text-gray-600">Form submit không lỗi</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900 p-6 rounded-3xl text-white relative overflow-hidden">
+                    <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-red-500/10 rounded-full blur-2xl"></div>
+                    <h4 class="font-bold text-yellow-400 mb-4 flex items-center gap-2">Tips đạt 9-10 PE:</h4>
+                    <ul class="text-sm space-y-3 text-gray-300">
+                        <li class="flex gap-2"><span>•</span> <span>Luôn copy-paste viewport meta từ template</span>
+                        </li>
+                        <li class="flex gap-2"><span>•</span> <span>Dùng Bootstrap CDN ngay từ đầu</span></li>
+                        <li class="flex gap-2"><span>•</span> <span>Test responsive F12 trước khi code xong</span></li>
+                        <li class="flex gap-2"><span>•</span> <span>Viết comment rõ ràng từng section</span></li>
+                        <li class="flex gap-2"><span>•</span> <span>Form validation đơn giản nhưng hoạt động</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Easter Egg -->
+            <div class="text-center pt-8">
+                <p class="text-[10px] text-gray-300 italic">"Làm màu tí thôi chứ sau cần nhắn a rush csr phát 3 hôm cho
+                    xong mà ôn thi =))"</p>
+            </div>
+            </div>
+            </div>
+
+            <div class="p-8 space-y-12">
+                <!-- 6.3 Mẫu đề thi PE -->
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-red-500 pl-4">6.3 Mẫu đề thi PE và
+                        tiêu chí chấm điểm</h3>
+
+                    <div class="bg-red-50 p-6 rounded-2xl border border-red-200">
+                        <h4 class="font-bold text-red-900 mb-4 uppercase text-sm tracking-widest">Đề PE mẫu Fall 2024
+                            (120 phút):</h4>
+                        <div class="text-sm text-gray-700 space-y-3">
+                            <p><strong>Đề bài:</strong> Xây dựng trang "FPT Shop Mini" gồm Header, Hero banner, Products
+                                grid, Newsletter form và Footer.</p>
+                            <div class="mt-4 p-4 bg-white rounded-xl border border-red-100 italic">
+                                <strong>Yêu cầu kỹ thuật:</strong> Responsive desktop 3 cột → mobile 1 cột; Bootstrap
+                                grid + custom CSS; Form validation JS; Hover effects.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table chấm điểm -->
+                    <div class="overflow-hidden rounded-xl border border-gray-200 mt-8">
+                        <table class="min-w-full text-sm divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left font-bold text-gray-500">Yêu cầu</th>
+                                    <th class="px-6 py-3 text-center font-bold text-gray-500">Điểm</th>
+                                    <th class="px-6 py-3 text-left font-bold text-gray-500">Lỗi thường gặp</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-3 font-medium">HTML semantic + viewport</td>
+                                    <td class="px-6 py-3 text-center font-bold text-red-600">8</td>
+                                    <td class="px-6 py-3 text-gray-500">Thiếu DOCTYPE, meta viewport</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-3 font-medium">CSS Layout responsive</td>
+                                    <td class="px-6 py-3 text-center font-bold text-red-600">10</td>
+                                    <td class="px-6 py-3 text-gray-500">Không responsive mobile, sai box-model</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-3 font-medium">Bootstrap grid đúng</td>
+                                    <td class="px-6 py-3 text-center font-bold text-red-600">8</td>
+                                    <td class="px-6 py-3 text-gray-500">Dùng table thay row/col</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-3 font-medium">JS Form validation</td>
+                                    <td class="px-6 py-3 text-center font-bold text-red-600">8</td>
+                                    <td class="px-6 py-3 text-gray-500">Không validate, lỗi console</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-3 font-medium">Code clean, comment</td>
+                                    <td class="px-6 py-3 text-center font-bold text-red-600">6</td>
+                                    <td class="px-6 py-3 text-gray-500">Code lộn xộn, thiếu đóng thẻ</td>
+                                </tr>
+                            </tbody>
+                            <tfoot class="bg-gray-900 text-white font-bold">
+                                <tr>
+                                    <td class="px-6 py-3 text-left">TỔNG CỘNG</td>
+                                    <td class="px-6 py-3 text-center">40</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <hr class="border-gray-100">
+
+                <!-- 7.1 Danh sách tài liệu -->
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-red-500 pl-4">7.1 Danh sách tài liệu
+                        tham khảo chính thức</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <h4 class="font-bold text-gray-800">Tài liệu bắt buộc FPT University:</h4>
+                            <ul class="text-sm space-y-2 text-gray-600">
+                                <li>• Giáo trình WED201c chính thức (Studocu): HTML/CSS/JS cơ bản + Bootstrap</li>
+                                <li>• <strong>Coursera Bonus (tối đa +1đ):</strong>
+                                    <ul class="pl-4 mt-1 space-y-1 text-xs text-gray-500">
+                                        <li>- Intro to HTML5 (+0.5đ)</li>
+                                        <li>- Intro to CSS3 (+0.5đ)</li>
+                                        <li>- Interactivity with JS</li>
+                                        <li>- Capstone Project</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="font-bold text-gray-800">Template code chuẩn cho PE:</h4>
+                            <pre class="text-[10px] !bg-slate-900"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="vi"&gt;
+&lt;head&gt;
+   &lt;meta charset="UTF-8"&gt;
+   &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+   &lt;title&gt;PE WED201c&lt;/title&gt;
+   &lt;link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+   &lt;!-- Code ở đây --&gt;
+   &lt;script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-100">
+
+                <!-- 7.2 Hướng dẫn công cụ -->
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-red-500 pl-4">7.2 Hướng dẫn công cụ và
+                        môi trường lập trình</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="space-y-4">
+                            <h4 class="font-bold text-gray-800 uppercase text-xs">VS Code Setup cho WED201c:</h4>
+                            <ul class="grid grid-cols-1 gap-2 text-sm text-gray-600">
+                                <li class="flex gap-2"><span>✅</span> <span><strong>Live Server:</strong> Preview ngay
+                                        lập tức</span></li>
+                                <li class="flex gap-2"><span>✅</span> <span><strong>Prettier:</strong> Format code tự
+                                        động</span></li>
+                                <li class="flex gap-2"><span>✅</span> <span><strong>Auto Rename Tag:</strong> Đồng bộ
+                                        thẻ mở/đóng</span></li>
+                                <li class="flex gap-2"><span>✅</span> <span><strong>HTML CSS Support:</strong>
+                                        Intellisense thông minh</span></li>
+                            </ul>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="font-bold text-gray-800 uppercase text-xs">Chrome DevTools Workflow:</h4>
+                            <ol class="text-sm space-y-2 text-gray-600">
+                                <li>1. <strong>Elements:</strong> Edit HTML/CSS real-time để thử nghiệm.</li>
+                                <li>2. <strong>Console:</strong> Test logic JS và debug lỗi nhanh.</li>
+                                <li>3. <strong>Responsive:</strong> Toggle device toolbar (iPhone/Android).</li>
+                                <li>4. <strong>Network:</strong> Check thời gian tải ảnh và CSS.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-gray-100">
+
+                <!-- 7.3 Lịch thi & Deadline -->
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-gray-900 border-l-4 border-red-500 pl-4">7.3 Lịch thi & deadline
+                        bonus Coursera</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+                            <h4 class="font-bold text-blue-800 mb-3">Lịch thi dự kiến Fall 2025:</h4>
+                            <ul class="text-sm space-y-2 text-blue-700">
+                                <li>• <strong>Progress Test 1-4:</strong> Tuần 3, 6, 9, 11</li>
+                                <li>• <strong>PE:</strong> Tuần 7 (Thứ 7, 120 phút)</li>
+                                <li>• <strong>FE:</strong> Tuần 12 (Quiz lý thuyết)</li>
+                            </ul>
+                        </div>
+                        <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
+                            <h4 class="font-bold text-indigo-800 mb-3">Deadline bonus Coursera:</h4>
+                            <ul class="text-sm space-y-2 text-indigo-700">
+                                <li>• <strong>Course 1-2:</strong> Tuần 4 (+0.5đ)</li>
+                                <li>• <strong>Course 3-5:</strong> Tuần 8 (+0.5đ)</li>
+                                <li class="italic text-xs mt-2">* Nhớ submit certificate để giảng viên verify!</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checklist & Tips (Combined) -->
+                <div class="grid md:grid-cols-2 gap-8 pt-8">
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-gray-900 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Checklist Debug trước khi nộp PE:
+                        </h4>
+                        <div class="space-y-2">
+                            <label
+                                class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-white transition-all border border-transparent hover:border-red-100">
+                                <input type="checkbox" class="w-4 h-4 accent-red-600" checked>
+                                <span class="text-sm text-gray-600">F12 Console: 0 lỗi JS</span>
+                            </label>
+                            <label
+                                class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-white transition-all border border-transparent hover:border-red-100">
+                                <input type="checkbox" class="w-4 h-4 accent-red-600" checked>
+                                <span class="text-sm text-gray-600">Responsive: Mobile/Tablet OK (không zoom tay)</span>
+                            </label>
+                            <label
+                                class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-white transition-all border border-transparent hover:border-red-100">
+                                <input type="checkbox" class="w-4 h-4 accent-red-600" checked>
+                                <span class="text-sm text-gray-600">Form validation: Hoạt động đúng yêu cầu</span>
+                            </label>
+                            <label
+                                class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-white transition-all border border-transparent hover:border-red-100">
+                                <input type="checkbox" class="w-4 h-4 accent-red-600" checked>
+                                <span class="text-sm text-gray-600">Images: Không bị broken, load đúng đường dẫn</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-6 rounded-3xl text-white relative overflow-hidden shadow-xl">
+                        <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-yellow-500/10 rounded-full blur-2xl"></div>
+                        <h4 class="font-bold text-yellow-400 mb-4 flex items-center gap-2">🔥 Bí kíp điểm 9-10 PE:</h4>
+                        <ul class="text-sm space-y-3 text-gray-300">
+                            <li class="flex gap-2"><span>1.</span> <span><strong>Học Coursera → Làm Lab → Ôn
+                                        PE:</strong> Lộ trình vàng để "cân" mọi đề thi.</span></li>
+                            <li class="flex gap-2"><span>2.</span> <span><strong>Group study:</strong> Giải đề PE cũ
+                                    cùng bạn bè để học hỏi logic layout.</span></li>
+                            <li class="flex gap-2"><span>3.</span> <span><strong>VS Code + Live Server:</strong> Combo
+                                    giúp bạn phản ứng nhanh với lỗi.</span></li>
+                            <li class="flex gap-2"><span>4.</span> <span><strong>Test responsive F12:</strong> Luôn kiểm
+                                    tra giao diện trước khi nộp bài 15 phút.</span></li>
+                            <li class="flex gap-2"><span>5.</span> <span><strong>Comment rõ ràng:</strong> Giúp giảng
+                                    viên chấm bài dễ hơn và bạn cũng dễ quản lý code.</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Easter Egg -->
+                <div class="text-center pt-8 opacity-50">
+                    <p class="text-[10px] text-gray-400 italic">"Làm màu tí thôi chứ sau cần nhắn a rush csr phát 3 hôm
+                        cho xong mà ôn thi =))"</p>
+                </div>
+            </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-20 border-t border-gray-200 py-10 bg-white">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex justify-center space-x-4 mb-4">
+                <span class="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-xs font-bold">HTML5</span>
+                <span class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-bold">CSS3</span>
+                <span class="px-3 py-1 bg-yellow-100 text-yellow-600 rounded-full text-xs font-bold">JS ES6</span>
+            </div>
+            <p class="text-sm text-gray-500">Tài liệu học tập WED201c - FPT University HCM</p>
+            <p class="text-[10px] text-gray-400 mt-2">Được thiết kế để tối ưu hóa việc học tập và ôn thi Practical Exam
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'shadow-sm', 'text-fpt-orange');
+                btn.classList.add('text-gray-500');
+            });
+
+            // Show current tab
+            document.getElementById(tabId).classList.add('active');
+
+            // Activate current button
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('bg-white', 'shadow-sm', 'text-fpt-orange');
+            activeBtn.classList.remove('text-gray-500');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+
+</html>

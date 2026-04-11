@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương 3: Processes & Threads</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .card-animate {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-animate:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; }
+        
+        .state-node {
+            transition: all 0.3s ease;
+        }
+        .state-node:hover {
+            fill: #3b82f6;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-slate-400 hidden md:flex flex-col p-8 z-50 border-r border-slate-800">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <i data-lucide="cpu" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-extrabold text-xl tracking-tight">OS Hub</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Chương 3: Processes & Threads</p>
+            </div>
+        </div>
+        
+        <nav class="space-y-3 flex-1 overflow-y-auto">
+            <p class="text-[10px] font-bold text-slate-600 uppercase mb-4 px-3">Phần 1: Tiến trình</p>
+            <a href="#proc-def" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition active">
+                <i data-lucide="info" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">Định nghĩa & Mô hình</span>
+            </a>
+            <a href="#proc-lifecycle" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="git-branch" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">Vòng đời & Phân cấp</span>
+            </a>
+            <a href="#proc-states" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">Trạng thái & PCB</span>
+            </a>
+            <p class="text-[10px] font-bold text-slate-600 uppercase mt-6 mb-4 px-3">Phần 2: Luồng</p>
+            <a href="#thread-def" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="milestone" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">Định nghĩa & Lợi ích</span>
+            </a>
+            <a href="#thread-imp" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="binary" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">Cài đặt & Thư viện</span>
+            </a>
+            <a href="#thread-special" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="zap" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">Khái niệm đặc biệt</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-72 min-h-screen">
+        
+        <!-- Header -->
+        <header class="sticky top-0 glass-header z-40 p-4 px-8 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-blue-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">Chapter 3: Processes & Threads</span>
+            </div>
+            <div class="text-slate-500 text-xs font-semibold uppercase">Tiếng Việt (Chính) | English (Keywords)</div>
+        </header>
+
+        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-24">
+
+            <!-- Section 1: Process Definition -->
+            <section id="proc-def" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-blue-100 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 1.1 - 1.2</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Tiến trình (Processes)</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">"Một chương trình đang thực thi là một thực thể hoạt động."</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-blue-600">
+                            <i data-lucide="book-open"></i> Định nghĩa & Mô hình
+                        </h3>
+                        <ul class="space-y-4 text-sm text-slate-600">
+                            <li class="p-4 bg-slate-50 rounded-2xl">
+                                <strong>Tiến trình (Process):</strong> Là một chương trình đang thực thi (program in execution), một bản thể (instance) trong bộ nhớ với tài nguyên riêng: Code, Data, Stack, PC, Register...
+                            </li>
+                            <li class="p-4 bg-slate-50 rounded-2xl">
+                                <strong>Không gian địa chỉ (Address space):</strong> Mỗi tiến trình có vùng nhớ riêng biệt mà nó có thể truy cập.
+                            </li>
+                            <li class="p-4 bg-blue-50 border border-blue-100 rounded-2xl italic text-blue-800">
+                                💡 Ví dụ: Công thức nấu ăn = Chương trình (Passive); Hành động nấu ăn = Tiến trình (Active).
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-600/20 blur-3xl rounded-full"></div>
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i data-lucide="cpu"></i> Sự song song giả (Pseudo-parallelism)
+                        </h3>
+                        <div class="space-y-4 text-sm text-slate-300">
+                            <p>Trên hệ thống đơn xử lý, OS chuyển đổi nhanh giữa các tiến trình để tạo cảm giác chạy song song.</p>
+                            <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+                                <h4 class="font-bold text-blue-400 mb-2">Chuyển ngữ cảnh (Context Switching)</h4>
+                                <ul class="space-y-2 list-disc list-inside">
+                                    <li>Lưu trạng thái tiến trình cũ.</li>
+                                    <li>Khôi phục trạng thái tiến trình mới.</li>
+                                    <li>Chi phí thừa (Overhead): Thời gian chuyển đổi không thực hiện việc có ích.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 1.3 - 1.5: Creation, Hierarchy, Termination -->
+            <section id="proc-lifecycle" class="reveal space-y-12 scroll-mt-24">
+                <div class="border-l-4 border-indigo-600 pl-6">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Vòng đời & Phân cấp</h2>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate">
+                        <h4 class="font-bold text-indigo-600 mb-4 italic">Khởi tạo (Creation)</h4>
+                        <ul class="text-xs text-slate-600 space-y-2">
+                            <li>• Khởi tạo hệ thống (Initialization).</li>
+                            <li>• Lời gọi hệ thống: <code class="bg-slate-100 px-1">fork()</code> (UNIX), <code class="bg-slate-100 px-1">CreateProcess()</code> (Win).</li>
+                            <li>• Yêu cầu người dùng / Tiến trình theo lô (Batch).</li>
+                        </ul>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate">
+                        <h4 class="font-bold text-indigo-600 mb-4 italic">Phân cấp (Hierarchies)</h4>
+                        <ul class="text-xs text-slate-600 space-y-2">
+                            <li>• <strong>UNIX:</strong> Cấu trúc cây (Parent - Descendants).</li>
+                            <li>• <strong>Windows:</strong> Các tiến trình ngang hàng, quản lý qua <strong>handle</strong>.</li>
+                        </ul>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate">
+                        <h4 class="font-bold text-indigo-600 mb-4 italic">Kết thúc (Termination)</h4>
+                        <ul class="text-xs text-slate-600 space-y-2">
+                            <li>• Thoát bình thường / Thoát do lỗi (Error exit).</li>
+                            <li>• Lỗi nghiêm trọng (Fatal error) - VD: chia cho 0.</li>
+                            <li>• Bị giết bởi tiến trình khác (Killed).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 1.6 - 1.8: States & PCB -->
+            <section id="proc-states" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Trạng thái & Quản lý (PCB)</h2>
+                </div>
+
+                <!-- Interactive State Diagram -->
+                <div class="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-inner flex flex-col items-center">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-10 italic">Sơ đồ chuyển trạng thái (State Transitions)</h3>
+                    <svg width="600" height="200" viewBox="0 0 600 200" class="max-w-full">
+                        <!-- New -->
+                        <circle cx="50" cy="100" r="35" class="state-node fill-slate-100 stroke-slate-300" />
+                        <text x="50" y="105" text-anchor="middle" class="text-[10px] font-bold">NEW</text>
+                        <!-- Ready -->
+                        <circle cx="200" cy="100" r="40" class="state-node fill-amber-50 stroke-amber-200" />
+                        <text x="200" y="105" text-anchor="middle" class="text-[10px] font-bold">READY</text>
+                        <!-- Running -->
+                        <circle cx="400" cy="100" r="45" class="state-node fill-blue-50 stroke-blue-200" />
+                        <text x="400" y="105" text-anchor="middle" class="text-[10px] font-bold">RUNNING</text>
+                        <!-- Blocked -->
+                        <circle cx="300" cy="180" r="35" class="state-node fill-rose-50 stroke-rose-200" />
+                        <text x="300" y="185" text-anchor="middle" class="text-[10px] font-bold">BLOCKED</text>
+                        <!-- Terminated -->
+                        <circle cx="550" cy="100" r="35" class="state-node fill-slate-200 stroke-slate-400" />
+                        <text x="550" y="105" text-anchor="middle" class="text-[10px] font-bold">TERM</text>
+                        
+                        <!-- Arrows (Simple lines) -->
+                        <path d="M85 100 H160" stroke="#cbd5e1" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+                        <path d="M240 90 H355" stroke="#3b82f6" stroke-width="2" fill="none"/>
+                        <path d="M355 110 H240" stroke="#cbd5e1" stroke-width="2" fill="none"/>
+                        <path d="M400 145 V180 H335" stroke="#f43f5e" stroke-width="2" fill="none"/>
+                        <path d="M265 180 H200 V140" stroke="#10b981" stroke-width="2" fill="none"/>
+                    </svg>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8 w-full text-[11px]">
+                        <div class="p-3 bg-slate-50 rounded-xl"><strong>1. New → Ready:</strong> Tiến trình được nạp vào bộ nhớ.</div>
+                        <div class="p-3 bg-blue-50 rounded-xl border border-blue-100"><strong>2. Ready → Running:</strong> Bộ lập lịch (Scheduler) chọn.</div>
+                        <div class="p-3 bg-amber-50 rounded-xl border border-amber-100"><strong>3. Running → Ready:</strong> Hết thời gian CPU (Time slice).</div>
+                        <div class="p-3 bg-rose-50 rounded-xl border border-rose-100"><strong>4. Running → Blocked:</strong> Chờ sự kiện (I/O...).</div>
+                        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100"><strong>5. Blocked → Ready:</strong> Sự kiện đã xảy ra.</div>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8 mt-12">
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <h3 class="text-xl font-bold mb-6 italic">Khối điều khiển tiến trình (PCB)</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-3">
+                                <div class="p-3 bg-slate-50 rounded-xl"><span class="font-bold text-blue-600 block text-xs">ID & State</span> <p class="text-[11px] text-slate-500">Định danh và trạng thái</p></div>
+                                <div class="p-3 bg-slate-50 rounded-xl"><span class="font-bold text-blue-600 block text-xs">Registers & PC</span> <p class="text-[11px] text-slate-500">Thanh ghi & Bộ đếm</p></div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-slate-50 rounded-xl"><span class="font-bold text-blue-600 block text-xs">Memory Info</span> <p class="text-[11px] text-slate-500">Địa chỉ & Con trỏ bộ nhớ</p></div>
+                                <div class="p-3 bg-slate-50 rounded-xl"><span class="font-bold text-blue-600 block text-xs">I/O Status</span> <p class="text-[11px] text-slate-500">Tệp mở & Thiết bị</p></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CPU Utilization Calculator -->
+                    <div class="p-8 bg-emerald-900 text-white rounded-[2.5rem] shadow-2xl flex flex-col justify-center">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i data-lucide="calculator" class="text-emerald-400"></i> Hiệu suất CPU (CPU Utilization)
+                        </h3>
+                        <p class="text-sm text-emerald-100 mb-6 italic">Công thức: Utilization = 1 – pⁿ</p>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <label class="text-xs font-bold w-32 uppercase tracking-widest text-emerald-400">Số tiến trình (n):</label>
+                                <input id="proc-n" type="number" value="10" class="bg-emerald-800/50 border border-emerald-700 rounded-lg px-3 py-1 text-sm w-full focus:outline-none focus:border-emerald-400">
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <label class="text-xs font-bold w-32 uppercase tracking-widest text-emerald-400">Chờ I/O (p):</label>
+                                <input id="proc-p" type="number" step="0.1" value="0.8" class="bg-emerald-800/50 border border-emerald-700 rounded-lg px-3 py-1 text-sm w-full focus:outline-none focus:border-emerald-400">
+                            </div>
+                            <div class="pt-4 border-t border-emerald-700 flex justify-between items-center">
+                                <span class="text-xs font-bold uppercase text-emerald-400">Kết quả:</span>
+                                <span id="util-result" class="text-2xl font-black text-emerald-300">89.26%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Threads -->
+            <section id="thread-def" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-purple-100 text-purple-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 2.1 - 2.3</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Luồng (Threads)</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">"Đơn vị thực thi CPU nhỏ nhất trong một tiến trình."</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300">
+                        <i data-lucide="zap" class="text-amber-500 mb-4"></i>
+                        <h4 class="font-bold text-slate-800 mb-2">Responsiveness</h4>
+                        <p class="text-xs text-slate-500 italic leading-relaxed">Tính phản hồi: Chương trình chạy tiếp dù một phần bị chặn.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300">
+                        <i data-lucide="share-2" class="text-blue-500 mb-4"></i>
+                        <h4 class="font-bold text-slate-800 mb-2">Resource Sharing</h4>
+                        <p class="text-xs text-slate-500 italic leading-relaxed">Chia sẻ tài nguyên: Threads dùng chung bộ nhớ và tệp của Process.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300">
+                        <i data-lucide="trending-down" class="text-emerald-500 mb-4"></i>
+                        <h4 class="font-bold text-slate-800 mb-2">Economy</h4>
+                        <p class="text-xs text-slate-500 italic leading-relaxed">Tiết kiệm: Tạo luồng nhanh và ít tốn tài nguyên hơn tạo tiến trình.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300">
+                        <i data-lucide="maximize" class="text-purple-500 mb-4"></i>
+                        <h4 class="font-bold text-slate-800 mb-2">Scalability</h4>
+                        <p class="text-xs text-slate-500 italic leading-relaxed">Khả năng mở rộng: Chạy song song thật trên hệ thống đa nhân.</p>
+                    </div>
+                </div>
+
+                <div class="p-8 bg-purple-50 border border-purple-100 rounded-[2.5rem]">
+                    <h3 class="text-lg font-bold text-purple-900 mb-4 italic flex items-center gap-2">
+                        <i data-lucide="alert-triangle"></i> Lưu ý quan trọng (Notes)
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-6 text-sm text-purple-800">
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 rounded-full bg-purple-500 mt-2"></div>
+                            <p>Threads có PC, Register và Stack riêng nhưng chia sẻ chung không gian địa chỉ.</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="w-2 h-2 rounded-full bg-purple-500 mt-2"></div>
+                            <p><strong>Không có bảo vệ</strong> giữa các luồng trong cùng một tiến trình.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2.4 - 2.8: Implementation & Libraries -->
+            <section id="thread-imp" class="reveal space-y-12 scroll-mt-24">
+                <div class="flex items-end justify-between border-l-4 border-purple-600 pl-6">
+                    <div>
+                        <span class="text-purple-600 font-bold text-xs uppercase tracking-widest">Implementation</span>
+                        <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Cài đặt & Thư viện (Libraries)</h2>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <!-- User Space -->
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h4 class="text-lg font-bold mb-4 text-blue-600">User Space Threads</h4>
+                        <p class="text-xs text-slate-500 mb-4 italic">OS không biết sự tồn tại của luồng.</p>
+                        <ul class="space-y-3 text-[11px] text-slate-600">
+                            <li class="flex items-center gap-2 text-green-600"><i data-lucide="plus" class="w-3 h-3"></i> Lập lịch rất nhanh, linh hoạt.</li>
+                            <li class="flex items-center gap-2 text-rose-600"><i data-lucide="minus" class="w-3 h-3"></i> Một luồng chặn (block) = Toàn bộ Process chặn.</li>
+                        </ul>
+                    </div>
+                    <!-- Kernel Space -->
+                    <div class="p-8 bg-slate-900 rounded-[2.5rem] shadow-xl text-white card-animate">
+                        <h4 class="text-lg font-bold mb-4 text-blue-400">Kernel Threads</h4>
+                        <p class="text-xs text-slate-400 mb-4 italic">Nhân hệ điều hành quản lý trực tiếp.</p>
+                        <ul class="space-y-3 text-[11px] text-slate-300">
+                            <li class="flex items-center gap-2 text-emerald-400"><i data-lucide="plus" class="w-3 h-3"></i> Song song thực sự, chặn một không ảnh hưởng khác.</li>
+                            <li class="flex items-center gap-2 text-rose-400"><i data-lucide="minus" class="w-3 h-3"></i> Chậm hơn do cần Lời gọi hệ thống (System call).</li>
+                        </ul>
+                    </div>
+                    <!-- Hybrid -->
+                    <div class="p-8 bg-purple-600 rounded-[2.5rem] shadow-xl text-white card-animate">
+                        <h4 class="text-lg font-bold mb-4 text-white">Hybrid Model</h4>
+                        <p class="text-xs text-purple-100 mb-4 italic">Sự kết hợp tối ưu (Multiplexing).</p>
+                        <p class="text-[11px] leading-relaxed">Nhiều luồng người dùng được gán lên luồng nhân. Tận dụng ưu điểm của cả hai: Hiệu năng + Song song thực.</p>
+                    </div>
+                </div>
+
+                <!-- Libraries Grid -->
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-3">
+                        <i data-lucide="terminal" class="text-slate-400"></i>
+                        <div><p class="text-xs font-bold">POSIX Pthreads</p><p class="text-[10px] text-slate-400 italic">Tiêu chuẩn UNIX/Linux</p></div>
+                    </div>
+                    <div class="p-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-3">
+                        <i data-lucide="windows" class="text-blue-400"></i>
+                        <div><p class="text-xs font-bold">Win32 Threads</p><p class="text-[10px] text-slate-400 italic">Giao diện cho Kernel Threads</p></div>
+                    </div>
+                    <div class="p-4 bg-white border border-slate-100 rounded-2xl flex items-center gap-3">
+                        <i data-lucide="box" class="text-orange-400"></i>
+                        <div><p class="text-xs font-bold">Java Threads</p><p class="text-[10px] text-slate-400 italic">JVM ánh xạ lên OS chủ</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2.9 - 2.11: Special Concepts & Legacy -->
+            <section id="thread-special" class="reveal space-y-12 scroll-mt-24 pb-20">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Khái niệm Luồng nâng cao</h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Scheduler Activations & Pop-up -->
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:border-blue-200 transition-colors">
+                            <h4 class="font-bold text-blue-600 mb-3 flex items-center gap-2 italic">
+                                <i data-lucide="megaphone" class="w-4 h-4"></i> Scheduler Activations
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed mb-4">Nhân OS giao tiếp với trình quản lý luồng người dùng qua <strong>upcalls</strong>. Giúp giữ tính linh hoạt của User Threads nhưng xử lý được vấn đề Blocking.</p>
+                        </div>
+                        <div class="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:border-emerald-200 transition-colors">
+                            <h4 class="font-bold text-emerald-600 mb-3 flex items-center gap-2 italic">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i> Pop-Up Threads
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">Xử lý thông điệp đến bằng cách tạo luồng mới "tức thì", không cần khôi phục trạng thái cũ. Cực nhanh và độ trễ thấp.</p>
+                        </div>
+                    </div>
+
+                    <!-- Multithreaded Code Conversion -->
+                    <div class="p-8 bg-slate-100 rounded-[2.5rem] border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-6 flex items-center gap-2 italic underline">
+                            <i data-lucide="git-merge" class="w-5 h-5"></i> Making Code Multithreaded
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <p class="text-[11px] font-bold text-slate-500 uppercase mb-2">Vấn đề (Problem)</p>
+                                <p class="text-xs font-bold text-rose-600">Biến toàn cục (Global variables) gây xung đột dữ liệu.</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                <p class="text-[11px] font-bold text-slate-500 uppercase mb-2">Giải pháp (Solutions)</p>
+                                <ul class="text-[11px] text-slate-600 space-y-2">
+                                    <li>• Cấp bản sao riêng (Private copy) cho mỗi Thread.</li>
+                                    <li>• Dùng hàm thư viện: <code class="bg-slate-50 px-1">create_global</code>, <code class="bg-slate-50 px-1">set_global</code>.</li>
+                                    <li>• Bọc thư viện bằng "jackets" để tránh chồng chéo (non-reentrant).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 py-12 px-8 text-center border-t border-slate-800">
+            <div class="flex flex-col items-center gap-4">
+                <p class="text-slate-500 text-sm">Hệ thống hóa Chương 3 • Tiến trình & Luồng • 2024</p>
+                <div class="flex gap-4 text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                    <span>Concurrency</span>
+                    <span class="text-blue-600">•</span>
+                    <span>Parallelism</span>
+                    <span class="text-blue-600">•</span>
+                    <span>Throughput</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // CPU Utilization Calculator Logic
+        const inputN = document.getElementById('proc-n');
+        const inputP = document.getElementById('proc-p');
+        const resultDisplay = document.getElementById('util-result');
+
+        function calculateUtil() {
+            const n = parseFloat(inputN.value);
+            const p = parseFloat(inputP.value);
+            if (isNaN(n) || isNaN(p)) return;
+            const util = 1 - Math.pow(p, n);
+            resultDisplay.textContent = (util * 100).toFixed(2) + "%";
+        }
+
+        inputN.addEventListener('input', calculateUtil);
+        inputP.addEventListener('input', calculateUtil);
+
+        // Scroll reveal & Sidebar highlight
+        const links = document.querySelectorAll('.sidebar-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if (pageYOffset >= s.offsetTop - 150) current = s.getAttribute('id');
+            });
+            links.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href').includes(current)) l.classList.add('active');
+            });
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
+        }, { threshold: 0.1 });
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

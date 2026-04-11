@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương 6: Memory Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .card-animate {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-animate:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; }
+        
+        .memory-block {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-slate-400 hidden md:flex flex-col p-8 z-50 border-r border-slate-800">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-900/20">
+                <i data-lucide="database" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-extrabold text-xl tracking-tight">OS Hub</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Chương 6: Memory Manager</p>
+            </div>
+        </div>
+        
+        <nav class="space-y-2 flex-1 overflow-y-auto">
+            <p class="text-[10px] font-bold text-slate-600 uppercase mb-4 px-3">Nội dung</p>
+            <a href="#overview" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition active">
+                <i data-lucide="layers" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">1. Tổng quan</span>
+            </a>
+            <a href="#no-abstraction" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="history" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">2. Không trừu tượng</span>
+            </a>
+            <a href="#abstraction" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="box" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">3. Trừu tượng bộ nhớ</span>
+            </a>
+            <a href="#virtual-mem" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="cloud" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">4. Bộ nhớ ảo (Virtual)</span>
+            </a>
+            <a href="#paging-tech" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">Phân trang & TLB</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-72 min-h-screen">
+        
+        <!-- Header -->
+        <header class="sticky top-0 glass-header z-40 p-4 px-8 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full">Chapter 6: Memory Management</span>
+            </div>
+            <div class="text-slate-500 text-xs font-semibold uppercase">Tiếng Việt (Chính) | English (Keywords)</div>
+        </header>
+
+        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-24">
+
+            <!-- Section 1: Overview -->
+            <section id="overview" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-emerald-100 text-emerald-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 1</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Tổng quan về Quản lý Bộ nhớ</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">"Phân cấp bộ nhớ: Cân bằng giữa tốc độ, dung lượng và tính bền vững."</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Memory Hierarchy -->
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center mb-4"><i data-lucide="zap"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Cache</h4>
+                        <p class="text-xs text-slate-500">Rất nhanh, dung lượng nhỏ, dễ mất dữ liệu (volatile).</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4"><i data-lucide="database"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">RAM (Main Memory)</h4>
+                        <p class="text-xs text-slate-500">Tốc độ trung bình, dễ mất dữ liệu (volatile).</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mb-4"><i data-lucide="hard-drive"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Disk Storage</h4>
+                        <p class="text-xs text-slate-500">Chậm, dung lượng lớn, không mất dữ liệu (nonvolatile).</p>
+                    </div>
+                </div>
+
+                <div class="p-8 bg-emerald-900 text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/20 blur-3xl rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <i data-lucide="settings" class="text-emerald-400"></i> Vai trò của Memory Manager
+                    </h3>
+                    <div class="grid md:grid-cols-3 gap-6 text-sm text-emerald-100">
+                        <div class="space-y-2">
+                            <span class="font-bold text-white block uppercase text-[10px] tracking-widest mb-1">Theo dõi</span>
+                            <p>Theo dõi vùng nhớ đang dùng (used) hoặc còn trống (free).</p>
+                        </div>
+                        <div class="space-y-2">
+                            <span class="font-bold text-white block uppercase text-[10px] tracking-widest mb-1">Cấp phát</span>
+                            <p>Cấp phát (Allocate) và thu hồi (Release) bộ nhớ cho tiến trình.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <span class="font-bold text-white block uppercase text-[10px] tracking-widest mb-1">Hoán đổi</span>
+                            <p>Quản lý hoán đổi (Swapping) giữa RAM và ổ đĩa.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: No Memory Abstraction -->
+            <section id="no-abstraction" class="reveal space-y-12 scroll-mt-24">
+                <div class="border-l-4 border-slate-900 pl-6">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Không trừu tượng hóa bộ nhớ (No Memory Abstraction)</h2>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                            <h4 class="font-bold text-slate-800 mb-3 italic">Đặc điểm hệ thống cũ (trước 1980)</h4>
+                            <ul class="text-sm text-slate-600 space-y-2 list-disc list-inside">
+                                <li>Chỉ chạy một chương trình tại một thời điểm.</li>
+                                <li>Không có hoán đổi (swapping) hay phân trang (paging).</li>
+                                <li>Hệ điều hành và chương trình nạp trực tiếp vào bộ nhớ vật lý.</li>
+                            </ul>
+                        </div>
+                        <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                            <h4 class="font-bold text-slate-800 mb-3 italic">Tổ chức bộ nhớ</h4>
+                            <p class="text-sm text-slate-600 mb-4">Hệ điều hành có thể nằm ở đầu (RAM) hoặc cuối (ROM). Sử dụng <strong>Limit Register</strong> để bảo vệ vùng nhớ của OS.</p>
+                            <div class="flex flex-col gap-1 max-w-[200px] mx-auto border-2 border-slate-200 p-2 rounded-xl">
+                                <div class="memory-block bg-rose-50 text-rose-600">Operating System (ROM)</div>
+                                <div class="memory-block bg-slate-50 py-12 text-slate-400">User Program</div>
+                                <div class="memory-block bg-blue-50 text-blue-600">Operating System (RAM)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="p-8 bg-slate-100 rounded-[2.5rem] border border-slate-200">
+                            <h4 class="font-bold text-slate-800 mb-4 italic underline">Đa nhiệm sơ khai & Tái định vị tĩnh</h4>
+                            <div class="space-y-4 text-sm text-slate-600">
+                                <div class="p-4 bg-white rounded-xl shadow-sm">
+                                    <strong>Khóa bảo vệ (Protection Keys):</strong> Bộ nhớ chia thành khối cố định, mỗi khối có khóa để ngăn truy cập trái phép.
+                                </div>
+                                <div class="p-4 bg-white rounded-xl shadow-sm">
+                                    <strong>Static Relocation (Tái định vị tĩnh):</strong> Địa chỉ tương đối khi biên dịch. Khi nạp tại địa chỉ $n$, tất cả địa chỉ được cộng thêm $n$.
+                                </div>
+                                <p class="text-xs text-rose-600 font-bold italic">⚠️ Vấn đề: Phân mảnh bên trong (Internal fragmentation), không thể di chuyển chương trình khi đang chạy.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Memory Abstraction -->
+            <section id="abstraction" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Trừu tượng hóa bộ nhớ (Memory Abstraction)</h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Address Space & Base/Limit -->
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-emerald-600">
+                            <i data-lucide="box"></i> Không gian địa chỉ (Address Space)
+                        </h3>
+                        <p class="text-sm text-slate-600 mb-6">Tách biệt bộ nhớ vật lý. Tiến trình dùng địa chỉ logic bắt đầu từ 0. Giúp các tiến trình độc lập và được bảo vệ.</p>
+                        <div class="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl">
+                            <h4 class="text-xs font-bold uppercase text-emerald-700 mb-3">Base & Limit Registers</h4>
+                            <ul class="text-xs text-emerald-800 space-y-2">
+                                <li>• <strong>Base:</strong> Địa chỉ vật lý bắt đầu.</li>
+                                <li>• <strong>Limit:</strong> Độ dài (địa chỉ tối đa).</li>
+                                <li class="pt-2 border-t border-emerald-200">Logic: $Vật lý = Logic + Base$ (nếu $Logic < Limit$).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Swapping -->
+                    <div class="p-8 bg-blue-900 text-white rounded-[2.5rem] shadow-xl card-animate">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i data-lucide="refresh-cw"></i> Hoán đổi (Swapping)
+                        </h3>
+                        <p class="text-sm text-blue-100 mb-6 italic leading-relaxed">Khi bộ nhớ đầy, đưa tiến trình ra đĩa (Swap out) và đưa tiến trình khác vào (Swap in).</p>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold">1</div>
+                                <p class="text-xs">Gom bộ nhớ (Memory Compaction): Di chuyển tiến trình để gộp vùng trống.</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold">2</div>
+                                <p class="text-xs">Cấp thêm vùng đệm (Extra memory) cho Stack và Data tăng trưởng.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bitmap vs Linked List -->
+                <div class="grid lg:grid-cols-2 gap-8 mt-12">
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <h4 class="font-bold text-slate-800 mb-6">Quản lý bằng Bitmaps</h4>
+                        <p class="text-sm text-slate-600 mb-4 italic">Bộ nhớ chia thành đơn vị bằng nhau. Mỗi bit đại diện cho 1 đơn vị.</p>
+                        <div class="flex flex-wrap gap-1 font-mono text-[10px] mb-4">
+                            <span class="w-6 h-6 bg-emerald-500 text-white flex items-center justify-center rounded">1</span>
+                            <span class="w-6 h-6 bg-emerald-500 text-white flex items-center justify-center rounded">1</span>
+                            <span class="w-6 h-6 bg-slate-200 text-slate-500 flex items-center justify-center rounded">0</span>
+                            <span class="w-6 h-6 bg-slate-200 text-slate-500 flex items-center justify-center rounded">0</span>
+                            <span class="w-6 h-6 bg-emerald-500 text-white flex items-center justify-center rounded">1</span>
+                        </div>
+                        <p class="text-[10px] text-rose-500 font-bold uppercase">Nhược điểm: Tìm k đơn vị trống liên tiếp rất chậm.</p>
+                    </div>
+
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <h4 class="font-bold text-slate-800 mb-4">Quản lý bằng Linked Lists</h4>
+                        <p class="text-xs text-slate-600 mb-4 italic">Mỗi mục (node) chứa: Loại (Process/Hole), Start, Length.</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="p-3 bg-slate-50 rounded-xl text-[11px]"><strong>First Fit:</strong> Chọn lỗ đầu tiên đủ lớn (Nhanh).</div>
+                            <div class="p-3 bg-slate-50 rounded-xl text-[11px]"><strong>Best Fit:</strong> Chọn lỗ nhỏ nhất vừa đủ (Tối ưu nhưng tạo rác).</div>
+                            <div class="p-3 bg-slate-50 rounded-xl text-[11px]"><strong>Next Fit:</strong> Tiếp tục từ vị trí trước đó.</div>
+                            <div class="p-3 bg-slate-50 rounded-xl text-[11px]"><strong>Worst Fit:</strong> Chọn lỗ lớn nhất (Ít dùng).</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Virtual Memory -->
+            <section id="virtual-mem" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-rose-100 text-rose-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 4</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Bộ nhớ ảo (Virtual Memory)</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">"Cho phép chạy chương trình lớn hơn cả RAM vật lý."</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Overlays -->
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h3 class="text-xl font-bold mb-4 text-rose-600">Overlays (Sơ khai)</h3>
+                        <p class="text-sm text-slate-600 mb-4 leading-relaxed">Chia chương trình thủ công thành các phần nhỏ. Trình quản lý Overlay ghi đè các phần cũ trên RAM.</p>
+                        <ul class="text-[11px] text-slate-500 space-y-1 italic">
+                            <li>• Ưu điểm: Không cần OS hỗ trợ.</li>
+                            <li>• Nhược điểm: Lập trình viên phải tự quản lý (rất phức tạp).</li>
+                        </ul>
+                    </div>
+                    <!-- Paging Definition -->
+                    <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-xl card-animate">
+                        <h3 class="text-xl font-bold mb-4 text-emerald-400">Phân trang (Paging)</h3>
+                        <p class="text-sm text-slate-300 mb-4 leading-relaxed italic">Mỗi chương trình có không gian ảo chia thành các <strong>Trang (Pages)</strong>. RAM chia thành các <strong>Khung trang (Page Frames)</strong>.</p>
+                        <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+                            <p class="text-xs">MMU (Hardware) tự động ánh xạ Địa chỉ ảo → Địa chỉ vật lý qua Bảng trang (Page Table).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page Fault & Mapping -->
+                <div class="p-10 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
+                    <h3 class="text-xl font-bold mb-8 text-center italic">Cơ chế Page Fault & Mapping</h3>
+                    <div class="grid md:grid-cols-2 gap-10">
+                        <div class="space-y-4">
+                            <h4 class="font-bold text-rose-600 uppercase text-xs tracking-widest">Lỗi trang (Page Fault)</h4>
+                            <p class="text-sm text-slate-600">Nếu trang được truy cập chưa có trong RAM (bit vắng mặt) → Xảy ra lỗi trang → OS tải trang từ đĩa và chạy lại lệnh.</p>
+                            <div class="p-4 bg-rose-50 rounded-xl border border-rose-100 text-[11px] text-rose-800 italic">
+                                Chú ý: Việc trao đổi dữ liệu RAM ↔ Đĩa diễn ra theo đơn vị Trang (Page).
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="font-bold text-emerald-600 uppercase text-xs tracking-widest">Cấu trúc địa chỉ ảo</h4>
+                            <div class="flex font-mono text-center">
+                                <div class="flex-1 p-3 bg-emerald-100 border border-emerald-300 rounded-l-lg text-emerald-800">Số trang (Page Number)</div>
+                                <div class="flex-1 p-3 bg-blue-100 border border-blue-300 rounded-r-lg text-blue-800">Độ lệch (Offset)</div>
+                            </div>
+                            <p class="text-sm text-slate-600">$Vật lý = Số khung \times Kích thước trang + Độ lệch$</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Speeding Up Paging & Advanced Tables -->
+            <section id="paging-tech" class="reveal space-y-12 scroll-mt-24 pb-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Kỹ thuật Phân trang Nâng cao</h2>
+                </div>
+
+                <!-- TLB Section -->
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="p-8 bg-indigo-900 text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
+                        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/20 blur-3xl rounded-full"></div>
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                            <i data-lucide="zap" class="text-indigo-400"></i> TLB (Translation Lookaside Buffer)
+                        </h3>
+                        <p class="text-sm text-indigo-100 mb-6 italic">Bộ đệm tra cứu cực nhanh bên trong MMU, lưu trữ các ánh xạ ảo → vật lý gần nhất.</p>
+                        <div class="grid grid-cols-2 gap-4 text-[11px]">
+                            <div class="p-3 bg-white/10 rounded-xl"><strong>TLB Hit:</strong> Tìm thấy trong đệm → Truy cập cực nhanh.</div>
+                            <div class="p-3 bg-white/10 rounded-xl"><strong>TLB Miss:</strong> Phải đọc từ bảng trang trong bộ nhớ.</div>
+                        </div>
+                    </div>
+
+                    <!-- Page Table Design -->
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
+                        <h3 class="text-xl font-bold mb-4">Thiết kế Bảng trang (Page Tables)</h3>
+                        <div class="space-y-4 text-sm text-slate-600">
+                            <div class="flex items-start gap-3">
+                                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></div>
+                                <p><strong>Thanh ghi nhanh:</strong> Nhanh nhưng gây chậm khi chuyển tiến trình (phải nạp lại).</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></div>
+                                <p><strong>Bộ nhớ chính:</strong> Chuyển tiến trình nhanh (chỉ nạp thanh ghi trỏ) nhưng truy cập bộ nhớ chậm.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Multilevel & Inverted Tables -->
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h4 class="font-bold text-slate-800 mb-4 italic">Bảng trang nhiều cấp (Multilevel)</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed italic mb-4">"Phân trang cho bảng trang" — chỉ nạp những phần cần thiết vào RAM để tiết kiệm không gian.</p>
+                        <div class="p-3 bg-slate-50 rounded-xl font-mono text-[10px]">
+                            PT1 (Top Level) -> PT2 (Second Level) -> Frame Number
+                        </div>
+                    </div>
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h4 class="font-bold text-slate-800 mb-4 italic">Bảng trang đảo (Inverted)</h4>
+                        <p class="text-xs text-slate-600 leading-relaxed italic mb-4">Dành cho hệ thống 64-bit khổng lồ. Mỗi khung vật lý chỉ có 1 mục duy nhất trong bảng.</p>
+                        <div class="p-3 bg-emerald-50 rounded-xl text-[10px] text-emerald-800 font-bold uppercase">
+                            Giảm đáng kể bộ nhớ. Tốc độ tra cứu phụ thuộc vào TLB hoặc Bảng băm (Hash Table).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Mapping Tool -->
+                <div class="p-10 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl">
+                    <h3 class="text-xl font-bold mb-6 text-center text-emerald-400">Interactive: Virtual to Physical Mapper</h3>
+                    <div class="grid md:grid-cols-3 gap-8 max-w-2xl mx-auto">
+                        <div>
+                            <label class="text-[10px] uppercase font-black text-slate-500 mb-2 block">Số trang ảo (p)</label>
+                            <input id="input-page" type="number" value="2" class="w-full bg-slate-800 border border-slate-700 p-2 rounded-lg text-sm text-emerald-400 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase font-black text-slate-500 mb-2 block">Số khung trang (f)</label>
+                            <input id="input-frame" type="number" value="10" class="w-full bg-slate-800 border border-slate-700 p-2 rounded-lg text-sm text-emerald-400 focus:outline-none focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="text-[10px] uppercase font-black text-slate-500 mb-2 block">Độ lệch (d)</label>
+                            <input id="input-offset" type="number" value="512" class="w-full bg-slate-800 border border-slate-700 p-2 rounded-lg text-sm text-emerald-400 focus:outline-none focus:border-emerald-500">
+                        </div>
+                    </div>
+                    <div class="mt-8 p-6 bg-white/5 border border-white/10 rounded-2xl text-center">
+                        <p class="text-xs text-slate-400 mb-2">Giả sử kích thước trang = 4096 bytes (4 KB)</p>
+                        <p id="map-formula" class="font-mono text-emerald-300 text-lg">Physical = 10 * 4096 + 512 = 41472</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 py-12 px-8 text-center border-t border-slate-800">
+            <div class="flex flex-col items-center gap-4">
+                <p class="text-slate-500 text-sm">Hệ thống hóa Chương 6 • Memory Management • 2024</p>
+                <div class="flex gap-4 text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                    <span>Isolation</span>
+                    <span class="text-emerald-600">•</span>
+                    <span>Paging</span>
+                    <span class="text-emerald-600">•</span>
+                    <span>Virtualization</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Interactive Mapper Logic
+        const iPage = document.getElementById('input-page');
+        const iFrame = document.getElementById('input-frame');
+        const iOffset = document.getElementById('input-offset');
+        const display = document.getElementById('map-formula');
+
+        function updateMap() {
+            const f = parseInt(iFrame.value) || 0;
+            const d = parseInt(iOffset.value) || 0;
+            const pageSize = 4096;
+            const res = (f * pageSize) + d;
+            display.textContent = `Physical = ${f} * ${pageSize} + ${d} = ${res}`;
+        }
+
+        [iPage, iFrame, iOffset].forEach(el => el.addEventListener('input', updateMap));
+
+        // Sidebar highlight
+        const links = document.querySelectorAll('.sidebar-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if (pageYOffset >= s.offsetTop - 150) current = s.getAttribute('id');
+            });
+            links.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href').includes(current)) l.classList.add('active');
+            });
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
+        }, { threshold: 0.1 });
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+const adRnd = Math.random();
+let provider = (adRnd < 0.95 ? "snigel" : "google");
+let pageType = "";
+
+const uic_prov_pre = (pt, provParam, subjectFolder) => {
+  if (pt == "default" || pt == "landing" || pt == "tryit" || pt == "tryitdb" || pt == "exercise" || pt == "xrcise" || pt == "video" || pt == "explainer" ) { pageType = pt; }
+  if (provParam == "snigel" || provParam == "sparteo" || provParam == "google") { provider = provParam; }
+  if (pageType == "video" || pageType == "explainer") { provider = "snigel"; }
+  if (!_uic_u_ok()) {
+    if (pageType == "landing") {
+      (function(){
+        const provConsent=document.createElement('script');
+        provConsent.type='text/javascript';
+        provConsent.async=false;
+        provConsent.src='https://cdn.snigelweb.com/adconsent/adconsent.js';
+        (document.getElementsByTagName('head')[0]||document.getElementsByTagName('body')[0]).appendChild(provConsent);
+      })();
+    } else {
+      if (provider == "snigel") {
+        window.googletag = window.googletag || { cmd: [] };
+          googletag.cmd.push(function() { googletag.pubads().setTargeting("page_section", subjectFolder); });
+        if (pageType == "default") {
+          window.snigelPubConf = {
+            "adengine": {
+              "activeLots": [
+                {placement: "adngin-bottom_left-0", adUnit: "bottom_left"},
+                {placement: "adngin-bottom_right-0", adUnit: "bottom_right"},
+                {placement: "adngin-main_leaderboard-0", adUnit: "main_leaderboard"},
+                {placement: "adngin-sidebar_top-0", adUnit: "sidebar_top"},
+                {placement: "adngin-outstream-0", adUnit: "outstream"}
+              ]
+            }
+          };
+        } else if (pageType == "tryit"  || pageType == "tryitdb" || pageType == "exercise" ) {
+          window.snigelPubConf = {
+            "adengine": { "activeLots": [ {placement: "adngin-try_it_leaderboard-0", adUnit: "try_it_leaderboard" } ] }
+          };
+        } else if (pageType == "xrcise") {
+          window.snigelPubConf = {
+            "adengine": {
+              "activeLots": [ 
+                {placement: "adngin-try_it_leaderboard-0", adUnit: "try_it_leaderboard" }
+              ]
+            }
+          };
+        } else if (pageType == "video") {
+          window.snigelPubConf = {
+            "adengine": {
+              "targeting": {
+                "key1": 1
+              },
+              "activeLots": [
+                {placement: "adngin-bottom_left-0", adUnit: "bottom_left"},
+                {placement: "adngin-bottom_right-0", adUnit: "bottom_right"},
+                {placement: "adngin-main_leaderboard-0", adUnit: "main_leaderboard"},
+                {placement: "adngin-sidebar_top-0", adUnit: "sidebar_top"},
+                {placement: "adngin-outstream-0", adUnit: "outstream"},
+                {placement: "snhb-w3schools_video-0", adUnit: "video"}
+              ]
+            }
+          };
+        } else if (pageType == "explainer") {
+          window.snigelPubConf = {
+            "adengine": {
+              "targeting": { "key1": 1 },
+              "activeLots": [ {placement: "adngin-explainer_video-0", adUnit: "explainer_video" } ]
+            }
+          };
+        }
+//      } else if (provider == "sparteo") {
+//        (function(){
+//          const provConsent=document.createElement('script');
+//          provConsent.type='text/javascript';
+//          provConsent.async=false;
+//          provConsent.src='https://cdn.snigelweb.com/adconsent/adconsent.js';
+//          (document.getElementsByTagName('head')[0]||document.getElementsByTagName('body')[0]).appendChild(provConsent);
+//        })();
+      } else if (provider == "google") {
+        let gptAdSlots = [];
+        window.googletag = window.googletag || { cmd: [] };
+        if (pageType == "default") {
+          googletag.cmd.push(function() {
+            googletag.pubads().setTargeting("page_section", subjectFolder);
+            let leaderMapping = googletag.sizeMapping().addSize([0, 0], [320, 50]).addSize([512, 0], [[320, 50], [468, 60]]).addSize([774, 0], [[320, 50], [468, 60], [728, 90]]).addSize([993, 0], [[320, 50], [468, 60]]).addSize([1176, 0], [[320, 50], [468, 60], [728, 90]]).addSize([1465, 0], [[320, 50], [468, 60], [728, 90], [970, 90]]).build();
+            gptAdSlots[0] = googletag.defineSlot('/16833175/MainLeaderboard', [[320, 50], [468, 60], [728, 90], [970, 90]], 'div-gpt-ad-1422003450156-2').defineSizeMapping(leaderMapping).addService(googletag.pubads());
+            let skyMapping = googletag.sizeMapping().addSize([0, 0], [320, 50]).addSize([992, 0], [120, 600]).addSize([1261, 0], [[120, 600], [160, 600]]).addSize([1701, 0], [[120, 600], [160, 600],  [300, 600], [300, 1050]]).build();
+            gptAdSlots[1] = googletag.defineSlot('/16833175/WideSkyScraper', [[120, 600], [160, 600], [300, 600], [300, 1050]], 'div-gpt-ad-1422003450156-5').defineSizeMapping(skyMapping).addService(googletag.pubads());
+            let stickyMapping = googletag.sizeMapping().addSize([0, 0], []).addSize([992, 0], [120, 600]).addSize([1261, 0], [[120, 600], [160, 600]]).addSize([1701, 0], [[120, 600], [160, 600],  [300, 600], [300, 1050]]).build();
+            gptAdSlots[4] = googletag.defineSlot('/16833175/StickySkyScraper', [[120, 600], [160, 600], [300, 600], [300, 1050]], 'div-gpt-ad-1472547360578-0').defineSizeMapping(stickyMapping).addService(googletag.pubads());
+            let mcontMapping = googletag.sizeMapping().addSize([0, 0], [[300, 250], [336, 280], [320, 50]]).addSize([512, 0], [[300, 250], [336, 280], [320, 50], [468, 60]]).addSize([774, 0], [[300, 250], [336, 280], [320, 50], [468, 60], [728, 90]]).addSize([993, 0], [[300, 250], [336, 280], [320, 50], [468, 60]]).addSize([1176, 0], [[300, 250], [336, 280], [320, 50], [468, 60], [728, 90]]).addSize([1465, 0], [[300, 250], [336, 280], [320, 50], [468, 60], [728, 90], [970, 90]]).build();
+            gptAdSlots[5] = googletag.defineSlot('/16833175/MidContent', [[300, 250], [336, 280], [320, 50], [468, 60], [728, 90], [970, 90]], 'div-gpt-ad-1493883843099-0').defineSizeMapping(mcontMapping).setCollapseEmptyDiv(true).addService(googletag.pubads());
+            let bmrMapping = googletag.sizeMapping().addSize([0, 0], [[300, 250], [336, 280]]).addSize([1465, 0], [[300, 250], [336, 280], [320, 50], [468, 60], [728, 90], [970, 90]]).build();
+            gptAdSlots[2] = googletag.defineSlot('/16833175/BottomMediumRectangle', [[300, 250], [336, 280], [970, 250]], 'div-gpt-ad-1422003450156-0').defineSizeMapping(bmrMapping).setCollapseEmptyDiv(true).addService(googletag.pubads());
+            let rbmrMapping = googletag.sizeMapping().addSize([0, 0], []).addSize([1176, 0], [[300, 250], [336, 280]]).build();
+            gptAdSlots[3] = googletag.defineSlot('/16833175/RightBottomMediumRectangle', [[300, 250], [336, 280]], 'div-gpt-ad-1422003450156-3').defineSizeMapping(rbmrMapping).setCollapseEmptyDiv(true).addService(googletag.pubads());
+          });
+          window.snigelPubConf = {
+            "adengine": {
+              "activeLots": [],
+              "additionalGptAdSlotIds": ["div-gpt-ad-1422003450156-2", "div-gpt-ad-1422003450156-5", "div-gpt-ad-1472547360578-0", "div-gpt-ad-1493883843099-0", "div-gpt-ad-1422003450156-0", "div-gpt-ad-1422003450156-3"]
+            }
+          };
+        } else if (pageType == "tryit" || pageType == "exercise" || pageType == "xrcise") {
+          googletag.cmd.push(function() {
+            googletag.pubads().setTargeting("page_section", subjectFolder);
+            let leaderMapping = googletag.sizeMapping().addSize([0, 0], [320, 50]).addSize([468, 0], [[320, 50], [468, 60]]).addSize([728, 0], [[320, 50], [468, 60], [728, 90]]).addSize([970, 0], [[320, 50], [468, 60], [728, 90], [970, 90]]).build();
+            gptAdSlots[0] = googletag.defineSlot('/16833175/TryitLeaderboard', [[320, 50], [468, 60], [728, 90], [970, 90]], 'div-gpt-ad-1428407818244-0').defineSizeMapping(leaderMapping).addService(googletag.pubads());
+          });
+          window.snigelPubConf = {
+            "adengine": {
+              "activeLots": [],
+              "additionalGptAdSlotIds": ["div-gpt-ad-1428407818244-0"]
+            }
+          };
+        } else if (pageType == "tryitdb") {
+          googletag.cmd.push(function() {
+            googletag.pubads().setTargeting("page_section", subjectFolder);
+            let leaderMapping = googletag.sizeMapping().addSize([0, 0], [320, 50]).addSize([468, 0], [[320, 50], [468, 60]]).addSize([728, 0], [[320, 50], [468, 60], [728, 90]]).addSize([970, 0], [[320, 50], [468, 60], [728, 90], [970, 90]]).build();
+            gptAdSlots[0] = googletag.defineSlot('/16833175/TryitLeaderboard', [[320, 50], [468, 60], [728, 90], [970, 90]], 'div-gpt-ad-1428407818244-0').defineSizeMapping(leaderMapping).addService(googletag.pubads());
+            let stickyMapping = googletag.sizeMapping().addSize([0, 0], []).addSize([992, 0], [[120, 600], [160, 600]]).addSize([1820, 0], [160, 600]).addSize([1683, 0], [[120, 600], [160, 600], [300, 250], [300, 600], [300, 1050]]).build();
+            gptAdSlots[4] = googletag.defineSlot('/16833175/StickySkyScraper', [[120, 600], [160, 600], [300, 250], [300, 600], [300, 1050]], 'div-gpt-ad-1472547360578-0').defineSizeMapping(stickyMapping).addService(googletag.pubads());
+          });
+          window.snigelPubConf = {
+            "adengine": {
+              "activeLots": [],
+              "additionalGptAdSlotIds": ["div-gpt-ad-1428407818244-0", "div-gpt-ad-1472547360578-0"]
+            }
+          };
+        }
+      }
+    }
+  } else if (_uic_u_ok()) {
+    if (pageType == "video" || pageType == "explainer") {
+      if (pageType == "explainer") {
+        window.snigelPubConf = {
+          "adengine": {
+            "targeting": { "key1": 2 },
+            "activeLots": [ {placement: "adngin-explainer_video-0", adUnit: "explainer_video" } ]
+          }
+        };
+      } else if (pageType == "video") {
+        window.snigelPubConf = {
+          "adengine": {
+            "targeting": { "key1": 2 },
+            "activeLots": [ {placement: "snhb-w3schools_video-0", adUnit: "video"} ]
+          }
+        };
+      }
+    }
+  }
+  if ( (!_uic_u_ok() && (pageType != "landing")) || (_uic_u_ok() && (pageType == "video" || pageType == "explainer"))) {
+    (function(){
+    const provLoader=document.createElement('script');
+    provLoader.type='text/javascript';
+    if ( provider == "snigel" || provider == "google") {
+      provLoader.async=true;
+      provLoader.src='https://cdn.snigelweb.com/adengine/w3schools.com/loader.js';
+//    } else if ( provider == "sparteo") {
+    }
+    (document.getElementsByTagName('head')[0]||document.getElementsByTagName('body')[0]).appendChild(provLoader);
+    })();
+    if ( provider == "snigel") {
+      fetch(window.location.href, { method: 'HEAD' })
+      .then(response => {
+        if (response.headers.get('X-Loc') === 'true') {
+          (function(){
+            const abLoader=document.createElement('script');
+            abLoader.type='text/javascript';
+            abLoader.async=true;
+            abLoader.src='https://btloader.com/tag?o=5658536637890560&upapi=true';
+            (document.getElementsByTagName('head')[0]||document.getElementsByTagName('body')[0]).appendChild(abLoader);
+          })();
+        }
+      });
+    }
+    // sparteo
+    (function(){
+      const sparteoLoader=document.createElement('script');
+      sparteoLoader.type='text/javascript';
+      sparteoLoader.async = true;
+      sparteoLoader.setAttribute("data-cfasync", "false");
+      sparteoLoader.src='https://www.flashb.id/universal/55f786fc-6e0e-5368-ade6-451e5d54251d.js';
+      (document.getElementsByTagName('head')[0]||document.getElementsByTagName('body')[0]).appendChild(sparteoLoader);
+    })();
+  }
+}
+
+const uic_prov_consent = () => {
+  adconsent('setPublisherCC', 'US');
+  adconsent('enableGoogleAnalytics', true);
+  adconsent('setPrivacyPolicy', 'https://www.w3schools.com/about/about_privacy.asp');
+  adconsent.gdpr('setLogo', 'https://www.w3schools.com/images/w3schools_logo_500_04AA6D.webp');
+  adconsent.gdpr('setPrivacyPolicy', 'https://www.w3schools.com/about/about_privacy.asp');
+  adconsent.gdpr('enableWelcomeTitle');
+  adconsent.gdpr('setUiMode',0);
+  adconsent.gdpr('enableWelcomeText');
+  adconsent.gdpr('reconsiderConsent', 48);
+  adconsent.gdpr('disableLegitimateInterest', false);
+  adconsent.ccpa('setUSPLink', 'ccpa');
+  adconsent.ccpa('setPrivacyPolicy', 'https://www.w3schools.com/about/about_privacy.asp');
+  adconsent.ccpa('setSignedLSPA');
+  adconsent('start');
+}
+
+const uic_prov_sec = () => {
+  if (!_uic_u_ok()) {
+    if (pageType == "landing") {
+      uic_prov_consent();
+    } else {
+      if (pageType == "default" || pageType == "video") {
+        const mainHeight = Number(w3_getStyleValue(document.getElementById("main"), "height").replace("px", ""));
+        if (provider == "snigel") {
+          if(window.adngin && window.adngin.adnginLoaderReady) {
+            if (mainHeight > 2000) {
+              if (document.getElementById("adngin-mid_content-0")) {
+                adngin.queue.push(function(){  adngin.cmd.startAuction([
+                  {placement: "adngin-sidebar_sticky-0", adUnit: "sidebar_sticky" },
+                  {placement: "adngin-mid_content-0", adUnit: "mid_content" }
+                  ]);
+                });
+              } else {
+                adngin.queue.push(function(){ adngin.cmd.startAuction([ {placement: "adngin-sidebar_sticky-0", adUnit: "sidebar_sticky" } ]); });
+              }
+            } else {
+              if (document.getElementById("adngin-mid_content-0")) {
+                adngin.queue.push(function(){ adngin.cmd.startAuction([ {placement: "adngin-mid_content-0", adUnit: "mid_content" } ]); });
+              }
+            }
+          } else {
+            window.addEventListener('adnginLoaderReady', function() {
+              if (mainHeight > 2000) {
+                if (document.getElementById("adngin-mid_content-0")) {
+                  adngin.queue.push(function(){  adngin.cmd.startAuction([
+                    {placement: "adngin-sidebar_sticky-0", adUnit: "sidebar_sticky" },
+                    {placement: "adngin-mid_content-0", adUnit: "mid_content" }
+                  ]);});
+                } else {
+                  adngin.queue.push(function(){  adngin.cmd.startAuction([ {placement: "adngin-sidebar_sticky-0", adUnit: "sidebar_sticky" } ]);});
+                }
+              } else {
+                if (document.getElementById("adngin-mid_content-0")) {
+                  adngin.queue.push(function(){  adngin.cmd.startAuction([ {placement: "adngin-mid_content-0", adUnit: "mid_content" } ]);});
+                }
+              }
+            });
+          }
+//        } else if (provider == "sparteo") {
+//          uic_prov_consent();
+        } else if (provider == "google") {
+          const midAdElement = document.getElementById("div-gpt-ad-1493883843099-0");
+          if (mainHeight > 2000) {
+            if (midAdElement) {
+              googletag.cmd.push(function () { googletag.display('div-gpt-ad-1493883843099-0'); });
+              googletag.cmd.push(function () { googletag.display('div-gpt-ad-1472547360578-0'); });
+            } else {
+              googletag.cmd.push(function () { googletag.display('div-gpt-ad-1472547360578-0'); });
+            }
+          } else if (midAdElement) { 
+            googletag.cmd.push(function () { googletag.display('div-gpt-ad-1493883843099-0'); });
+          }
+        }
+        window.addEventListener("scroll", fix_stickyad);
+        window.addEventListener("resize", fix_stickyad);
+      } else if (pageType == "tryitdb") {
+        if (provider == "snigel") {
+          if(window.adngin && window.adngin.adnginLoaderReady) {
+            adngin.queue.push(function(){ adngin.cmd.startAuction([ {placement: "adngin-sidebar_sticky-0", adUnit: "sidebar_sticky" } ]);});
+          } else {
+            window.addEventListener('adnginLoaderReady', function() {
+              adngin.queue.push(function(){ adngin.cmd.startAuction([ {placement: "adngin-sidebar_sticky-0", adUnit: "sidebar_sticky" } ]);});
+            });
+          };
+//        } else if (provider == "sparteo") {
+//          window._hbdbrk = window._hbdbrk || [];
+//          window._hbdbrk.push(['_vars', {
+//            page_type: pageType,
+//            custom1: subjectFolder
+//          }]);  
+//          uic_prov_consent();
+        } else if (provider == "google") {
+          googletag.cmd.push(function () { googletag.display('div-gpt-ad-1472547360578-0'); });
+        }
+      } else if (pageType == "xrcise") {       
+        if (provider == "snigel") {
+          if(window.adngin && window.adngin.adnginLoaderReady) {
+            adngin.queue.push(function(){ adngin.cmd.startAuction([ {placement: "adngin-adhesive-0", adUnit: "adhesive"} ]);});
+          } else {
+            window.addEventListener('adnginLoaderReady', function() {
+              adngin.queue.push(function(){ adngin.cmd.startAuction([ {placement: "adngin-adhesive-0", adUnit: "adhesive" } ]);});
+            });
+          }
+//        } else if (provider == "sparteo") {
+//          window._hbdbrk = window._hbdbrk || [];
+//          window._hbdbrk.push(['_vars', {
+//            page_type: pageType,
+//            custom1: subjectFolder
+//          }]);  
+//          uic_prov_consent();
+        }
+      }  
+      window._hbdbrk = window._hbdbrk || [];
+      window._hbdbrk.push(['_vars', {
+        page_type: pageType,
+        custom1: subjectFolder
+      }]);  
+    }
+  }
+}
+
+const uic_prov_al = () => {
+  const mainLeaderboard = document.getElementById("mainLeaderboard");
+  const midContent = document.getElementById("midcontentadcontainer");
+  const wideSkyscraper = document.getElementById("skyscraper");
+  const vidPos = document.getElementById("vidpos");
+  const stickySkyscraper = document.getElementById("stickyadcontainer");
+  const bottom = document.getElementById("bottomads");
+  const tryitLeaderboard = document.getElementById("tryitLeaderboard");
+  const sqlstickyadcontainer = document.getElementById("sqlstickyadcontainer");
+  const bottomPlacement = document.getElementById("bottomad");
+  const internalAd = document.getElementById("upperfeatureshowcaselink");
+  const stickyPos = document.getElementById("stickypos");
+  const xleftad = document.getElementById("xleftad");
+  const xrightad = document.getElementById("xrightad");
+  if (_uic_u_ok()) {
+    if (pageType == "default" || pageType == "video" ) {
+      if (mainLeaderboard) { mainLeaderboard.remove(); }
+      if (midContent) {
+        const previousSibling = midContent.previousElementSibling;
+        if (previousSibling) { previousSibling.remove(); }
+        midContent.remove();
+      }
+      const mainElement = document.getElementById("main");
+      if (mainElement) {
+        mainElement.classList.remove("l10");
+        mainElement.classList.add("l12");
+        mainElement.style.width = "100%";
+        mainElement.style.borderRight = "none";
+      }
+      const rightElement = document.getElementById("right");
+      if (rightElement) { rightElement.remove(); }
+      if (bottom.length > 0) {
+        const bottomAdParentElement = bottom[0].parentElement;
+        if (bottomAdParentElement) {
+          const previousElement = bottomAdParentElement.previousElementSibling;
+          if (previousElement) { previousElement.remove(); }
+          bottomAdParentElement.remove();
+        }
+      }
+      if (typeof fix_stickyad === "function") { 
+        window.removeEventListener("scroll", fix_stickyad);
+        window.removeEventListener("resize", fix_stickyad);
+      }
+    } else if (pageType == "tryit") {
+      if (tryitLeaderboard) { tryitLeaderboard.remove(); }
+      const breadcrumb = document.getElementById("breadcrumb");
+      const container = document.getElementById("container");
+      const tryTopNav = document.getElementsByClassName("trytopnav");
+      const dragBar = document.getElementById("dragbar");
+      if (breadcrumb) {
+        if (tryTopNav.length > 0) { tryTopNav[0].style.top = "40px"; }
+        if (dragBar) { dragBar.style.top = "85px"; }
+        if (container) { container.style.top = "85px"; }
+      } else {
+        if (container) {
+          if (tryTopNav.length > 0) { tryTopNav[0].style.top = "0px"; }
+          if (dragBar) { dragBar.style.top = "45px"; }
+          container.style.top = "45px";
+        } else {
+          const altContainer = document.getElementsByClassName("container");
+          if (altContainer.length > 0) { altContainer[0].style.top = "0px"; }
+        }
+      }
+    } else if (pageType == "tryitdb") {
+      document.getElementById("tryitLeaderboard").remove();
+      document.getElementById("sqlstickyadcontainer").remove();
+    } else if (pageType == "xrcise") {
+      document.getElementById("tryitLeaderboard").parentElement.parentElement.remove();
+      document.getElementById("xleftad").remove();
+      document.getElementById("xrightad").remove();
+    } else if (pageType == "exercise") {
+      if (tryitLeaderboard) { tryitLeaderboard.parentElement.parentElement.remove();}
+      document.getElementById("menubtn").style.left = "";
+      document.getElementById("menubtn").style.right = "20px";
+      document.getElementById("assignmenttext").previousElementSibling.style.textAlign = "center";
+      document.getElementById("assignmenttext").previousElementSibling.style.marginTop = "0";
+      document.getElementById("assignmenttext").previousElementSibling.style.paddingTop = "0";
+      document.getElementById("menubtn").style.top = "40px";
+    }
+  } else {
+    if (pageType == "default" || pageType == "video") {
+      (function(){
+        let provLeaderboard=document.createElement('div');
+        if (provider == "snigel" || provider == "sni2025") { 
+          provLeaderboard.id='adngin-main_leaderboard-0';
+        } else if (provider == "google") {
+          provLeaderboard.id='div-gpt-ad-1422003450156-2';
+        }
+        if (mainLeaderboard) {
+          mainLeaderboard.appendChild(provLeaderboard);
+          if (provider == "google") { googletag.cmd.push(function () { googletag.display('div-gpt-ad-1422003450156-2'); });}
+        }
+      })();
+      (function(){
+        let provMidContent=document.createElement('div');
+        if (provider == "snigel") {
+          provMidContent.id='adngin-mid_content-0';
+        } else if (provider == "google") {
+          provMidContent.id='div-gpt-ad-1493883843099-0';
+          provMidContent.style='display: inline-block;';
+        }
+        if (midContent) { midContent.appendChild(provMidContent); }
+      })();     
+      (function(){
+        let provWideSky=document.createElement('div');
+        if (provider == "snigel") {
+          provWideSky.id='adngin-sidebar_top-0';
+        } else if (provider == "google") {
+          provWideSky.id='div-gpt-ad-1422003450156-5';
+        }
+        if (wideSkyscraper) {
+          wideSkyscraper.appendChild(provWideSky);
+          if (provider == "google") { googletag.cmd.push(function () { googletag.display('div-gpt-ad-1422003450156-5'); }); }
+        }
+      })();
+      if (provider == "snigel") {
+        (function(){
+          let provOutstream=document.createElement('div');
+          provOutstream.id='adngin-outstream-0';
+          if (vidPos) { vidPos.appendChild(provOutstream); }
+        })();
+      }
+      (function(){
+        let provStickySky=document.createElement('div');
+        if (provider == "snigel") {
+          provStickySky.id='adngin-sidebar_sticky-0';
+        } else if (provider == "google") {
+          provStickySky.id='div-gpt-ad-1472547360578-0';
+        }
+        if (stickySkyscraper) { stickySkyscraper.children[0].appendChild(provStickySky);}
+      })();
+      (function(){
+        let provBottomAds=document.createElement('div');
+        provBottomAds.className='bottomad';
+        let provLeftBottom=document.createElement('div');
+        let provRightBottom=document.createElement('div');
+        if (provider == "snigel") {
+          provLeftBottom.id='adngin-bottom_left-0';
+          provLeftBottom.style='padding:0 10px 10px 0;float:left;width:auto;';
+          provRightBottom.id='adngin-bottom_right-0';
+          provRightBottom.style='padding:0 10px 10px 0;float:left;width:auto;';
+          provBottomAds.appendChild(provLeftBottom);
+          provBottomAds.appendChild(provRightBottom); 
+        } else if (provider == "google") {
+          provLeftBottom.id='div-gpt-ad-1422003450156-0';
+          provLeftBottom.class='bottomad';
+          provRightBottom.id='div-gpt-ad-1422003450156-3';
+          provRightBottom.class='bottomad';
+        }
+        if (bottom) {
+          if (provider == "snigel") {
+            bottom.appendChild(provBottomAds);
+          } else if (provider == "google") {
+            bottom.appendChild(provLeftBottom);
+            bottom.appendChild(provRightBottom);
+          }
+          if (provider == "google") {
+            googletag.cmd.push(function () { googletag.display('div-gpt-ad-1422003450156-0'); });
+            googletag.cmd.push(function () { googletag.display('div-gpt-ad-1422003450156-3'); });
+          }
+        }
+      })(); 
+    } else if (pageType == "tryit" || pageType == "xrcise" || pageType == "exercise" || pageType == "tryitdb" ) {
+      (function(){
+        let provLeaderboard=document.createElement('div');
+        if (provider == "snigel") {
+          provLeaderboard.id='adngin-try_it_leaderboard-0';
+        } else if (provider == "google") {
+          provLeaderboard.id='div-gpt-ad-1428407818244-0';
+        }
+        if (tryitLeaderboard) { tryitLeaderboard.appendChild(provLeaderboard); }
+      })();
+      if (pageType == "xrcise") {
+        if (provider == "snigel") {
+          (function(){
+            let provAdhesive=document.createElement('div');
+            provAdhesive.id='adngin-adhesive-0';
+            document.getElementById("xrcise-container").appendChild(provAdhesive);
+          })();
+        }
+      } else if (pageType == "tryitdb") {
+        (function(){
+          let provDBSky=document.createElement('div');
+          if (provider == "snigel") {
+            provDBSky.id='adngin-sidebar_sticky-0';
+          } else if (provider == "google") {
+            provDBSky.id='div-gpt-ad-1472547360578-0';
+          }
+          if (sqlstickyadcontainer) { sqlstickyadcontainer.appendChild(provDBSky); }
+        })();
+      }
+      if (provider == "google") {
+        googletag.cmd.push(function () { googletag.display('div-gpt-ad-1428407818244-0'); });
+      } 
+    }
+    docReady(function() {
+      let checkReadyState = setInterval(function () {
+        if (document.readyState === "interactive" || document.readyState === "complete") {
+          clearInterval(checkReadyState);        
+          if (pageType == "landing") {
+            docReady(function() {
+              // Ensure Adconsent is loaded
+              let checkAdconsent = setInterval(function () {
+                if (adconsent) {
+                  clearInterval(checkAdconsent);
+                  uic_prov_sec();
+                }
+              }, 300); // check every 300ms
+            });           
+//          } else if (provider == "sparteo") {
+//            docReady(function() {
+//              // Ensure Sparteo is loaded
+//              let checkAdSparteo = setInterval(function () {
+//                if (window._hbdbrk) {
+//                  clearInterval(checkAdSparteo);    
+//                  uic_prov_sec();
+//                }
+//              }, 300); // check every 300ms
+//            });
+          } else {
+            docReady(function() {
+              // Ensure AdEngine is loaded
+              let checkAdEngine = setInterval(function () {
+                if (window.adngin && window.adngin.adnginLoaderReady) {
+                  clearInterval(checkAdEngine);    
+                  uic_prov_sec();
+                }
+              }, 300); // check every 300ms
+            });
+          }
+        }
+      }, 300); // check every 300ms
+    });
+  }
+}
+
+const uic_prov_run = () => {
+  if (!_uic_u_ok()) {
+    const sqlstickyadcontainer = document.getElementById("sqlstickyadcontainer");
+    if (pageType == "tryit" || pageType == "exercise" || pageType == "tryitdb" ) {
+      if (provider == "snigel") {
+        adngin.cmd.startAuction([{placement: "adngin-try_it_leaderboard-0", adUnit: "try_it_leaderboard" }]);
+      } else if (provider == "google") {
+        googletag.cmd.push(function () { googletag.display('div-gpt-ad-1428407818244-0'); });
+      }
+      if (sqlstickyadcontainer) {
+        if (provider == "snigel") {
+          adngin.cmd.startAuction([{placement: "adngin-sidebar_sticky-0", adUnit: "sidebar_sticky"}]);
+        } else if (provider == "google") {
+          googletag.cmd.push(function () { googletag.display('div-gpt-ad-1472547360578-0'); });
+        }
+      }
+    }
+  }
+}

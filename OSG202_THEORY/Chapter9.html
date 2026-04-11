@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương 9: File System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        .card-animate {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-animate:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; }
+        
+        .file-icon {
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
+        }
+
+        .allocation-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+        }
+        .block {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: bold;
+        }
+        .block-used { background-color: #fbbf24; color: white; border-color: #d97706; }
+        .block-free { background-color: #f1f5f9; color: #94a3b8; }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-slate-400 hidden md:flex flex-col p-8 z-50 border-r border-slate-800">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <i data-lucide="folder-open" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-extrabold text-xl tracking-tight">OS Hub</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Chương 9: File System</p>
+            </div>
+        </div>
+        
+        <nav class="space-y-2 flex-1 overflow-y-auto">
+            <p class="text-[10px] font-bold text-slate-600 uppercase mb-4 px-3">Cấu trúc File & Thư mục</p>
+            <a href="#files-intro" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition active">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">1. Khái niệm File</span>
+            </a>
+            <a href="#directories" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="folder-tree" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">2. Thư mục (Directories)</span>
+            </a>
+            <p class="text-[10px] font-bold text-slate-600 uppercase mt-6 mb-4 px-3">Triển khai & Kỹ thuật</p>
+            <a href="#implementation" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="database" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">3. Triển khai hệ thống</span>
+            </a>
+            <a href="#management" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">4. Quản lý & Tối ưu</span>
+            </a>
+            <a href="#examples" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="hard-drive" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">5. Các hệ thống mẫu</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-72 min-h-screen">
+        
+        <!-- Header -->
+        <header class="sticky top-0 glass-header z-40 p-4 px-8 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-amber-600 uppercase tracking-widest bg-amber-50 px-3 py-1 rounded-full">Chapter 9: File System & Management</span>
+            </div>
+            <div class="text-slate-500 text-xs font-semibold uppercase text-right">Tiếng Việt (Chính) | English (Keywords)</div>
+        </header>
+
+        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-24">
+
+            <!-- Section 1: Files Intro -->
+            <section id="files-intro" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-amber-100 text-amber-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 1</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Khái niệm File (Tệp tin)</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">Đơn vị logic của thông tin, tồn tại bền vững trên bộ nhớ thứ cấp.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate flex flex-col">
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="file-key"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">persistent (Bền vững)</h4>
+                        <p class="text-sm text-slate-500 flex-1">Thông tin trong file phải tồn tại độc lập với việc tiến trình tạo hay kết thúc.</p>
+                    </div>
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate flex flex-col">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="tag"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Naming (Đặt tên)</h4>
+                        <p class="text-sm text-slate-500 flex-1">Tên file là chuỗi ký tự. Phần mở rộng (extension) gợi ý nội dung (.c, .txt, .bat).</p>
+                    </div>
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate flex flex-col">
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="list"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">Structure (Cấu trúc)</h4>
+                        <p class="text-sm text-slate-500 flex-1">Byte sequence (không cấu trúc), Record sequence (bản ghi), hoặc Tree (cây).</p>
+                    </div>
+                </div>
+
+                <!-- File Types & Access -->
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-2xl">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-amber-400">
+                            <i data-lucide="files"></i> Phân loại File (File Types)
+                        </h3>
+                        <div class="space-y-4 text-sm">
+                            <div class="flex items-center gap-4 p-3 bg-white/5 rounded-2xl border border-white/10">
+                                <span class="px-2 py-1 bg-blue-600 rounded text-[10px] font-bold">Regular</span>
+                                <p>Chứa dữ liệu người dùng (ASCII hoặc Binary).</p>
+                            </div>
+                            <div class="flex items-center gap-4 p-3 bg-white/5 rounded-2xl border border-white/10">
+                                <span class="px-2 py-1 bg-emerald-600 rounded text-[10px] font-bold">Directory</span>
+                                <p>File hệ thống duy trì cấu trúc thư mục.</p>
+                            </div>
+                            <div class="flex items-center gap-4 p-3 bg-white/5 rounded-2xl border border-white/10">
+                                <span class="px-2 py-1 bg-rose-600 rounded text-[10px] font-bold">Special</span>
+                                <p>Character special (thiết bị tuần tự) & Block special (thiết bị khối).</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+                        <h3 class="text-xl font-bold italic">Phương thức Truy cập & Thuộc tính</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-3">
+                                <h4 class="text-xs font-black text-slate-400 uppercase">Access methods</h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                    <li>• <strong>Sequential:</strong> Tuần tự.</li>
+                                    <li>• <strong>Random:</strong> Ngẫu nhiên (ổ đĩa).</li>
+                                </ul>
+                            </div>
+                            <div class="space-y-3">
+                                <h4 class="text-xs font-black text-slate-400 uppercase">Metadata</h4>
+                                <ul class="text-xs text-slate-600 space-y-1">
+                                    <li>• Owner, Access rights.</li>
+                                    <li>• Timestamps, Size.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-slate-50">
+                            <h4 class="text-xs font-black text-slate-400 uppercase mb-3">System Calls</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <code class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">open()</code>
+                                <code class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">read()</code>
+                                <code class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">write()</code>
+                                <code class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">seek()</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Directories -->
+            <section id="directories" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Thư mục (Directories)</h2>
+                    <p class="text-slate-500 italic">Ánh xạ tên file ASCII sang thông tin dữ liệu vật lý.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h4 class="text-lg font-bold mb-4 flex items-center gap-2"><i data-lucide="folder" class="text-amber-500"></i> Single-level System</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed mb-4">Một thư mục duy nhất chứa tất cả file. Đơn giản nhưng không thể trùng tên và khó mở rộng.</p>
+                        <div class="flex items-center justify-center p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                            <div class="grid grid-cols-3 gap-2">
+                                <i data-lucide="file" class="text-slate-400"></i>
+                                <i data-lucide="file" class="text-slate-400"></i>
+                                <i data-lucide="file" class="text-slate-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h4 class="text-lg font-bold mb-4 flex items-center gap-2"><i data-lucide="folder-tree" class="text-blue-500"></i> Hierarchical System</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed mb-4">Thư mục chứa thư mục con, tạo cấu trúc cây. Giúp nhóm file hiệu quả và cá nhân hóa root directory.</p>
+                        <div class="space-y-2 text-[11px] font-mono text-blue-600 bg-blue-50 p-4 rounded-2xl">
+                            <div>/ (root)</div>
+                            <div class="pl-4">├── home/</div>
+                            <div class="pl-8">├── john/ (Working Directory)</div>
+                            <div class="pl-12">└── program.c</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <h5 class="font-bold text-xs uppercase tracking-widest text-slate-400 mb-2">Absolute Path</h5>
+                        <p class="text-xs text-slate-600 italic">Bắt đầu từ gốc: <br><strong>/home/students/john/pro.c</strong></p>
+                    </div>
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <h5 class="font-bold text-xs uppercase tracking-widest text-slate-400 mb-2">Relative Path</h5>
+                        <p class="text-xs text-slate-600 italic">Từ thư mục hiện tại: <br><strong>john/program.c</strong></p>
+                    </div>
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <h5 class="font-bold text-xs uppercase tracking-widest text-slate-400 mb-2">Special Dirs</h5>
+                        <p class="text-xs text-slate-600 italic"><strong>.</strong> (Hiện tại) <br> <strong>..</strong> (Thư mục cha)</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: File System Implementation -->
+            <section id="implementation" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-indigo-100 text-indigo-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 3</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Triển khai Hệ thống File</h2>
+                </div>
+
+                <!-- Disk Layout -->
+                <div class="p-10 bg-indigo-900 text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/20 blur-3xl rounded-full"></div>
+                    <h3 class="text-xl font-bold mb-8 text-center">Bố cục hệ thống file (File System Layout)</h3>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <div class="px-4 py-6 bg-white/10 border border-white/20 rounded-xl text-center flex-1 min-w-[100px]"><p class="text-[10px] font-bold">MBR / Boot</p></div>
+                        <div class="px-4 py-6 bg-amber-500 rounded-xl text-center flex-1 min-w-[100px] shadow-lg shadow-amber-900/40"><p class="text-[10px] font-bold">Super Block</p></div>
+                        <div class="px-4 py-6 bg-white/10 border border-white/20 rounded-xl text-center flex-1 min-w-[100px]"><p class="text-[10px] font-bold">Free space mgmt</p></div>
+                        <div class="px-4 py-6 bg-blue-500 rounded-xl text-center flex-1 min-w-[100px] shadow-lg shadow-blue-900/40"><p class="text-[10px] font-bold">i-nodes</p></div>
+                        <div class="px-4 py-6 bg-white/10 border border-white/20 rounded-xl text-center flex-1 min-w-[100px]"><p class="text-[10px] font-bold">Root Directory</p></div>
+                        <div class="px-4 py-12 bg-indigo-800 border border-indigo-700 rounded-xl text-center flex-[2] min-w-[150px]"><p class="text-[10px] font-bold">Data Blocks</p></div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-8 mt-10 text-[11px] text-indigo-100">
+                        <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+                            <strong>MBR vs GPT:</strong> MBR (sector 0) hỗ trợ < 2TB; GPT hiện đại hỗ trợ > 2TB và > 128 phân vùng, cần UEFI.
+                        </div>
+                        <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+                            <strong>Super Block:</strong> Chứa thông tin quản trị cốt lõi (loại FS, số khối).
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Implementing Files: Allocation Methods -->
+                <div class="space-y-8">
+                    <h3 class="text-2xl font-bold border-l-4 border-amber-500 pl-6">Cấp phát đĩa (Implementing Files)</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Contiguous -->
+                        <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                            <h4 class="font-bold text-slate-800 mb-2">Contiguous Allocation</h4>
+                            <p class="text-xs text-slate-500 mb-4 italic">Dãy khối liên tiếp. Hiệu suất cao, nhưng gây phân mảnh ngoài.</p>
+                            <div class="allocation-grid">
+                                <div class="block block-used">A</div><div class="block block-used">A</div><div class="block block-used">A</div>
+                                <div class="block block-free"></div><div class="block block-used">B</div><div class="block block-used">B</div>
+                                <div class="block block-free"></div><div class="block block-free"></div>
+                            </div>
+                        </div>
+                        <!-- Linked List -->
+                        <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                            <h4 class="font-bold text-slate-800 mb-2">Linked List Allocation</h4>
+                            <p class="text-xs text-slate-500 mb-4 italic">Mỗi khối trỏ tới khối kế tiếp. Không phân mảnh ngoài nhưng truy cập ngẫu nhiên chậm.</p>
+                            <div class="allocation-grid">
+                                <div class="block block-used">1→</div><div class="block block-free"></div><div class="block block-used">→2</div>
+                                <div class="block block-free"></div><div class="block block-used">→3</div><div class="block block-free"></div>
+                                <div class="block block-used">end</div><div class="block block-free"></div>
+                            </div>
+                        </div>
+                        <!-- FAT -->
+                        <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                            <h4 class="font-bold text-slate-800 mb-2">FAT (File Allocation Table)</h4>
+                            <p class="text-xs text-slate-500 mb-4 italic">Bảng con trỏ trong RAM. Truy cập ngẫu nhiên nhanh hơn, nhưng FAT chiếm bộ nhớ.</p>
+                        </div>
+                        <!-- i-nodes -->
+                        <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-xl card-animate">
+                            <h4 class="font-bold mb-2 text-blue-400">i-nodes</h4>
+                            <p class="text-xs text-slate-400 mb-4 italic">Cấu trúc chứa thuộc tính và địa chỉ các khối. Chỉ nạp khi mở file (Memory efficient).</p>
+                            <div class="flex gap-2">
+                                <div class="p-2 bg-blue-500 rounded text-[9px] font-bold">Direct Ptrs</div>
+                                <div class="p-2 bg-indigo-500 rounded text-[9px] font-bold">Indirect Ptrs</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advanced concepts (JFS, VFS, etc) -->
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="p-8 bg-emerald-50 border border-emerald-100 rounded-[2.5rem]">
+                        <h4 class="font-bold text-emerald-800 mb-4 italic">Journaling (JFS) & Log-Structured (LFS)</h4>
+                        <div class="space-y-4 text-xs text-emerald-900">
+                            <p><strong>LFS:</strong> Coi toàn bộ đĩa như một log, ghi theo phân đoạn lớn để tăng hiệu suất. Cần luồng "cleaner" dọn dẹp.</p>
+                            <p><strong>JFS:</strong> Ghi nhật ký thao tác dự kiến để khôi phục sau sự cố (NTFS, ext3). Đảm bảo tính nhất quán.</p>
+                        </div>
+                    </div>
+                    <div class="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem]">
+                        <h4 class="font-bold text-blue-800 mb-4 italic">Virtual File System (VFS)</h4>
+                        <p class="text-xs text-blue-900 mb-4">Giao diện thống nhất cho nhiều hệ thống tệp khác nhau (Vnode, Superblock, Mount table).</p>
+                        <div class="flex items-center gap-4">
+                            <div class="px-3 py-1 bg-white border border-blue-200 rounded-lg text-[10px] font-bold">Ext4</div>
+                            <div class="px-3 py-1 bg-white border border-blue-200 rounded-lg text-[10px] font-bold">NTFS</div>
+                            <div class="px-3 py-1 bg-white border border-blue-200 rounded-lg text-[10px] font-bold">FAT32</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Management & Optimization -->
+            <section id="management" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-rose-100 text-rose-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phần 4</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Quản lý & Tối ưu hóa</h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Disk Space -->
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-rose-600">
+                            <i data-lucide="hard-drive"></i> Disk Space Mgmt
+                        </h3>
+                        <div class="space-y-4 text-sm text-slate-600">
+                            <p><strong>Block Size:</strong> Cân bằng giữa hiệu năng (khối lớn) và tiết kiệm không gian (khối nhỏ).</p>
+                            <p><strong>Free Space:</strong> Theo dõi bằng Linked List hoặc Bitmap (bit=1 nếu trống).</p>
+                            <p><strong>Disk Quotas:</strong> Hạn mức số tệp và khối cho mỗi người dùng.</p>
+                        </div>
+                    </div>
+
+                    <!-- Performance -->
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-blue-600">
+                            <i data-lucide="zap"></i> Performance Tuning
+                        </h3>
+                        <div class="space-y-4 text-sm text-slate-600">
+                            <p><strong>Block Cache:</strong> Lưu khối đĩa thường dùng trong RAM (LRU algorithm).</p>
+                            <p><strong>Read-Ahead:</strong> Tải trước khối kế tiếp cho truy cập tuần tự.</p>
+                            <p><strong>Defragmentation:</strong> Sắp xếp lại file để chúng liền mạch trên đĩa.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consistency & Backup -->
+                <div class="p-10 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl">
+                    <h3 class="text-xl font-bold mb-6 text-center italic">Tính nhất quán & Sao lưu</h3>
+                    <div class="grid md:grid-cols-2 gap-10 text-sm">
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold uppercase tracking-widest text-blue-400">Consistency (Tính nhất quán)</h4>
+                            <p class="text-slate-300">Sự cố có thể gây sai lệch i-node hoặc khối. Sử dụng <strong>fsck</strong> (Linux) hoặc <strong>scandisk</strong> (Windows) để sửa lỗi.</p>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="text-xs font-bold uppercase tracking-widest text-emerald-400">Backups (Sao lưu)</h4>
+                            <p class="text-slate-300">Physical dump (toàn bộ đĩa) và Logical dump (các file thay đổi từ mốc thời gian nhất định).</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Example File Systems -->
+            <section id="examples" class="reveal space-y-12 scroll-mt-24 pb-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight italic">Hệ thống File mẫu (Example FS)</h2>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- CD-ROM -->
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="disc"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">CD-ROM (ISO 9660)</h4>
+                        <p class="text-[10px] text-slate-500 mb-4">Môi trường ghi một lần, rãnh xoắn ốc liên tục.</p>
+                        <ul class="text-[10px] text-slate-600 space-y-1">
+                            <li>• <strong>Rock Ridge:</strong> Mở rộng cho UNIX.</li>
+                            <li>• <strong>Joliet:</strong> Mở rộng cho Windows (Unicode).</li>
+                        </ul>
+                    </div>
+                    <!-- MS-DOS -->
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6"><i data-lucide="terminal"></i></div>
+                        <h4 class="font-bold text-slate-800 mb-2">MS-DOS System</h4>
+                        <p class="text-[10px] text-slate-500 mb-4">Cấu trúc thư mục phẳng, mục cố định 32 byte.</p>
+                        <ul class="text-[10px] text-slate-600 space-y-1">
+                            <li>• Tên tệp định dạng 8.3.</li>
+                            <li>• Quản lý qua bảng <strong>FAT</strong>.</li>
+                        </ul>
+                    </div>
+                    <!-- UNIX V7 -->
+                    <div class="p-8 bg-slate-900 text-white rounded-3xl shadow-xl card-animate">
+                        <div class="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mb-6"><i data-lucide="command"></i></div>
+                        <h4 class="font-bold mb-2">UNIX V7</h4>
+                        <p class="text-[10px] text-slate-400 mb-4">Cấu trúc cây dạng Đồ thị có hướng không chu trình (DAG).</p>
+                        <ul class="text-[10px] text-slate-300 space-y-1">
+                            <li>• i-node chứa metadata & pointers.</li>
+                            <li>• Mục thư mục: Tên (14B) + i-node # (2B).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 py-12 px-8 text-center border-t border-slate-800">
+            <div class="flex flex-col items-center gap-4">
+                <p class="text-slate-500 text-sm">Hệ thống hóa Chương 9 • File System • 2024</p>
+                <div class="flex gap-4 text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                    <span>Persistence</span>
+                    <span class="text-amber-600">•</span>
+                    <span>Hierarchy</span>
+                    <span class="text-amber-600">•</span>
+                    <span>Reliability</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Sidebar highlight logic
+        const links = document.querySelectorAll('.sidebar-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if (pageYOffset >= s.offsetTop - 150) current = s.getAttribute('id');
+            });
+            links.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href').includes(current)) l.classList.add('active');
+            });
+        });
+
+        // Intersection Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
+        }, { threshold: 0.1 });
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

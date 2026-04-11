@@ -1,0 +1,202 @@
+<!-- File No: HTML.02 - Lesson 01 - Introduction to HTML Version 2 -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng hợp Kiến thức HTML - Web Design Phần 1</title>
+    <style>
+        /* CSS nhỏ để trang web dễ nhìn hơn một chút */
+        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+        section { margin-bottom: 30px; border-bottom: 1px dashed #ccc; padding-bottom: 20px; }
+        h2 { color: #2c3e50; border-left: 5px solid #3498db; padding-left: 10px; }
+        table { border-collapse: collapse; width: 50%; }
+        th, td { padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+
+    <section>
+        <h2>1. Định dạng văn bản</h2>
+        
+        <h1>Đây là thẻ H1 (Lớn nhất)</h1>
+        <h3>Đây là thẻ H3</h3>
+        <h6>Đây là thẻ H6 (Nhỏ nhất)</h6>
+
+        <p>Đây là một đoạn văn bản (paragraph). Thẻ p tự động tạo khoảng cách trên và dưới.</p>
+
+        Dòng này sẽ bị ngắt xuống đây.<br>
+        Dòng mới sau thẻ br.
+        <hr> <p>
+            <b>Chữ in đậm (Bold)</b> - <i>Chữ in nghiêng (Italic)</i> - <u>Gạch chân (Underline)</u><br>
+            <small>Chữ nhỏ hơn</small> - <mark>Đánh dấu (Highlight)</mark> - <del>Gạch ngang (Delete)</del><br>
+            Công thức hóa học: H<sub>2</sub>O (Subscript)<br>
+            Diện tích: 100m<sup>2</sup> (Superscript)
+        </p>
+    </section>
+
+
+    <section>
+        <h2>2. Siêu liên kết (Links)</h2>
+
+        <a href="https://www.google.com" target="_blank">Truy cập Google (Mở tab mới)</a>
+        <br>
+        
+        <a href="#">Link về đầu trang</a>
+        <br>
+
+        <a href="mailto:contact@example.com">Gửi Email cho tôi</a>
+    </section>
+
+
+    <section>
+        <h2>3. Đa phương tiện (Media)</h2>
+
+        <h3>Hình ảnh:</h3>
+        <img src="https://via.placeholder.com/150" alt="Ảnh mẫu placeholder" title="Đây là chú thích ảnh">
+        
+        <p>Click vào logo bên dưới để đến Google:</p>
+        <a href="https://google.com" target="_blank">
+            <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google Logo">
+        </a>
+
+        <h3>Âm thanh:</h3>
+        <audio controls>
+            <source src="music.mp3" type="audio/mpeg">
+            Trình duyệt của bạn không hỗ trợ thẻ audio.
+        </audio>
+
+        <h3>Video:</h3>
+        <video controls width="320" height="240">
+            <source src="video.mp4" type="video/mp4">
+            Trình duyệt của bạn không hỗ trợ thẻ video.
+        </video>
+    </section>
+
+
+    <section>
+        <h2>4. Danh sách (Lists)</h2>
+
+        <h4>Danh sách đi chợ (ul):</h4>
+        <ul>
+            <li>Thịt heo</li>
+            <li>Rau cải</li>
+            <li>Trái cây
+                <ul>
+                    <li>Táo</li>
+                    <li>Cam</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Các bước nấu ăn (ol):</h4>
+        <ol type="1">
+            <li>Rửa sạch nguyên liệu</li>
+            <li>Sơ chế và tẩm ướp</li>
+            <li>Nấu chín</li>
+        </ol>
+
+        <h4>Từ điển (dl):</h4>
+        <dl>
+            <dt>HTML</dt>
+            <dd>Ngôn ngữ đánh dấu siêu văn bản.</dd>
+            <dt>CSS</dt>
+            <dd>Ngôn ngữ định dạng kiểu dáng.</dd>
+        </dl>
+    </section>
+
+
+    <section>
+        <h2>5. Bảng biểu (Tables)</h2>
+        
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Họ và Tên</th>
+                    <th>Năm sinh</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Nguyễn Văn A</td>
+                    <td>2000</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Trần Thị B</td>
+                    <td>2001</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+
+    <section>
+        <h2>6. Div và Span</h2>
+
+        <div style="background-color: #f0f0f0; padding: 10px; border: 1px solid #999;">
+            Đây là một thẻ DIV. Nó chiếm toàn bộ chiều rộng và tạo thành một khối riêng biệt.
+        </div>
+        
+        <div style="background-color: #e0e0e0; padding: 10px; border: 1px solid #999; margin-top: 5px;">
+            Đây là thẻ DIV thứ hai.
+        </div>
+
+        <br>
+
+        <p>
+            Đây là đoạn văn bản có chứa <span style="color: red; font-weight: bold;">thẻ SPAN màu đỏ</span> và vẫn nằm trên cùng một dòng.
+        </p>
+    </section>
+
+
+    <section>
+        <h2>7. Biểu mẫu (Forms)</h2>
+        
+        <form action="#" method="POST">
+            <label for="username">Tên đăng nhập:</label><br>
+            <input type="text" id="username" name="username" placeholder="Nhập tên của bạn..."><br><br>
+
+            <label for="pwd">Mật khẩu:</label><br>
+            <input type="password" id="pwd" name="password"><br><br>
+
+            <label for="dob">Ngày sinh:</label><br>
+            <input type="date" id="dob" name="dob"><br><br>
+
+            <label>Giới tính:</label><br>
+            <input type="radio" id="nam" name="gender" value="male">
+            <label for="nam">Nam</label>
+            <input type="radio" id="nu" name="gender" value="female">
+            <label for="nu">Nữ</label><br><br>
+
+            <label for="city">Thành phố:</label><br>
+            <select id="city" name="city">
+                <option value="hanoi">Hà Nội</option>
+                <option value="hcm">TP. Hồ Chí Minh</option>
+                <option value="danang">Đà Nẵng</option>
+            </select><br><br>
+
+            <input type="submit" value="Gửi đi">
+            <input type="reset" value="Nhập lại">
+        </form>
+    </section>
+
+
+    <section>
+        <h2>8. Iframe & Button Script</h2>
+
+        <p>Nhúng bản đồ hoặc trang web khác:</p>
+        <iframe src="https://www.wikipedia.org/" width="100%" height="200" style="border:1px solid black;"></iframe>
+
+        <br><br>
+
+        <p id="demoText">Chào bạn! Hãy bấm nút bên dưới.</p>
+        <button onclick="document.getElementById('demoText').innerHTML = 'Bạn vừa bấm nút! (Nội dung đã thay đổi)'">
+            Bấm vào tôi
+        </button>
+    </section>
+
+</body>
+</html>

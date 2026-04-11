@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Hóa Kiến Thức Hệ Điều Hành</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .sidebar-link {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .hero-gradient {
+            background: radial-gradient(circle at top right, #eff6ff 0%, #f8fafc 100%);
+        }
+
+        .card-animate {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-animate:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .glow-blue:hover { box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; }
+
+        .os-node {
+            position: relative;
+            z-index: 1;
+        }
+        .os-node::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -24px;
+            width: 2px;
+            height: 24px;
+            background: #e2e8f0;
+            transform: translateX(-50%);
+        }
+        .os-node-last::after { display: none; }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <!-- Mobile Navigation Toggle -->
+    <button id="menuBtn" class="fixed bottom-6 right-6 z-[60] md:hidden bg-blue-600 text-white p-4 rounded-full shadow-2xl">
+        <i data-lucide="menu"></i>
+    </button>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-slate-400 hidden md:flex flex-col p-8 z-50 border-r border-slate-800">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-900/20">
+                <i data-lucide="cpu" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-extrabold text-xl tracking-tight">OS Hub</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Knowledge System</p>
+            </div>
+        </div>
+        
+        <nav class="space-y-3 flex-1">
+            <p class="text-[10px] font-bold text-slate-600 uppercase mb-4 px-3">Main Sections</p>
+            <a href="#intro" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition active">
+                <i data-lucide="info" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">1. Giới thiệu chung</span>
+            </a>
+            <a href="#zoo" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">2. OS Zoo</span>
+            </a>
+            <a href="#concepts" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="layers" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">3. Khái niệm cốt lõi</span>
+            </a>
+            <a href="#history" class="sidebar-link group flex items-center gap-3 p-3.5 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="history" class="w-5 h-5"></i>
+                <span class="font-medium text-sm">4. Lịch sử tiến hóa</span>
+            </a>
+        </nav>
+
+        <div class="mt-auto p-4 bg-slate-800/50 rounded-2xl border border-slate-700/50">
+            <p class="text-xs text-slate-400 leading-relaxed italic">
+                "An OS is the heart of every machine."
+            </p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-72 min-h-screen hero-gradient">
+        
+        <!-- Header -->
+        <header class="sticky top-0 glass-header z-40 p-4 px-8 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Live Learning Dashboard</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="hidden sm:flex items-center gap-2 text-slate-500">
+                    <i data-lucide="languages" class="w-4 h-4"></i>
+                    <span class="text-xs font-semibold">EN | VN</span>
+                </div>
+                <button class="bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-blue-600 transition shadow-lg">Download PDF</button>
+            </div>
+        </header>
+
+        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-24">
+
+            <!-- Section 1: Intro -->
+            <section id="intro" class="reveal scroll-mt-24 space-y-12">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-blue-100 text-blue-600 rounded-full text-[10px] font-bold uppercase tracking-tighter">Module 01</span>
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">Operating System Overview</h2>
+                    <p class="text-slate-500 text-lg max-w-2xl mx-auto">Nền tảng của mọi hệ thống tính toán hiện đại.</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="shield-check"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-3">Core Software</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Phần mềm cốt lõi quản lý mọi tài nguyên phần cứng và phần mềm của máy tính.</p>
+                    </div>
+                    
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="split"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-3">Intermediary</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Đóng vai trò trung gian, giúp người dùng giao tiếp với phần cứng một cách dễ dàng.</p>
+                    </div>
+                    <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6">
+                            <i data-lucide="eye-off"></i>
+                        </div>
+                        <h3 class="text-lg font-bold mb-3">Abstraction</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed">Ẩn đi sự phức tạp của phần cứng bên dưới, cung cấp giao diện thân thiện.</p>
+                    </div>
+                </div>
+
+                <!-- Goals & Structure -->
+                <div class="grid lg:grid-cols-5 gap-8">
+                    <div class="lg:col-span-2 space-y-6">
+                        <h3 class="text-2xl font-bold flex items-center gap-3">
+                            <i data-lucide="target" class="text-blue-600"></i> Goals of an OS
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                <span class="text-sm font-medium">Thực thi chương trình hiệu quả</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                <span class="text-sm font-medium">Thân thiện với người dùng</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                                <span class="text-sm font-medium">Quản lý tài nguyên phần cứng</span>
+                            </div>
+
+                            <div class="flex items-center gap-3 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                                <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                                <span class="text-sm font-medium">Cung cấp môi trường ổn định để chạy các chương trình.</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:col-span-3 bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
+                        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-600/20 blur-3xl rounded-full"></div>
+                        <h3 class="text-xl font-bold mb-8 text-center">System Architecture</h3>
+                        <div class="flex flex-col items-center gap-6">
+                            <div class="w-full max-w-xs py-3 bg-blue-600 rounded-xl text-center font-bold shadow-lg shadow-blue-500/20 z-10">Users</div>
+                            <div class="w-full max-w-xs py-3 bg-indigo-600 rounded-xl text-center font-bold shadow-lg shadow-indigo-500/20 z-10">Application Software</div>
+                            <div class="w-full max-w-xs py-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-center z-10">
+                                <span class="text-blue-400 font-extrabold uppercase tracking-widest text-xs block mb-1">Heart of System</span>
+                                <span class="text-lg font-bold">Operating System</span>
+                            </div>
+                            <div class="w-full max-w-xs py-4 bg-slate-800 border border-slate-700 rounded-xl text-center">
+                                <span class="text-slate-400 font-bold">Hardware Resources</span>
+                                <p class="text-[10px] text-slate-500 mt-1">CPU • Memory • I/O</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: OS Zoo -->
+            <section id="zoo" class="reveal scroll-mt-24 space-y-12">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div class="space-y-2">
+                        <span class="text-indigo-600 font-bold text-xs uppercase tracking-widest">Classification</span>
+                        <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">The Operating System Zoo</h2>
+                    </div>
+                    <p class="text-slate-500 text-sm max-w-xs italic border-l-2 border-indigo-200 pl-4">
+                        Tùy vào mục đích sử dụng, hệ điều hành được chia thành nhiều "loài" khác nhau.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards with improved styling -->
+                    <div class="p-7 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="database"></i>
+                            </div>
+                            <span class="text-[10px] font-black text-slate-300 uppercase">Enterprise</span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Mainframe OS</h3>
+                        <p class="text-sm text-slate-500 mb-6 flex-1">Xử lý khối lượng công việc I/O khổng lồ qua Batch, Transaction và Time-sharing.</p>
+                        <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-50">
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">OS/360</span>
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">Linux</span>
+                        </div>
+                    </div>
+
+                    <div class="p-7 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="server"></i>
+                            </div>
+                            <span class="text-[10px] font-black text-slate-300 uppercase">Network</span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Server OS</h3>
+                        <p class="text-sm text-slate-500 mb-6 flex-1">Phục vụ người dùng qua mạng, chia sẻ tài nguyên phần cứng và phần mềm (Web, SQL, File).</p>
+                        <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-50">
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">Windows Server</span>
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">UNIX</span>
+                        </div>
+                    </div>
+
+                    <div class="p-7 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="smartphone"></i>
+                            </div>
+                            <span class="text-[10px] font-black text-slate-300 uppercase">Mobile</span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Handheld OS</h3>
+                        <p class="text-sm text-slate-500 mb-6 flex-1">Tối ưu cho thiết bị di động, hạn chế pin và tài nguyên nhưng vẫn đảm bảo đa nhiệm.</p>
+                        <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-50">
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">Android</span>
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">iOS</span>
+                        </div>
+                    </div>
+
+                    <div class="p-7 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center">
+                                <i data-lucide="clock"></i>
+                            </div>
+                            <span class="text-[10px] font-black text-slate-300 uppercase">Mission Critical</span>
+                        </div>
+                        <h3 class="font-bold text-lg mb-2">Real-Time (RTOS)</h3>
+                        <p class="text-sm text-slate-500 mb-6 flex-1">Đáp ứng deadline thời gian cực kỳ nghiêm ngặt (Hard Real-time) hoặc linh hoạt hơn (Soft).</p>
+                        <div class="flex flex-wrap gap-2 pt-4 border-t border-slate-50">
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">eCos</span>
+                            <span class="px-2 py-1 bg-slate-100 rounded text-[10px] font-bold text-slate-600">QNX</span>
+                        </div>
+                    </div>
+
+                    <div class="p-7 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col col-span-1 md:col-span-2">
+                        <div class="flex gap-8 h-full">
+                            <div class="flex-1 flex flex-col">
+                                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mb-4">
+                                    <i data-lucide="settings-2"></i>
+                                </div>
+                                <h4 class="font-bold mb-2">Embedded OS</h4>
+                                <p class="text-xs text-slate-500">Tích hợp sâu trong lò vi sóng, ô tô, MP3. Chức năng xác định trước.</p>
+                            </div>
+                            <div class="w-px bg-slate-100"></div>
+                            <div class="flex-1 flex flex-col">
+                                <div class="w-10 h-10 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mb-4">
+                                    <i data-lucide="credit-card"></i>
+                                </div>
+                                <h4 class="font-bold mb-2">Smart Card OS</h4>
+                                <p class="text-xs text-slate-500">Siêu nhỏ gọn cho thanh toán điện tử, xác thực và bảo mật ATM.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Concepts -->
+            <section id="concepts" class="reveal scroll-mt-24 space-y-12">
+                <div class="text-center space-y-4">
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Key OS Concepts</h2>
+                    <div class="h-1 w-20 bg-blue-600 mx-auto rounded-full"></div>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Concept Detail Card -->
+                    <div class="group bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500">
+                        <div class="flex items-start gap-6 mb-8">
+                            <div class="w-16 h-16 bg-blue-600 text-white rounded-3xl flex items-center justify-center shadow-lg shadow-blue-200 group-hover:rotate-12 transition-transform">
+                                <i data-lucide="activity" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold">Processes (Tiến trình)</h3>
+                                <p class="text-blue-600 text-xs font-bold uppercase tracking-widest mt-1 italic">Program in execution</p>
+                            </div>
+                        </div>
+                        <ul class="space-y-4">
+                            <li class="flex gap-4 p-4 bg-slate-50 rounded-2xl">
+                                <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
+                                <p class="text-sm text-slate-600">Chương trình đã nạp vào bộ nhớ và đang chạy.</p>
+                            </li>
+                            <li class="flex gap-4 p-4 bg-slate-50 rounded-2xl">
+                                <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
+                                <p class="text-sm text-slate-600">Đi kèm tài nguyên: Stack, Data, CPU Regs, PC.</p>
+                            </li>
+                            <li class="flex gap-4 p-4 bg-slate-50 rounded-2xl">
+                                <i data-lucide="check-circle-2" class="text-green-500 w-5 h-5 flex-shrink-0"></i>
+                                <p class="text-sm text-slate-600">Cấu trúc phân cấp Cha (Parent) - Con (Child).</p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Address Space Concept -->
+                    <div class="group bg-slate-900 p-10 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
+                        <div class="absolute -left-10 -top-10 w-40 h-40 bg-indigo-500/10 blur-3xl rounded-full"></div>
+                        <div class="flex items-start gap-6 mb-8">
+                            <div class="w-16 h-16 bg-white text-slate-900 rounded-3xl flex items-center justify-center shadow-lg group-hover:-rotate-6 transition-transform">
+                                <i data-lucide="box" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold">Address Spaces</h3>
+                                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1 italic">Memory Abstraction</p>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
+                            <p class="text-sm leading-relaxed mb-4">
+                                Giải quyết xung đột địa chỉ khi nạp nhiều chương trình. Cung cấp một "không gian ảo" (0 → Max) cho mỗi tiến trình.
+                            </p>
+                            <div class="flex items-center gap-4 text-xs font-mono text-indigo-400">
+                                <span class="px-2 py-1 bg-indigo-400/10 rounded">Independence</span>
+                                <span class="px-2 py-1 bg-indigo-400/10 rounded">Protection</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Small Concepts Grid -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4">
+                        <i data-lucide="file-text" class="text-orange-500"></i>
+                        <h4 class="font-bold">Files</h4>
+                        <p class="text-xs text-slate-500">Trừu tượng hóa dữ liệu trên đĩa (Block/Character special).</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4">
+                        <i data-lucide="terminal" class="text-green-500"></i>
+                        <h4 class="font-bold">The Shell</h4>
+                        <p class="text-xs text-slate-500">Giao diện trung gian (CLI/GUI) thực thi các script lệnh.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4">
+                        <i data-lucide="hard-drive" class="text-blue-500"></i>
+                        <h4 class="font-bold">I/O System</h4>
+                        <p class="text-xs text-slate-500">Quản lý và điều phối các thiết bị nhập xuất vật lý.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col gap-4">
+                        <i data-lucide="lock" class="text-rose-500"></i>
+                        <h4 class="font-bold">Protection</h4>
+                        <p class="text-xs text-slate-500">Bảo mật tài nguyên, phân quyền người dùng và tiến trình.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: History -->
+            <section id="history" class="reveal scroll-mt-24 space-y-12 pb-24">
+                <div class="border-l-4 border-slate-900 pl-6">
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight italic">"Ontogeny Recapitulates Phylogeny"</h2>
+                    <p class="text-slate-500 mt-2 font-medium">Sự phát triển của cá thể lặp lại sự tiến hóa của loài.</p>
+                </div>
+
+                <div class="relative">
+                    <!-- Timeline Line -->
+                    <div class="absolute left-8 top-0 h-full w-1 bg-slate-200 rounded-full hidden md:block"></div>
+
+                    <div class="space-y-12">
+                        <!-- Step 1 -->
+                        <div class="relative md:pl-20">
+                            <div class="absolute left-6 top-0 w-5 h-5 bg-slate-400 rounded-full border-4 border-white shadow-sm hidden md:block"></div>
+                            <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm hover:border-slate-300 transition-colors">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">1940s - 1950s</span>
+                                <h4 class="text-xl font-extrabold mb-3">Early Computing</h4>
+                                <p class="text-sm text-slate-600 leading-relaxed">Chạy trực tiếp trên phần cứng, tập lệnh cố định, bộ nhớ cực hạn chế, không có bảo vệ.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="relative md:pl-20">
+                            <div class="absolute left-6 top-0 w-5 h-5 bg-blue-600 rounded-full border-4 border-white shadow-sm hidden md:block"></div>
+                            <div class="p-8 bg-blue-600 rounded-3xl shadow-xl shadow-blue-200 text-white transform md:translate-x-4">
+                                <span class="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-2 block">Improvement</span>
+                                <h4 class="text-xl font-extrabold mb-3">Microprogramming</h4>
+                                <p class="text-sm text-blue-100 leading-relaxed">Tăng tính linh hoạt và tốc độ xử lý thông qua vi lập trình.</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="relative md:pl-20">
+                            <div class="absolute left-6 top-0 w-5 h-5 bg-green-500 rounded-full border-4 border-white shadow-sm hidden md:block"></div>
+                            <div class="p-8 bg-white rounded-3xl border border-slate-100 shadow-sm hover:border-slate-300 transition-colors">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Modern Era</span>
+                                <h4 class="text-xl font-extrabold mb-3">Virtual Memory & GB/TB RAM</h4>
+                                <p class="text-sm text-slate-600 leading-relaxed">Ra đời bộ nhớ ảo, cho phép chạy chương trình lớn hơn RAM vật lý. Đa nhiệm và bảo mật toàn diện.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 py-16 px-8 text-center text-slate-500 border-t border-slate-800">
+            <div class="flex flex-col items-center gap-6">
+                <div class="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center">
+                    <i data-lucide="terminal" class="text-slate-400"></i>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-white font-bold tracking-tight">OS Knowledge Hub v2.0</p>
+                    <p class="text-sm text-slate-500 italic max-w-sm mx-auto">Hệ thống hóa toàn diện nội dung bài học Hệ điều hành.</p>
+                </div>
+                <div class="pt-8 border-t border-slate-800 w-full max-w-xs flex justify-center gap-6">
+                    <i data-lucide="github" class="w-5 h-5 hover:text-white cursor-pointer transition"></i>
+                    <i data-lucide="twitter" class="w-5 h-5 hover:text-white cursor-pointer transition"></i>
+                    <i data-lucide="linkedin" class="w-5 h-5 hover:text-white cursor-pointer transition"></i>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Mobile Menu Toggle
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        let menuOpen = false;
+
+        menuBtn.addEventListener('click', () => {
+            if(!menuOpen) {
+                sidebar.classList.remove('hidden');
+                sidebar.classList.add('flex', 'w-full');
+                menuOpen = true;
+            } else {
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('flex', 'w-full');
+                menuOpen = false;
+            }
+        });
+
+        // Sidebar link highlight logic
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            sidebarLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Intersection Observer for reveal animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        sections.forEach(section => observer.observe(section));
+    </script>
+</body>
+</html>

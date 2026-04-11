@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng dụng Toán học: Hợp các phép quay</title>
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 60% 40%;
+            grid-template-rows: auto auto auto;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .slide-container {
+            grid-column: 1;
+            grid-row: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            height: 400px;
+            overflow: auto;
+        }
+        .lecture-container {
+            grid-column: 1;
+            grid-row: 2;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow: auto;
+        }
+        .audio-container {
+            grid-column: 2;
+            grid-row: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            height: fit-content;
+        }
+        .quiz-container {
+            grid-column: 2;
+            grid-row: 2;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow: auto;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .quiz-question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+            display: none;
+        }
+        .quiz-question.active {
+            display: block;
+        }
+        .quiz-options {
+            margin-left: 20px;
+        }
+        .quiz-option {
+            margin: 10px 0;
+            padding: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-radius: 4px;
+        }
+        .quiz-option:hover {
+            background-color: #e8f4fc;
+        }
+        .quiz-option.selected {
+            background-color: #d4e6f1;
+        }
+        .correct {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+        .incorrect {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .latex-block {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .section-title {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+        .frame-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .author-info {
+            font-style: italic;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .block {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f0f7ff;
+            border-radius: 4px;
+        }
+        .solution-step {
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 3px solid #3498db;
+        }
+        .katex-display {
+            margin: 1em 0;
+        }
+        .quiz-buttons {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .quiz-buttons button {
+            padding: 8px 16px;
+            margin: 0 5px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .quiz-buttons button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .result-message {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .progress-info {
+            text-align: center;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+            }
+            .slide-container, .lecture-container, .audio-container, .quiz-container {
+                grid-column: 1;
+            }
+            .slide-container {
+                grid-row: 1;
+            }
+            .audio-container {
+                grid-row: 2;
+            }
+            .lecture-container {
+                grid-row: 3;
+            }
+            .quiz-container {
+                grid-row: 4;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="slide-container">
+            <h2>Bài giảng: Hợp của các phép quay và phản xạ</h2>
+            
+            <!-- Title Frame -->
+            <div class="block">
+                <div class="frame-title">Bài giảng: Hợp của các phép quay và phản xạ trong ánh xạ tuyến tính</div>
+                <div class="author-info">Nguyễn Phạm An - Toán Đại cương - Đại học</div>
+            </div>
+            
+            <!-- Table of Contents -->
+            <div class="block">
+                <div class="frame-title">Nội dung chính</div>
+                <ul>
+                    <li>Đặt vấn đề</li>
+                    <li>Phép quay</li>
+                    <li>Phản xạ hình học</li>
+                    <li>Kết luận</li>
+                </ul>
+            </div>
+            
+            <!-- Problem Statement -->
+            <div class="block">
+                <div class="frame-title">Bài toán đặt ra</div>
+                <p>Cho ánh xạ tuyến tính \( T: \mathbb{R}^2 \to \mathbb{R}^2 \), là hợp của:</p>
+                <ul>
+                    <li>Phép quay quanh gốc toạ độ góc \( \theta = \frac{\pi}{3} \)</li>
+                    <li>Sau đó phản xạ qua đường thẳng \( y = 2x \)</li>
+                </ul>
+                <p>Hỏi: phần tử hàng 1, cột 2 của ma trận biểu diễn ánh xạ là bao nhiêu?</p>
+            </div>
+            
+            <!-- Rotation -->
+            <div class="block">
+                <div class="frame-title">Ánh xạ quay</div>
+                <p>Xét véc-tơ chuẩn \( \vec{e}_2 = (0, 1) \). Ma trận quay:</p>
+                <div class="latex-block">
+                    \[
+                    R\left( \frac{\pi}{3} \right) =
+                    \begin{bmatrix}
+                    \cos \frac{\pi}{3} & -\sin \frac{\pi}{3} \\
+                    \sin \frac{\pi}{3} & \cos \frac{\pi}{3}
+                    \end{bmatrix}
+                    = \begin{bmatrix}
+                    \frac{1}{2} & -\frac{\sqrt{3}}{2} \\
+                    \frac{\sqrt{3}}{2} & \frac{1}{2}
+                    \end{bmatrix}
+                    \]
+                </div>
+                <p>Vậy \( R(\pi/3) \cdot \vec{e}_2 = \begin{bmatrix} -\frac{\sqrt{3}}{2} \\ \frac{1}{2} \end{bmatrix} \Rightarrow M = \left( -\frac{\sqrt{3}}{2}, \frac{1}{2} \right) \)</p>
+            </div>
+            
+            <!-- Reflection -->
+            <div class="block">
+                <div class="frame-title">Phản xạ điểm M qua đường thẳng</div>
+                <ul>
+                    <li>Xét đường thẳng \( y = 2x \), có vtcp \( \vec{u} = (1,2) \)</li>
+                    <li>Gọi \( N = (x, 2x) \) là chân vuông góc từ \( M \) lên đường thẳng</li>
+                    <li>Ta có: \( \vec{MN} = (x + \frac{\sqrt{3}}{2},\; 2x - \frac{1}{2}) \)</li>
+                </ul>
+                <p>Từ điều kiện vuông góc: \( \vec{MN} \cdot \vec{u} = 0 \)</p>
+                <div class="latex-block">
+                    \[
+                    x + \frac{\sqrt{3}}{2} + 4x - 1 = 0 \Rightarrow x = \frac{2 - \sqrt{3}}{10}
+                    \]
+                </div>
+            </div>
+            
+            <!-- Conclusion -->
+            <div class="block">
+                <div class="frame-title">Kết luận cuối cùng</div>
+                <p>Từ bước trên, ta suy ra:</p>
+                <div class="latex-block" style="background-color: #e8f4f8; border-left: 4px solid #3498db;">
+                    <strong>Phần tử hàng 1, cột 2 của ma trận ánh xạ</strong>
+                    \[ \boxed{ \frac{4 + 3\sqrt{3}}{10} } \]
+                </div>
+                <p>Đây là hoành độ của ảnh phản xạ \( T(\vec{e}_2) \), ứng với cột thứ 2 của ma trận.</p>
+            </div>
+        </div>
+
+        <div class="lecture-container">
+            <h2>Bài giảng chi tiết</h2>
+            
+            <div class="block">
+                <div class="frame-title">Bài toán</div>
+                <p>Cho ánh xạ tuyến tính \( T : \mathbb{R}^2 \to \mathbb{R}^2 \), được tạo thành bởi phép quay quanh gốc tọa độ một góc \( \dfrac{\pi}{3} \), sau đó phản xạ qua đường thẳng \( y = 2x \). Hãy tìm phần tử hàng 1, cột 2 của ma trận ánh xạ \( T \).</p>
+            </div>
+            
+            <div class="solution-step">
+                <strong>Bước 1.</strong> Quay véc-tơ đơn vị \( \vec{e}_2 = (0, 1) \) một góc \( \dfrac{\pi}{3} \). Ma trận quay:
+                <div class="latex-block">
+                    \[
+                    R\left( \frac{\pi}{3} \right) =
+                    \begin{bmatrix}
+                    \cos\left( \frac{\pi}{3} \right) & -\sin\left( \frac{\pi}{3} \right) \\
+                    \sin\left( \frac{\pi}{3} \right) & \cos\left( \frac{\pi}{3} \right)
+                    \end{bmatrix}
+                    =
+                    \begin{bmatrix}
+                    \frac{1}{2} & -\frac{\sqrt{3}}{2} \\
+                    \frac{\sqrt{3}}{2} & \frac{1}{2}
+                    \end{bmatrix}
+                    \]
+                </div>
+                <p>Áp dụng vào \( \vec{e}_2 = (0,1) \), ta được:</p>
+                <div class="latex-block">
+                    \[
+                    R\left( \frac{\pi}{3} \right) \cdot \vec{e}_2 =
+                    \begin{bmatrix}
+                    - \frac{\sqrt{3}}{2} \\
+                    \frac{1}{2}
+                    \end{bmatrix}
+                    \Rightarrow M = \left( -\frac{\sqrt{3}}{2}, \frac{1}{2} \right)
+                    \]
+                </div>
+            </div>
+            
+            <div class="solution-step">
+                <strong>Bước 2.</strong> Tìm ảnh phản xạ của điểm \( M \) qua đường \( y = 2x \) bằng phương pháp dựng hình vuông góc.
+                <p>Đường thẳng \( y = 2x \) có véc-tơ chỉ phương \( \vec{u} = (1,2) \). Gọi \( N = (x, 2x) \) là chân đường vuông góc từ \( M \) đến đường \( y = 2x \). Ta có:</p>
+                <div class="latex-block">
+                    \[
+                    \vec{MN} = \left( x + \frac{\sqrt{3}}{2},\; 2x - \frac{1}{2} \right)
+                    \]
+                </div>
+                <p>Yêu cầu \( \vec{MN} \perp \vec{u} \), tức là tích vô hướng bằng 0:</p>
+                <div class="latex-block">
+                    \[
+                    \vec{MN} \cdot \vec{u} = \left( x + \frac{\sqrt{3}}{2} \right) \cdot 1 + \left( 2x - \frac{1}{2} \right) \cdot 2 = 0
+                    \]
+                </div>
+                <p>Tính:</p>
+                <div class="latex-block">
+                    \[
+                    x + \frac{\sqrt{3}}{2} + 4x - 1 = 0
+                    \Rightarrow 5x = 1 - \frac{\sqrt{3}}{2}
+                    \Rightarrow x = \frac{2 - \sqrt{3}}{10}
+                    \]
+                </div>
+            </div>
+            
+            <div class="solution-step">
+                <strong>Bước 3.</strong> Tìm tọa độ ảnh phản xạ \( M' \) của điểm \( M \)
+                <p>Gọi \( a = -\dfrac{\sqrt{3}}{2} \) là hoành độ của \( M \), và \( b \) là hoành độ của điểm đối xứng \( M' \).  
+                Vì hoành độ trung điểm \( N \) là:</p>
+                <div class="latex-block">
+                    \[
+                    m = \frac{a + b}{2} = \frac{2 - \sqrt{3}}{10}
+                    \Rightarrow b = 2m - a = 2 \cdot \frac{2 - \sqrt{3}}{10} + \frac{\sqrt{3}}{2}
+                    \]
+                </div>
+                <p>Rút gọn:</p>
+                <div class="latex-block">
+                    \[
+                    b = \frac{4 - 2\sqrt{3}}{10} + \frac{5\sqrt{3}}{10} = \frac{4 + 3\sqrt{3}}{10}
+                    \]
+                </div>
+                <p>Vậy</p>
+                <div class="latex-block">
+                    \[
+                    T(\vec{e}_2) = M' = \left( \frac{4 + 3\sqrt{3}}{10},\; \dots \right)
+                    \]
+                </div>
+                <p>Và phần tử hàng 1, cột 2 của ma trận ánh xạ T là</p>
+                <div class="latex-block" style="background-color: #e8f4f8;">
+                    \[
+                    \frac{4 + 3\sqrt{3}}{10}
+                    \]
+                </div>
+            </div>
+        </div>
+
+        <div class="audio-container">
+            <h2>Âm thanh bài giảng</h2>
+            <div>
+                <iframe width="100%" height="60" src="https://vocaroo.com/embed/19HH4sqjE6tR?autoplay=0" frameborder="0" allow="autoplay"></iframe>
+                <br>
+                <a href="https://voca.ro/19HH4sqjE6tR" title="Vocaroo Voice Recorder" target="_blank">View on Vocaroo &gt;&gt;</a>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <h3>Ghi chú bài giảng</h3>
+                <ul>
+                    <li>Không cần dùng công thức phản xạ phức tạp</li>
+                    <li>Dựng trực tiếp qua hình học: vuông góc và trung điểm</li>
+                    <li>Có thể áp dụng cho các đường phản xạ bất kỳ dạng \( y = kx \)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="quiz-container">
+            <h2>Bài tập trắc nghiệm</h2>
+            <div class="progress-info">Câu 1/5</div>
+            
+            <!-- Question 1 -->
+            <div class="quiz-question active" id="q1">
+                <p><strong>Bài 1:</strong> Let \( T : \mathbb{R}^2 \to \mathbb{R}^2 \) be a transformation defined by <strong>rotation through \( \dfrac{\pi}{6} \)</strong> followed by <strong>reflection across the line \( y = x \)</strong>. Find the <strong>(2, 1)-entry</strong> of the matrix of \( T \).</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-correct="false">A. \(\dfrac{1 - \sqrt{3}}{2}\)</div>
+                    <div class="quiz-option" data-correct="true">B. \(\dfrac{\sqrt{3} - 1}{2}\)</div>
+                    <div class="quiz-option" data-correct="false">C. None of the above</div>
+                </div>
+            </div>
+            
+            <!-- Question 2 -->
+            <div class="quiz-question" id="q2">
+                <p><strong>Bài 2:</strong> Let \( T : \mathbb{R}^2 \to \mathbb{R}^2 \) be the composition of <strong>rotation by \( \pi/2 \)</strong> followed by <strong>reflection in the line \( y = -x \)</strong>. Determine the <strong>(2, 2)-entry</strong> of the standard matrix of \( T \).</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-correct="true">A. \(-1\)</div>
+                    <div class="quiz-option" data-correct="false">B. \(1\)</div>
+                    <div class="quiz-option" data-correct="false">C. None of the other choices is correct</div>
+                </div>
+            </div>
+            
+            <!-- Question 3 -->
+            <div class="quiz-question" id="q3">
+                <p><strong>Bài 3:</strong> Let \( T : \mathbb{R}^2 \to \mathbb{R}^2 \) be defined as <strong>a reflection in the line \( y = 3x \)</strong> followed by <strong>rotation through \( \pi/4 \)</strong>. Find the <strong>(1, 2)-entry</strong> of the transformation matrix of \( T \).</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-correct="true">A. \(\dfrac{-3 + 2\sqrt{2}}{5}\)</div>
+                    <div class="quiz-option" data-correct="false">B. \(\dfrac{3 + 2\sqrt{2}}{5}\)</div>
+                    <div class="quiz-option" data-correct="false">C. None of the other choices is correct</div>
+                </div>
+            </div>
+            
+            <!-- Question 4 -->
+            <div class="quiz-question" id="q4">
+                <p><strong>Bài 4:</strong> Let \( T: \mathbb{R}^2 \to \mathbb{R}^2 \) be a transformation consisting of a <strong>rotation of angle \( \pi \)</strong> followed by <strong>reflection in the x-axis</strong>. What is the <strong>(1, 1)-entry</strong> of the matrix of \( T \)?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-correct="true">A. \(-1\)</div>
+                    <div class="quiz-option" data-correct="false">B. \(1\)</div>
+                    <div class="quiz-option" data-correct="false">C. \(0\)</div>
+                </div>
+            </div>
+            
+            <!-- Question 5 -->
+            <div class="quiz-question" id="q5">
+                <p><strong>Bài 5:</strong> Let \( T : \mathbb{R}^2 \to \mathbb{R}^2 \) be a linear transformation defined as <strong>rotation through \( \pi/3 \)</strong> followed by <strong>reflection in the line \( y = 2x \)</strong>. Which of the following is the <strong>trace</strong> (sum of diagonal entries) of the matrix of \( T \)?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-correct="false">A. \(\dfrac{2 + \sqrt{3}}{5}\)</div>
+                    <div class="quiz-option" data-correct="false">B. \(\dfrac{7}{5}\)</div>
+                    <div class="quiz-option" data-correct="true">C. None of the other choices is correct</div>
+                </div>
+            </div>
+            
+            <div class="quiz-buttons">
+                <button id="checkAnswerBtn" onclick="checkAnswer()" disabled>Kiểm tra</button>
+                <button id="nextQuestionBtn" onclick="nextQuestion()" disabled>Tiếp theo</button>
+                <button id="resetQuizBtn" onclick="resetQuiz()">Làm lại bài tập</button>
+            </div>
+            <div class="result-message" id="resultMessage"></div>
+        </div>
+    </div>
+
+    <!-- KaTeX JS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body);"></script>
+    
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 5;
+        let selectedOption = null;
+
+        function showQuestion(questionNumber) {
+            // Hide all questions
+            document.querySelectorAll('.quiz-question').forEach(q => {
+                q.classList.remove('active');
+            });
+            
+            // Show current question
+            document.querySelector(`#q${questionNumber}`).classList.add('active');
+            
+            // Reset buttons and message
+            document.getElementById('checkAnswerBtn').disabled = true;
+            document.getElementById('nextQuestionBtn').disabled = true;
+            document.getElementById('resultMessage').textContent = '';
+            
+            // Update progress info
+            document.querySelector('.progress-info').textContent = `Câu ${questionNumber}/${totalQuestions}`;
+            
+            // Reset options for current question
+            const options = document.querySelectorAll(`#q${questionNumber} .quiz-option`);
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+                opt.style.pointerEvents = 'auto';
+                opt.onclick = function() {
+                    selectOption(this);
+                };
+            });
+            
+            selectedOption = null;
+        }
+
+        function selectOption(element) {
+            // Deselect all options in current question
+            const options = document.querySelectorAll(`#q${currentQuestion} .quiz-option`);
+            options.forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Select clicked option
+            element.classList.add('selected');
+            selectedOption = element;
+            document.getElementById('checkAnswerBtn').disabled = false;
+        }
+
+        function checkAnswer() {
+            if (!selectedOption) return;
+
+            const isCorrect = selectedOption.getAttribute('data-correct') === 'true';
+            
+            // Highlight correct and incorrect answers
+            const options = document.querySelectorAll(`#q${currentQuestion} .quiz-option`);
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+                if (opt.getAttribute('data-correct') === 'true') {
+                    opt.classList.add('correct');
+                } else if (opt === selectedOption && !isCorrect) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            // Show result message
+            const resultMessage = document.getElementById('resultMessage');
+            if (isCorrect) {
+                resultMessage.textContent = 'Chính xác!';
+                resultMessage.style.color = '#28a745';
+            } else {
+                resultMessage.textContent = 'Chưa chính xác. Hãy thử lại!';
+                resultMessage.style.color = '#dc3545';
+            }
+            
+            // Enable/disable buttons
+            document.getElementById('checkAnswerBtn').disabled = true;
+            document.getElementById('nextQuestionBtn').disabled = currentQuestion >= totalQuestions;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+            }
+        }
+
+        function resetQuiz() {
+            currentQuestion = 1;
+            showQuestion(currentQuestion);
+        }
+
+        // Initialize the quiz
+        document.addEventListener("DOMContentLoaded", function() {
+            showQuestion(currentQuestion);
+            
+            // Render LaTeX
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+</body>
+</html>

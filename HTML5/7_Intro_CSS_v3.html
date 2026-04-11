@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WED201c - CSS Demo (All in One)</title>
+    <style>
+        /* --- CSS NỘI BỘ (Thay thế cho file style.css bên ngoài) --- */
+
+        /* CSS trang trí khung cho dễ nhìn */
+        body { padding: 20px; font-family: sans-serif; padding-bottom: 100px; max-width: 800px; margin: 0 auto;}
+        section { border-bottom: 2px dashed #ccc; padding: 20px 0; }
+        h2 { color: #333; border-left: 5px solid orange; padding-left: 10px; margin-top: 30px; }
+        .demo-box { border: 1px solid #999; padding: 10px; background: #eee; text-align: center; }
+
+        /* --- PHẦN 2 & 3: CƠ BẢN VỀ CSS & CASCADING --- */
+         /* 2.1.2 Cấu trúc cơ bản [cite: 74-81] */
+        h1.basic-style {
+            color: blue;
+        }
+
+         /* 2.1.5 Nhiều thuộc tính [cite: 99-102] */
+        h1.multiple-props {
+            color: blue;
+            background-color: yellow;
+        }
+
+         /* 3.2 Thứ tự ưu tiên (Cascading) [cite: 146-153] */
+        h1.cascade-example {
+            font-family: Arial, sans-serif;
+            font-family: "Times New Roman", Times, serif; /* Times sẽ được áp dụng vì viết sau */
+        }
+
+         /* 3.3 !important [cite: 162-168] */
+        h1.important-example {
+            font-family: Arial, sans-serif !important; /* Arial được áp dụng dù Times viết sau */
+            font-family: "Times New Roman", Times, serif;
+        }
+
+        /* --- PHẦN 4: ĐỊNH KIỂU VĂN BẢN (TYPOGRAPHY) --- */
+         /* 4.2 Font-family [cite: 185-192] */
+        .text-font {
+            font-family: Courier, Impact, Arial;
+        }
+
+        /* 4.2.2 Custom Fonts (@font-face) - Phần này cần file font thật mới chạy được */
+        @font-face {
+            font-family: mySpecialFont;
+            src: local('Arial'); /* Fallback tạm thời để không lỗi */
+        }
+        .custom-font-apply {
+            font-family: mySpecialFont;
+        }
+
+         /* 4.4 Font-variant [cite: 224-227] */
+        .small-caps {
+            font-variant: small-caps;
+        }
+
+         /* 4.6 Màu sắc và Màu nền [cite: 244-247] */
+        .color-example {
+            color: #0006CC; /* Xanh dương đậm */
+            background-color: #d3d3d3; /* Xám nhạt */
+            padding: 10px;
+        }
+
+         /* 4.8 Line-height [cite: 263-269] */
+        .line-height-small { line-height: 50%; border: 1px solid #ddd; padding: 5px;}
+        .line-height-large { line-height: 200%; border: 1px solid #ddd; padding: 5px;}
+
+        /* --- PHẦN 10: LIÊN KẾT & DANH SÁCH --- */
+         /* 10.1 Định kiểu Link [cite: 529-538] */
+        a.button-link {
+            display: inline-block; /* Đổi thành inline-block để không vỡ layout */
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #0006CC;
+            width: 200px;
+            text-align: center;
+            padding: 10px 4px;
+            text-decoration: none;
+            margin-bottom: 10px;
+        }
+
+         /* 10.3 Các trạng thái Link [cite: 545-556] */
+        a.state-demo { font-size: 1.2em; font-weight: bold; }
+        a.state-demo:link { color: blue; }
+        a.state-demo:visited { color: purple; }
+        a.state-demo:hover { color: red; text-decoration: underline; cursor: pointer; } 
+        a.state-demo:active { color: orange; }
+
+         /* 10.5 List Styles [cite: 566-581] */
+        ul.roman-list { list-style-type: upper-roman; }
+        ul.alpha-list { list-style-type: upper-alpha; }
+
+        /* --- PHẦN 11 & 12: SELECTORS --- */
+         /* 11.3 ID Selector [cite: 609-613] */
+        #mainLogo {
+            border: 5px solid #0006CC;
+            margin: 10px auto;
+            width: 150px;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+         /* 11.4 Class Selector [cite: 618-621] */
+        .thumb {
+            border: 2px solid #0006CC;
+            width: 100px; /* Chỉnh lại px cho dễ nhìn hơn % trong ví dụ này */
+            display: block;
+            margin: 10px 0;
+        }
+
+         /* 12.2 Attribute Selectors [cite: 663-676] */
+        a[href^='http'] { background-color: yellow; color: black; }
+
+        /* --- PHẦN 17: BOX MODEL --- */
+         /* 17.1.2 Border [cite: 835-857] */
+        .box-border {
+            border: solid 1px #CC00AA;
+            border-width: 5px 10px 15px 2px; /* Trên - Phải - Dưới - Trái */
+            border-style: solid;
+            border-color: green;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+         /* 17.1.6 Additive Box [cite: 882-888] */
+        .box-calc {
+            width: 100px;
+            height: 50px;
+            padding: 20px;
+            margin: 5px;
+            border: 5px solid black;
+            background-color: lightblue;
+            color: black;
+            font-size: 0.8em;
+            display: flex; align-items: center; justify-content: center; /* Căn giữa chữ */
+        }
+
+        /* 17.1.8 Box Sizing */
+        .box-sizing-fix {
+            box-sizing: border-box; 
+            width: 100px;
+            height: 100px; /* Tăng height để dễ nhìn */
+            padding: 20px;
+            border: 5px solid black;
+            background-color: lightcoral;
+            color: black;
+            font-size: 0.8em;
+            display: flex; align-items: center; justify-content: center;
+            margin: 5px;
+        }
+
+        /* --- PHẦN 8 & 9: LAYOUT --- */
+         /* 8.2 Grid [cite: 425-438] */
+        .grid-container-3 {
+            display: grid;
+            grid-template-columns: 30% 30% 30%; 
+            gap: 10px; 
+            background-color: #f0f0f0;
+            padding: 10px;
+        }
+
+         /* 9.2 Flexbox [cite: 478-499] */
+        .flex-container {
+            display: flex;
+            flex-direction: row; 
+            justify-content: space-around; 
+            flex-wrap: wrap; 
+            background-color: #e0e0e0;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .flex-container .demo-box { width: 100px; height: 50px; line-height: 50px; background: white;}
+
+        /* --- PHẦN 19: POSITIONING --- */
+        .pos-wrapper {
+            height: 150px; border: 2px dashed gray; position: relative; margin-top: 20px; background: #fff;
+        }
+        .pos-relative {
+            position: relative;
+            top: 30px;
+            left: 30px;
+            background-color: yellow;
+            border: 1px solid black;
+            padding: 5px;
+            width: 150px;
+            z-index: 1;
+        }
+        .pos-absolute {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            padding: 10px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* --- EFFECTS --- */
+        /* 14.1 Background Image */
+        .bg-image-demo {
+            /* Dùng gradient thay ảnh để đảm bảo hiển thị */
+            background-image: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%); 
+            height: 150px;
+            display: flex; align-items: center; justify-content: center;
+            color: #333; font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+         /* 21.3 Transition [cite: 1066-1089] */
+        .transition-box {
+            color: #000000;
+            background: #2db34a;
+            line-height: 100px; 
+            text-align: center;
+            width: 150px; /* Giảm size cho vừa màn hình */
+            height: 100px;
+            border-radius: 6px;
+            transition: all 1s linear; /* Viết gọn */
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .transition-box:hover {
+            color: #ffffff;
+            width: 250px;
+            background: #2D31B3;
+            border-radius: 50px;
+        }
+
+         /* 22.2 Transforms [cite: 1111-1129] */
+        .transform-rotate {
+            transform: rotate(15deg);
+            background-color: pink;
+            display: inline-block;
+            padding: 20px;
+            margin: 20px;
+            border: 1px solid #333;
+        }
+        .transform-skew {
+            transform: skew(20deg, 0deg);
+            background-color: cyan;
+            display: inline-block;
+            padding: 20px;
+            margin: 20px;
+            border: 1px solid #333;
+        }
+
+        /* 23.5 Accessibility */
+        .offpage {
+            position: absolute;
+            left: -10000px;
+            top: auto;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tổng hợp bài tập thực hành CSS - WED201c (Bản sửa lỗi)</h1>
+    <p><i>Lưu ý: Nếu bạn thấy chữ màu xanh và nền vàng bên dưới nghĩa là CSS đã hoạt động.</i></p>
+    
+    <section>
+        <h2>Phần 2 & 3: Basic Syntax & Cascading</h2>
+        <h1 class="basic-style" style="font-size: 1.5em;">2.1.2: Tiêu đề này phải có màu xanh (Blue)</h1>
+        <h1 class="multiple-props" style="font-size: 1.5em;">2.1.5: Tiêu đề này chữ xanh nền vàng</h1>
+        <h1 class="cascade-example" style="font-size: 1.5em;">3.2: Font Times New Roman (Do quy tắc viết sau)</h1>
+        <h1 class="important-example" style="font-size: 1.5em;">3.3: Font Arial (Do dùng !important)</h1>
+    </section>
+
+    <section>
+        <h2>Phần 4: Định kiểu văn bản</h2>
+        <p class="text-font">4.2: Font-family fallback (Courier/Impact/Arial)</p>
+        <h3 class="small-caps">4.4: Tiêu đề Font-variant Small-Caps</h3>
+        <p class="color-example">4.6: Ví dụ về Color (Trắng/Xanh) và Background (Xám)</p>
+        
+        <div style="display: flex; gap: 20px;">
+            <div style="width: 45%;">
+                <p><b>4.8 Line-height 50% (Dính sát):</b></p>
+                <p class="line-height-small">Dòng 1<br>Dòng 2<br>Dòng 3</p>
+            </div>
+            <div style="width: 45%;">
+                <p><b>4.8 Line-height 200% (Thoáng):</b></p>
+                <p class="line-height-large">Dòng 1<br>Dòng 2<br>Dòng 3</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Phần 10: Links & Lists</h2>
+        <p>10.1 Button Link:</p>
+        <a href="#" class="button-link">Đây là Link dạng Nút</a>
+        
+        <p>10.3 Pseudo-classes (Thử di chuột vào link dưới):</p>
+        <a href="#" class="state-demo">Di chuột vào tôi (Hover me)</a>
+
+        <div style="display: flex; gap: 50px;">
+            <div>
+                <p><b>10.5 Roman List:</b></p>
+                <ul class="roman-list">
+                    <li>Mục I</li>
+                    <li>Mục II</li>
+                </ul>
+            </div>
+            <div>
+                <p><b>10.5 Alpha List:</b></p>
+                <ul class="alpha-list">
+                    <li>Mục A</li>
+                    <li>Mục B</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Phần 11 & 12: Advanced Selectors</h2>
+        <div id="mainLogo">ID #mainLogo</div>
+        
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <div class="thumb">Hộp Class .thumb</div>
+            <p><- Box này rộng cố định 100px, viền xanh</p>
+        </div>
+        
+        <p><b>Attribute Selectors:</b></p>
+        <ul>
+            <li><a href="http://google.com">Link bắt đầu bằng 'http' (Nền vàng)</a></li>
+            <li><a href="ftp://example.com">Link ftp (Không nền)</a></li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Phần 17: Box Model</h2>
+        <div class="box-border">17.1.2: Box với viền xanh lá dày mỏng khác nhau</div>
+        
+        <div style="display: flex; align-items: flex-start;">
+            <div>
+                <p><b>Content-box (Cộng dồn):</b></p>
+                <div class="box-calc">Width phình to</div>
+            </div>
+            <div>
+                <p><b>Border-box (Cố định):</b></p>
+                <div class="box-sizing-fix">Width giữ nguyên</div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Phần 8 & 9: Layout (Grid & Flexbox)</h2>
+        <p><b>8.2 Grid (3 cột):</b></p>
+        <div class="grid-container-3">
+            <div class="demo-box">Cột 1</div>
+            <div class="demo-box">Cột 2</div>
+            <div class="demo-box">Cột 3</div>
+            <div class="demo-box">Cột 4</div>
+            <div class="demo-box">Cột 5</div>
+            <div class="demo-box">Cột 6</div>
+        </div>
+
+        <p><b>9.2 Flexbox (Dàn hàng ngang):</b></p>
+        <div class="flex-container">
+            <div class="demo-box">Flex 1</div>
+            <div class="demo-box">Flex 2</div>
+            <div class="demo-box">Flex 3</div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Phần 19: Positioning</h2>
+        <div class="pos-wrapper">
+            <div class="pos-relative">Relative (Vàng)<br>(Cách top/left 30px)</div>
+            <div class="pos-absolute">Absolute (Đỏ)<br>(Gim vào góc phải)</div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Phần 14, 21, 22: Hiệu ứng & Chuyển động</h2>
+        <p><b>14.1 Background Gradient:</b></p>
+        <div class="bg-image-demo">Nền màu Gradient</div>
+        
+        <p><b>21.3 Transition (Di chuột vào ô xanh lá):</b></p>
+        <div class="transition-box">HOVER ME</div>
+
+        <p><b>22.2 Transforms:</b></p>
+        <div>
+            <div class="transform-rotate">Xoay 15 độ</div>
+            <div class="transform-skew">Nghiêng 20 độ</div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Phần 23: Accessibility</h2>
+        <h3 class="offpage">Tiêu đề này bị ẩn khỏi màn hình (Bạn sẽ không thấy dòng này)</h3>
+        <p>Dòng trên này có một thẻ <code>h3 class="offpage"</code> nhưng đã bị ẩn bằng CSS để dành cho trình đọc màn hình.</p>
+    </section>
+
+</body>
+</html>

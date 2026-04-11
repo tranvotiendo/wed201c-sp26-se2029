@@ -1,0 +1,148 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+#menu-nav {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#menu-nav img {
+    width: 60%;
+}
+
+.content-menu ul {
+    display: flex;
+}
+
+.content-menu li {
+    list-style-type: none;
+    margin: 0 10px;
+}
+
+.content-menu a {
+    text-decoration: none;
+    color: #82B8BC;
+}
+
+#menu-nav button {
+    background-color: black;
+    color: white;
+    padding: 1px;
+}
+
+#best-seller {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+        "heading heading heading"
+        "ip img des"
+        "cb cb cb";
+    gap: 15px;
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+.item1 {
+    grid-area: heading;
+    text-align: center;
+}
+
+.item2,
+.item3,
+.item4 {
+    border: 1px solid lightgrey;
+    box-shadow: 0 26px 58px 0 rgba(0, 0, 0, .22), 0 5px 14px 0 rgba(0, 0, 0, .18);
+    padding: 10px;
+}
+
+.item5 {
+    grid-area: cb;
+}
+
+.item2 {
+    grid-area: ip;
+}
+
+.item3 {
+    grid-area: img;
+}
+
+.item4 {
+    grid-area: des;
+}
+
+#best-seller .item img {
+    width: 100%;
+}
+
+.addtocart {
+    padding: 10px;
+    background-color: orange;
+    border: none;
+    margin: 10px -10px -10px -10px;
+}
+
+
+.addtocart button {    
+    margin: 0 auto;
+    width: 100%;
+    background-color: orange;
+    border: none;
+}
+
+.addtocart {
+    margin-top: auto;
+}
+
+
+.content2 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+
+}
+
+.content2 img {
+    width: 100%;
+}
+
+.content2 h1 {
+    width: 100%;
+
+}
+
+.content2 .access-item {
+    width: 20%;
+    border: 1px solid lightgrey;
+    box-shadow: 0 26px 58px 0 rgba(0, 0, 0, .22), 0 5px 14px 0 rgba(0, 0, 0, .18);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#cart {
+    /* padding-left: 10px; */
+    /* padding-right: 10px; */
+    margin: auto 10px;
+    border: 1px solid gray;
+}
+
+#cart h2 {
+    background-color: #fde9ea;
+    padding: 10px;
+}
+
+#cart .cart-content ul {
+    margin: 10px auto 10px 30px;
+}
+
+#cart h3 {
+    margin: 10px;
+}

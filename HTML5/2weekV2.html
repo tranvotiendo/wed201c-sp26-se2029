@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Ôn Thi FE - SP26 (MAD, NWC, PRO, WED) - FPT University</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Chosen Palette: Corporate Professional (Slate-900 for headers, Soft Blue/Gray background, high-contrast subject colors for clarity). -->
+    <!-- Application Structure Plan: 
+         - Dashboard Centralization: Everything is managed through a single central dashboard to monitor progress across all 4 subjects.
+         - Distributed Load: NWC204 is now split across Week 1 (Basics) and Week 2 (Advanced/Security) based on the user's specific request for a 2-week spread.
+         - Sequential Learning: MAD101 and PRO192 tasks are strictly ordered (Chapter 1, 2, etc.) to ensure a solid foundation before moving to complex topics.
+         - Phase Separation: Week 1 focuses on 'Content Mastery', while Week 2 focuses on 'Strategic Practice & Simulation' with clear action items. -->
+    <!-- Visualization & Content Choices: 
+         - Overall Mastery -> Goal: Inform -> Viz: Donut Chart -> Interaction: Dynamic updates -> Justification: Immediate feedback on completion.
+         - Subject Strength -> Goal: Compare -> Viz: Radar or Bar Chart (Bar used for clarity) -> Interaction: Per-subject tracking -> Justification: Identifies weak points.
+         - Task Matrix -> Goal: Organize -> Viz: Subject-Color Coded Cards -> Interaction: Filtering & Progress Checking -> Justification: Replaces flat checklists with actionable UI. 
+         - Confirming: NO SVG/Mermaid used. Unicode icons and Tailwind borders used for visual depth. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 550px;
+            margin: auto;
+            height: 300px;
+        }
+
+        .task-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .subject-badge-MAD101 { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #d8b4fe; }
+        .subject-badge-NWC204 { background-color: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+        .subject-badge-PRO192 { background-color: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
+        .subject-badge-WED201c { background-color: #fce7f3; color: #be185d; border: 1px solid #f9a8d4; }
+
+        .border-MAD101 { border-left: 4px solid #7e22ce; }
+        .border-NWC204 { border-left: 4px solid #1d4ed8; }
+        .border-PRO192 { border-left: 4px solid #c2410c; }
+        .border-WED201c { border-left: 4px solid #be185d; }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .dimmed { opacity: 0.2; pointer-events: none; filter: grayscale(1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl">📚</span>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Dashboard Ôn Thi FE - SP26 - FPT University</h1>
+                    <p class="text-xs text-slate-400 font-medium uppercase tracking-widest">Lộ Trình 14 Ngày: PRO192 | MAD101 | NWC204 | WED201c</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs text-slate-400 font-bold uppercase">Trạng Thái Tổng Thể</p>
+                    <p id="overall-percentage" class="text-xl font-black text-emerald-400">0%</p>
+                </div>
+                <div class="w-12 h-12 rounded-full border-2 border-slate-700 flex items-center justify-center bg-slate-800">
+                    <span id="completed-count" class="font-bold text-sm">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-10">
+
+        <!-- Analytics Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <h2 class="text-lg font-bold mb-6 flex items-center gap-2 text-slate-800">
+                    <span>📊</span> Phân Tích Hiệu Suất Theo Môn Học
+                </h2>
+                <div class="chart-container">
+                    <canvas id="subjectProgressChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col justify-center items-center">
+                <h2 class="text-lg font-bold mb-6 text-slate-800">Tỷ Lệ Hoàn Thành</h2>
+                <div class="chart-container" style="height: 220px;">
+                    <canvas id="overallDonutChart"></canvas>
+                </div>
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-slate-500 font-medium" id="stat-summary">Bắt đầu ngay để thấy sự thay đổi!</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Week 1: Foundation Matrix -->
+        <section class="space-y-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900">🗓 TUẦN 1: CỦNG CỐ KIẾN THỨC NỀN TẢNG</h2>
+                    <p class="text-slate-500 mt-1">Mỗi ngày ôn chắc 1 Chương/Module theo đúng lộ trình khoa học.</p>
+                </div>
+                <div class="flex flex-wrap gap-2" id="filterButtons">
+                    <button onclick="app.filter('ALL')" class="filter-btn active px-4 py-2 rounded-full text-xs font-bold bg-slate-900 text-white transition-all shadow-md">TẤT CẢ</button>
+                    <button onclick="app.filter('MAD101')" class="filter-btn px-4 py-2 rounded-full text-xs font-bold bg-white text-purple-700 border border-purple-200 hover:bg-purple-50 transition-all">MAD101</button>
+                    <button onclick="app.filter('PRO192')" class="filter-btn px-4 py-2 rounded-full text-xs font-bold bg-white text-orange-700 border border-orange-200 hover:bg-orange-50 transition-all">PRO192</button>
+                    <button onclick="app.filter('NWC204')" class="filter-btn px-4 py-2 rounded-full text-xs font-bold bg-white text-blue-700 border border-blue-200 hover:bg-blue-50 transition-all">NWC204</button>
+                    <button onclick="app.filter('WED201c')" class="filter-btn px-4 py-2 rounded-full text-xs font-bold bg-white text-pink-700 border border-pink-200 hover:bg-pink-50 transition-all">WED201c</button>
+                </div>
+            </div>
+
+            <div id="week1-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Days will be injected here -->
+            </div>
+        </section>
+
+        <!-- Week 2: Intensive Strategy -->
+        <section class="bg-slate-900 rounded-3xl p-8 text-white shadow-2xl">
+            <div class="mb-8">
+                <h2 class="text-3xl font-black italic tracking-tighter">🚀 TUẦN 2: LUYỆN ĐỀ & THI MÔ PHỎNG</h2>
+                <p class="text-slate-400 mt-2 max-w-2xl">Giai đoạn nước rút. Tập trung vào thực hành, giải quyết các lỗi sai thường gặp và làm quen với áp lực thời gian trong phòng thi.</p>
+            </div>
+
+            <div id="week2-list" class="space-y-4">
+                <!-- Week 2 items will be injected here -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-10 mt-12 text-center">
+        <p class="text-slate-400 text-sm">Hệ thống được thiết kế để hỗ trợ sinh viên FPT ôn tập hiệu quả.</p>
+        <p class="text-slate-900 font-bold mt-2 italic">Học là một hành trình, không phải là một đích đến. ⚡</p>
+    </footer>
+
+    <script>
+        const appData = {
+            week1: [
+                {
+                    day: "Thứ 2",
+                    tasks: [
+                        { id: "w1d1_mad", code: "MAD101", title: "Chương 1: Logic & Chứng minh", desc: "Bảng chân trị, tương đương logic, lượng từ ∀, ∃." },
+                        { id: "w1d1_pro", code: "PRO192", title: "Chương 1 & 2: OOP & Java Basics", desc: "Hiểu rõ Class, Object, Constructor, Encapsulation." },
+                        { id: "w1d1_nwc", code: "NWC204", title: "Module 2: Cấu hình Switch", desc: "Hostname, Password, Banner, quản lý Interface Switch." },
+                        { id: "w1d1_wed", code: "WED201c", title: "Box Model cơ bản", desc: "Margin, Border, Padding. Cách tính thực của Box." }
+                    ]
+                },
+                {
+                    day: "Thứ 3",
+                    tasks: [
+                        { id: "w1d2_mad", code: "MAD101", title: "Chương 2: Tập hợp & Hàm", desc: "Các phép toán tập hợp, hàm đơn ánh, toàn ánh." },
+                        { id: "w1d2_pro", code: "PRO192", title: "Chương 3: Inheritance (Kế thừa)", desc: "Phân biệt extends, override và overload." },
+                        { id: "w1d2_nwc", code: "NWC204", title: "Module 3: Protocols & Models", desc: "Hiểu sâu mô hình OSI và TCP/IP, cách đóng gói dữ liệu." },
+                        { id: "w1d2_wed", code: "WED201c", title: "Selectors & Positioning", desc: "Relative, Absolute, Fixed. Khi nào dùng cái nào?" }
+                    ]
+                },
+                {
+                    day: "Thứ 4",
+                    tasks: [
+                        { id: "w1d3_mad", code: "MAD101", title: "Chương 3: Thuật toán", desc: "Độ phức tạp O-lớn, các thuật toán tìm kiếm/sắp xếp cơ bản." },
+                        { id: "w1d3_pro", code: "PRO192", title: "Chương 4: Polymorphism (Đa hình)", desc: "Dùng Interface và Abstract class hiệu quả trong Project." },
+                        { id: "w1d3_nwc", code: "NWC204", title: "Module 4: Physical Layer", desc: "Cấu tạo cáp mạng, các chuẩn kết nối vật lý cơ bản." },
+                        { id: "w1d3_wed", code: "WED201c", title: "Flex-box (Cơ bản)", desc: "Justify-content, align-items, flex-direction." }
+                    ]
+                },
+                {
+                    day: "Thứ 5",
+                    tasks: [
+                        { id: "w1d4_mad", code: "MAD101", title: "Chương 5: Quy nạp & Đệ quy", desc: "Chứng minh quy nạp (3 bước) và định nghĩa đệ quy." },
+                        { id: "w1d4_pro", code: "PRO192", title: "Chương 5: Exception Handling", desc: "Try-catch-finally. Phân biệt checked và unchecked." },
+                        { id: "w1d4_nwc", code: "NWC204", title: "Module 6 & 7: Data Link & Switching", desc: "Địa chỉ MAC, cơ chế Learn/Flood của Switch." },
+                        { id: "w1d4_wed", code: "WED201c", title: "Flex-box (Nâng cao)", desc: "Xây dựng layout phức tạp, căn giữa mọi thứ với Flex." }
+                    ]
+                },
+                {
+                    day: "Thứ 6",
+                    tasks: [
+                        { id: "w1d5_mad", code: "MAD101", title: "Chương 6: Phép đếm (Tổ hợp)", desc: "Hoán vị, Chỉnh hợp, Tổ hợp, bài toán chia kẹo Euler." },
+                        { id: "w1d5_pro", code: "PRO192", title: "Collections (List & ArrayList)", desc: "Thực hành add, remove, search, sort trong ArrayList." },
+                        { id: "w1d5_nwc", code: "NWC204", title: "Module 8: Network Layer", desc: "Cấu tạo gói tin IP, vai trò của Default Gateway." },
+                        { id: "w1d5_wed", code: "WED201c", title: "CSS Grid System", desc: "Grid-template-columns, gap, định dạng lưới hiện đại." }
+                    ]
+                },
+                {
+                    day: "Thứ 7",
+                    tasks: [
+                        { id: "w1d6_mad", code: "MAD101", title: "Chương 8: Đồ thị", desc: "Bậc đỉnh, đường đi Euler, Hamilton. Giải Dijkstra." },
+                        { id: "w1d6_pro", code: "PRO192", title: "Collections (Set & Map)", desc: "Cách dùng HashMap để quản lý dữ liệu hiệu quả." },
+                        { id: "w1d6_nwc", code: "NWC204", title: "Module 9 & 10: ARP & Router", desc: "Giao thức ARP, cấu hình IP cơ bản cho Router." },
+                        { id: "w1d6_wed", code: "WED201c", title: "Responsive Media Queries", desc: "Căn chỉnh giao diện cho Mobile, Tablet bằng @media." }
+                    ]
+                },
+                {
+                    day: "Chủ Nhật",
+                    tasks: [
+                        { id: "w1d7_mad", code: "MAD101", title: "Chương 10: Cây (Tree)", desc: "Tìm cây khung nhỏ nhất: Thuật toán Prim và Kruskal." },
+                        { id: "w1d7_pro", code: "PRO192", title: "File I/O Stream", desc: "Đọc/Ghi dữ liệu danh sách đối tượng vào file .txt." },
+                        { id: "w1d7_nwc", code: "NWC204", title: "Checkpoint Exams 1", desc: "Tổng ôn lý thuyết Networking từ Module 2 đến Module 10." },
+                        { id: "w1d7_wed", code: "WED201c", title: "Bootstrap 5 Framework", desc: "Dùng các Component Navbar, Card, Modal của Bootstrap." }
+                    ]
+                }
+            ],
+            week2: [
+                {
+                    id: "w2p1",
+                    period: "Thứ 2 - Thứ 3",
+                    focus: "Networking Chuyên Sâu & Review PRO",
+                    items: [
+                        { id: "w2i1", code: "NWC204", title: "Module 11 & 12: Địa chỉ IP", desc: "Luyện tính Subnet (VLSM) cho IPv4 và định dạng IPv6." },
+                        { id: "w2i2", code: "PRO192", title: "Thực hành Đề PE (Inheritance)", desc: "Giải các bài PE cũ liên quan đến Kế thừa & Đa hình." },
+                        { id: "w2i3", code: "MAD101", title: "Review Logic & Đồ thị", desc: "Làm lại các bài tính bảng chân trị và tìm đường đi ngắn nhất." }
+                    ]
+                },
+                {
+                    id: "w2p2",
+                    period: "Thứ 4 - Thứ 5",
+                    focus: "Transport Layer & WED Project",
+                    items: [
+                        { id: "w2i4", code: "NWC204", title: "Module 14: Transport Layer", desc: "Hiểu cơ chế TCP (3-way handshake) và sự khác biệt UDP." },
+                        { id: "w2i5", code: "WED201c", title: "Clone Landing Page", desc: "Dùng Flex/Grid xây dựng hoàn thiện một trang web mẫu." },
+                        { id: "w2i6", code: "PRO192", title: "Thực hành Đề PE (Collections)", desc: "Luyện các câu PE về Sorting và quản lý List/Map." }
+                    ]
+                },
+                {
+                    id: "w2p3",
+                    period: "Thứ 6 - Thứ 7",
+                    focus: "Security & Thi Mô Phỏng",
+                    items: [
+                        { id: "w2i7", code: "NWC204", title: "Module 15, 16, 17: Security", desc: "Bảo mật mạng cơ bản và xây dựng mô hình mạng nhỏ." },
+                        { id: "w2i8", code: "ALL", title: "Giải Đề Final Mockup", desc: "Mô phỏng thi thực tế cho cả 4 môn trong giới hạn thời gian." },
+                        { id: "w2i9", code: "MAD101", title: "Tổng ôn Cây & Thuật toán", desc: "Rà soát lại toàn bộ công thức MAD trước khi thi." }
+                    ]
+                }
+            ]
+        };
+
+const app = {
+        state: {
+            completed: new Set(),
+            subjectChart: null,
+            donutChart: null
+        },
+
+        init() {
+            this.loadData(); // <--- MỚI: Tải dữ liệu cũ lên ngay khi mở web
+            this.renderWeek1();
+            this.renderWeek2();
+            this.initCharts();
+            this.updateUI();
+        },
+
+        // --- HÀM MỚI: Lưu dữ liệu ---
+        saveData() {
+            localStorage.setItem('FPT_SP26_Tracking', JSON.stringify([...this.state.completed]));
+        },
+
+        // --- HÀM MỚI: Đọc dữ liệu ---
+        loadData() {
+            const data = localStorage.getItem('FPT_SP26_Tracking');
+            if (data) {
+                this.state.completed = new Set(JSON.parse(data));
+            }
+        },
+
+        filter(subject) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-slate-900', 'text-white', 'shadow-md');
+                btn.classList.add('bg-white', 'text-slate-700');
+                if (btn.innerText === subject || (subject === 'ALL' && btn.innerText === 'TẤT CẢ')) {
+                    btn.classList.add('bg-slate-900', 'text-white', 'shadow-md');
+                    btn.classList.remove('bg-white', 'text-slate-700');
+                }
+            });
+
+            document.querySelectorAll('.task-card').forEach(card => {
+                if (subject === 'ALL' || card.dataset.subject === subject) {
+                    card.classList.remove('dimmed');
+                } else {
+                    card.classList.add('dimmed');
+                }
+            });
+        },
+
+        toggle(id) {
+            if (this.state.completed.has(id)) {
+                this.state.completed.delete(id);
+            } else {
+                this.state.completed.add(id);
+            }
+            this.saveData(); // <--- MỚI: Lưu lại mỗi khi bấm
+            this.updateUI();
+        },
+
+        renderWeek1() {
+            const grid = document.getElementById('week1-grid');
+            grid.innerHTML = '';
+            appData.week1.forEach(day => {
+                const col = document.createElement('div');
+                col.className = 'space-y-4';
+                col.innerHTML = `<h3 class="font-black text-slate-400 uppercase text-xs tracking-widest pl-2 border-l-2 border-slate-200">${day.day}</h3>`;
+                day.tasks.forEach(task => {
+                    const card = document.createElement('div');
+                    card.dataset.subject = task.code;
+                    card.className = `task-card bg-white rounded-xl p-4 border border-slate-200 border-MAD101 border-${task.code} cursor-pointer group`;
+                    card.onclick = () => this.toggle(task.id);
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="subject-badge-${task.code} text-[10px] font-black px-2 py-0.5 rounded-md uppercase">${task.code}</span>
+                            <div class="w-5 h-5 rounded border-2 border-slate-200 flex items-center justify-center transition-colors group-hover:border-slate-400" id="check-${task.id}">
+                                <span class="text-xs hidden" id="icon-${task.id}">✔</span>
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-sm text-slate-800 leading-tight mb-1 group-hover:text-slate-900" id="title-${task.id}">${task.title}</h4>
+                        <p class="text-[11px] text-slate-500 leading-snug" id="desc-${task.id}">${task.desc}</p>
+                    `;
+                    col.appendChild(card);
+                });
+                grid.appendChild(col);
+            });
+        },
+
+        renderWeek2() {
+            const list = document.getElementById('week2-list');
+            list.innerHTML = '';
+            appData.week2.forEach(phase => {
+                const block = document.createElement('div');
+                block.className = 'bg-slate-800/50 rounded-2xl p-6 border border-slate-700/50';
+                block.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-4 border-b border-slate-700 pb-3">
+                        <h3 class="text-emerald-400 font-black text-lg">${phase.period}</h3>
+                        <span class="text-slate-400 text-sm font-medium italic">🎯 Trọng tâm: ${phase.focus}</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        ${phase.items.map(item => `
+                            <div class="bg-slate-900/50 border border-slate-700 p-4 rounded-xl cursor-pointer hover:border-emerald-500/50 transition-all group" onclick="app.toggle('${item.id}')">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">${item.code}</span>
+                                    <div class="w-4 h-4 rounded-sm border border-slate-600 flex items-center justify-center" id="check-${item.id}">
+                                        <span class="text-[10px] hidden text-emerald-400" id="icon-${item.id}">✔</span>
+                                    </div>
+                                </div>
+                                <p class="font-bold text-sm text-slate-200 group-hover:text-white" id="title-${item.id}">${item.title}</p>
+                                <p class="text-[11px] text-slate-500 mt-1">${item.desc}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                list.appendChild(block);
+            });
+        },
+
+        updateUI() {
+            const stats = this.calculateStats();
+            document.getElementById('overall-percentage').innerText = `${stats.percentage}%`;
+            document.getElementById('completed-count').innerText = stats.done;
+            document.getElementById('stat-summary').innerText = stats.done > 0 ? `Bạn đã hoàn thành ${stats.done}/${stats.total} mục.` : `Bắt đầu ngay để thấy sự thay đổi!`;
+
+            // Gom tất cả ID lại để kiểm tra trạng thái (Check hoặc Uncheck)
+            let allTasks = [];
+            appData.week1.forEach(d => d.tasks.forEach(t => allTasks.push(t.id)));
+            appData.week2.forEach(p => p.items.forEach(i => allTasks.push(i.id)));
+
+            allTasks.forEach(id => {
+                const check = document.getElementById(`check-${id}`);
+                const icon = document.getElementById(`icon-${id}`);
+                const title = document.getElementById(`title-${id}`);
+                
+                if (check && icon && title) {
+                    if (this.state.completed.has(id)) {
+                        // Trạng thái: ĐÃ XONG
+                        check.classList.remove('border-slate-200', 'border-slate-600');
+                        check.classList.add('bg-emerald-500', 'border-emerald-500');
+                        icon.classList.remove('hidden');
+                        title.classList.add('line-through', 'text-slate-400');
+                        title.classList.remove('text-slate-800', 'text-slate-200');
+                    } else {
+                        // Trạng thái: CHƯA XONG (Reset lại)
+                        check.classList.remove('bg-emerald-500', 'border-emerald-500');
+                        // Trả lại border cũ (check xem là week 2 hay week 1)
+                        check.classList.add(id.includes('w2') ? 'border-slate-600' : 'border-slate-200'); 
+                        icon.classList.add('hidden');
+                        title.classList.remove('line-through', 'text-slate-400');
+                        title.classList.add(id.includes('w2') ? 'text-slate-200' : 'text-slate-800');
+                    }
+                }
+            });
+
+            if (this.state.subjectChart) {
+                this.state.subjectChart.data.datasets[0].data = [
+                    stats.subjects.MAD101.percent, stats.subjects.PRO192.percent,
+                    stats.subjects.NWC204.percent, stats.subjects.WED201c.percent
+                ];
+                this.state.subjectChart.update();
+            }
+            if (this.state.donutChart) {
+                this.state.donutChart.data.datasets[0].data = [stats.done, stats.total - stats.done];
+                this.state.donutChart.update();
+            }
+        },
+
+        calculateStats() {
+            const total = 37; // 28 (W1) + 9 (W2)
+            const done = this.state.completed.size;
+            const percentage = total === 0 ? 0 : Math.round((done / total) * 100);
+            
+            const subjects = { MAD101: {t:0, d:0}, NWC204: {t:0, d:0}, PRO192: {t:0, d:0}, WED201c: {t:0, d:0} };
+            const count = (arr) => arr.forEach(g => (g.tasks||g.items).forEach(i => {
+                if(subjects[i.code]) { subjects[i.code].t++; if(this.state.completed.has(i.id)) subjects[i.code].d++; }
+            }));
+            count(appData.week1); count(appData.week2);
+            
+            Object.keys(subjects).forEach(k => subjects[k].percent = subjects[k].t===0?0:Math.round((subjects[k].d/subjects[k].t)*100));
+            return { total, done, percentage, subjects };
+        },
+
+        initCharts() {
+            const stats = this.calculateStats();
+            const ctxSub = document.getElementById('subjectProgressChart').getContext('2d');
+            this.state.subjectChart = new Chart(ctxSub, {
+                type: 'bar',
+                data: {
+                    labels: ['MAD101', 'PRO192', 'NWC204', 'WED201c'],
+                    datasets: [{ label: 'Tiến độ (%)', data: [0,0,0,0], backgroundColor: ['#7e22ce', '#c2410c', '#1d4ed8', '#be185d'], borderRadius:12, barThickness:40 }]
+                },
+                options: { responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true, max:100, grid:{color:'#f1f5f9'}}, x:{grid:{display:false}}}, plugins:{legend:{display:false}} }
+            });
+            const ctxDonut = document.getElementById('overallDonutChart').getContext('2d');
+            this.state.donutChart = new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: { labels: ['Xong', 'Chưa'], datasets: [{ data: [stats.done, stats.total-stats.done], backgroundColor: ['#10b981', '#f1f5f9'], borderWidth:0 }] },
+                options: { responsive:true, maintainAspectRatio:false, cutout:'80%', plugins:{legend:{display:false}} }
+            });
+        }
+    };
+
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>

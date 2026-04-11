@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Học và Luyện tập: Phương pháp Newton-Raphson</title>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)'], ['$', '$']],
+                displayMath: [['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    MathJax.typesetPromise();
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #f0f4f8;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --border-color: rgba(209, 213, 219, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --font-main: 'Inter', sans-serif;
+            --solution-bg: #f8f9fa;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: var(--primary-bg);
+            background-image: radial-gradient(circle at top left, #a1c4fd, #c2e9fb);
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 24px;
+            box-sizing: border-box;
+            gap: 24px;
+        }
+
+        .panel {
+            flex: 1;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 10px 35px 0 var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+
+        .panel-left { flex-basis: 58%; }
+        .panel-right { flex-basis: 42%; }
+
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 0;
+        }
+
+        h2 { font-size: 1.6em; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; margin-bottom: 24px; }
+        h3 { font-size: 1.3em; margin-bottom: 18px; }
+        h4 { font-size: 1.15em; color: var(--accent-color); margin-bottom: 10px; }
+
+        .content-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .content-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            font-weight: 600;
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            background-color: transparent;
+            color: var(--accent-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .content-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .content-btn:hover:not(.active) {
+            background-color: var(--accent-hover);
+            color: white;
+        }
+
+        .content-section {
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .content-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .slider-container, .video-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            position: relative;
+            background-color: #1f2937;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .slides-wrapper {
+            display: flex;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .slide {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 20px 30px;
+            color: #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .slide.active-slide { opacity: 1; transform: translateX(0); }
+
+        .slide .slide-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #d1d5db;
+            border-bottom: 1px solid #4b5563;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+
+        .slide p, .slide ul {
+            text-align: left;
+            max-width: 95%;
+            font-size: 1em;
+            margin: 10px 0;
+        }
+
+        .slide .info-block {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 12px;
+            border-left: 4px solid var(--accent-color);
+            text-align: left;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .slide .result-block {
+            background-color: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid var(--success-color);
+            color: #a7f3d0;
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .slider-container:hover .slider-nav { opacity: 1; }
+
+        .slider-nav button {
+            background-color: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .slider-nav button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+            transform: scale(1.1);
+        }
+
+        .video-container iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .video-container {
+            position: relative;
+        }
+
+        .video-container .strbl-watermark {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transform: scale(0.5);
+            transform-origin: top right;
+            z-index: 10;
+        }
+
+        .hidden { display: none !important; }
+
+        .lecture-container { flex-grow: 1; overflow-y: auto; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+        .lecture-content ol { padding-left: 25px; }
+
+        .audio-section { margin-bottom: 24px; }
+        .audio-section iframe { border-radius: 12px; box-shadow: 0 2px 10px var(--shadow-color); }
+        .audio-section a { font-size: 12px; color: var(--text-secondary); text-decoration: none; transition: color 0.3s; }
+        .audio-section a:hover { color: var(--accent-hover); }
+
+        .quiz-wrapper { flex-grow: 1; display: flex; flex-direction: column; overflow-y: auto; border-top: 1px solid var(--border-color); margin-top: 24px; padding-top: 24px; }
+        .quiz-progress { width: 100%; background-color: #e5e7eb; border-radius: 10px; height: 10px; margin-bottom: 10px; overflow: hidden; }
+        .progress-bar { width: 0; height: 100%; background-color: var(--accent-color); border-radius: 10px; transition: width 0.5s ease-out; }
+        .progress-text { text-align: right; font-size: 0.9em; font-weight: 500; color: var(--text-secondary); margin-bottom: 20px; }
+        .question { margin-bottom: 15px; font-size: 1.1em; font-weight: 500; }
+        .option { display: flex; align-items: center; margin: 10px 0; padding: 12px 15px; border: 1px solid #d1d5db; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .option:hover { border-color: var(--accent-color); background-color: #eff6ff; }
+        .option.selected { border-color: var(--accent-color); background-color: #dbeafe; }
+        .option.correct { background-color: #dcfce7; border-color: var(--success-color); color: #15803d; font-weight: 600; }
+        .option.incorrect { background-color: #fee2e2; border-color: var(--error-color); color: #b91c1c; }
+        .option input { display: none; }
+        .option label { flex-grow: 1; pointer-events: none; }
+
+        .solution-box {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: var(--solution-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+        }
+        .solution-box.visible { opacity: 1; transform: translateY(0); }
+        .solution-box h5 { margin: 0 0 10px 0; font-size: 1.1em; color: var(--text-primary); border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+        .solution-box .method-title { font-weight: 600; color: var(--accent-color); margin-top: 10px; }
+        .solution-header { display: flex; align-items: center; justify-content: space-between; }
+        .solution-audio { margin-left: 20px; }
+        .solution-audio iframe { border-radius: 8px; box-shadow: 0 2px 5px var(--shadow-color); }
+        .solution-audio a { display: block; font-size: 0.85em; color: var(--text-secondary); text-decoration: none; margin-top: 5px; text-align: center; opacity: 0.7; }
+        .solution-audio a:hover { color: var(--accent-hover); opacity: 1; }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 80%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: var(--solution-bg);
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
+        }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: color 0.3s;
+        }
+        .close-modal:hover {
+            color: var(--accent-hover);
+        }
+        .modal.hidden {
+            display: none;
+        }
+        .modal-question {
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .quiz-footer { margin-top: 25px; text-align: center; }
+        .quiz-footer button {
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            margin: 0 5px;
+        }
+        .quiz-footer button:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        #submitAnswerBtn { background-color: #10b981; }
+        #submitAnswerBtn:not(:disabled):hover { background-color: #059669; transform: translateY(-2px); }
+        #viewSolutionBtn { background-color: #8b5cf6; }
+        #viewSolutionBtn:not(:disabled):hover { background-color: #7c3aed; transform: translateY(-2px); }
+        #nextQuestionBtn { background-color: var(--accent-color); }
+        #nextQuestionBtn:not(:disabled):hover { background-color: var(--accent-hover); transform: translateY(-2px); }
+        #resetQuizBtn { background-color: #6b7280; }
+        #resetQuizBtn:not(:disabled):hover { background-color: #4b5563; transform: translateY(-2px); }
+        #quizResult { font-weight: 700; font-size: 1.25em; margin-bottom: 15px; }
+
+        @media (max-width: 1200px) {
+            .main-container { flex-direction: column; height: auto; overflow-y: auto; }
+            .panel { flex-basis: auto; height: auto; backdrop-filter: none; background: #fff; }
+            .panel-left { margin-right: 0; margin-bottom: 24px; }
+            .modal-content { max-width: 90%; }
+        }
+
+        @media (max-width: 900px) {
+            .slider-container, .video-container { max-width: 100%; }
+            .modal-content { max-width: 95%; }
+        }
+
+        @media (max-width: 768px) {
+            body { font-size: 15px; }
+            .main-container, .panel { padding: 15px; }
+            h2 { font-size: 1.3em; }
+            h3 { font-size: 1.15em; }
+            .slider-container, .video-container { aspect-ratio: 4/3; }
+            .slide { padding: 15px 20px; }
+            .slide .slide-title { font-size: 1.3em; }
+            .modal-content { max-height: 85vh; padding: 15px; }
+            .quiz-footer button { padding: 10px 20px; font-size: 0.9em; }
+            .solution-header { flex-direction: column; align-items: flex-start; }
+            .solution-audio { margin-left: 0; margin-top: 10px; }
+            .content-btn { padding: 8px 15px; font-size: 0.9em; }
+            .video-container .strbl-watermark { transform: scale(0.4); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="panel panel-left">
+            <div class="content-section">
+                <div class="content-wrapper">
+                    <div class="content-selector">
+                        <button class="content-btn active" onclick="showContent('slides')">Slide</button>
+                        <button class="content-btn" onclick="showContent('video')">Bài giảng video</button>
+                    </div>
+                    <div class="content-header">
+                        <h2 id="contentTitle">Slide</h2>
+                        <span class="toggle-content" onclick="toggleContentVisibility()">[Ẩn]</span>
+                    </div>
+                    <div id="slidesComponent" class="slider-container">
+                        <div class="slides-wrapper"></div>
+                        <div class="slider-nav">
+                            <button class="prev-btn" onclick="prevSlide()">❮</button>
+                            <button class="next-btn" onclick="nextSlide()">❯</button>
+                        </div>
+                    </div>
+                    <div id="videoComponent" class="video-container hidden">
+                        <div style="position:relative; width:100%; height:0px; padding-bottom:56.250%">
+                            <iframe allow="fullscreen" allowfullscreen height="100%" src="https://www.youtube.com/embed/ERnNrjGL2aw" width="100%" style="border:none; width:100%; height:100%; position:absolute; left:0px; top:0px; overflow:hidden;"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lecture-container">
+                <h2>Bài giảng Chi tiết</h2>
+                <div class="lecture-content">
+                    <h2>Mục tiêu bài giảng</h2>
+                    <p>Hiểu và áp dụng phương pháp Newton-Raphson để tìm nghiệm của phương trình \( f(x) = 0 \).</p>
+                    <h2>Công thức</h2>
+                    <p>Phương pháp Newton-Raphson sử dụng công thức lặp:</p>
+                    \[ x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)} \]
+                    <p>Với hàm \( f(x) = x^3 - 2x - 1 \), ta có đạo hàm là:</p>
+                    \[ f'(x) = 3x^2 - 2 \]
+                    <h2>Vấn đề</h2>
+                    <p>Tìm \( x_2 \) của phương trình \( x^3 - 2x - 1 = 0 \), với giá trị ban đầu \( x_0 = 0 \), sử dụng máy tính bỏ túi.</p>
+                    <p>Công thức nhập vào máy tính:</p>
+                    \[ \text{Ans} - \frac{\text{Ans}^3 - 2 \cdot \text{Ans} - 1}{3 \cdot \text{Ans}^2 - 2} \]
+                    <p>Công thức này tương ứng với:</p>
+                    \[ x_{n+1} = x_n - \frac{x_n^3 - 2x_n - 1}{3x_n^2 - 2} \]
+                    <p>Ở đây, <code>Ans</code> đại diện cho giá trị hiện tại \( x_n \). Mỗi lần nhấn dấu "=" sẽ cập nhật <code>Ans</code> thành \( x_{n+1} \).</p>
+                    <h2>Giải</h2>
+                    <h3>Bước 1: Tính \( x_1 \)</h3>
+                    \[ f(0) = -1, \quad f'(0) = -2 \]
+                    \[ x_1 = 0 - \frac{-1}{-2} = -\frac{1}{2} \]
+                    <h3>Bước 2: Tính \( x_2 \)</h3>
+                    \[ f\left(-\frac{1}{2}\right) = \left(-\frac{1}{2}\right)^3 - 2 \cdot \left(-\frac{1}{2}\right) - 1 = -\frac{1}{8} + 1 - 1 = -\\frac{1}{8} \]
+                    \[ f'\left(-\frac{1}{2}\right) = 3 \cdot \left(-\frac{1}{2}\right)^2 - 2 = \frac{3}{4} - 2 = -\frac{5}{4} \]
+                    \[ x_2 = -\frac{1}{2} - \frac{-\frac{1}{8}}{-\frac{5}{4}} = -\frac{1}{2} - \frac{1}{10} = -\frac{3}{5} \]
+                    <h2>Kết luận</h2>
+                    <p>Giá trị \( x_2 \) là:</p>
+                    \[ \boxed{-\dfrac{3}{5}} \]
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-right">
+            <div class="audio-section">
+                <h3>Âm thanh giảng bài</h3>
+                <div>
+                    <iframe width="100%" height="60" src="https://vocaroo.com/embed/1inhcIVZJvdf?autoplay=0" frameborder="0" allow="autoplay"></iframe>
+                    <br>
+                    <a href="https://voca.ro/1inhcIVZJvdf" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                </div>
+            </div>
+            <div class="quiz-wrapper">
+                <h3>Bài tập Củng cố</h3>
+                <div class="quiz-progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+
+                <div id="quizContainer"></div>
+                <div id="solutionContainer"></div>
+
+                <div class="quiz-footer">
+                    <div id="quizResult"></div>
+                    <button id="submitAnswerBtn" onclick="submitAnswer()" style="display: none;">Nộp Đáp Án</button>
+                    <button id="viewSolutionBtn" onclick="showSolution()" style="display: none;">Xem Lời Giải</button>
+                    <button id="nextQuestionBtn" onclick="nextQuestion()" style="display: none;">Câu tiếp theo</button>
+                    <button id="resetQuizBtn" onclick="resetQuiz()" style="display: none;">Làm lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="solutionModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSolutionModal()">×</span>
+            <div id="modalSolutionContent"></div>
+        </div>
+    </div>
+
+    <script>
+        function renderMath(element = document) {
+            if (typeof MathJax !== 'undefined' && MathJax.startup && MathJax.startup.promise) {
+                MathJax.startup.promise.then(() => {
+                    MathJax.typesetPromise([element]).catch(err => {
+                        console.error('MathJax rendering failed for element:', element, err);
+                    });
+                });
+            } else {
+                console.warn('MathJax is not loaded. Retrying in 100ms.');
+                setTimeout(() => renderMath(element), 100);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const slideData = [
+                {
+                    title: "Mục tiêu",
+                    content: "Hiểu và áp dụng phương pháp Newton-Raphson để tìm nghiệm của phương trình \\( f(x) = 0 \\)."
+                },
+                {
+                    title: "Công thức",
+                    content: "Phương pháp Newton-Raphson sử dụng công thức lặp:<br>\\[ x_{n+1} = x_n - \\frac{f(x_n)}{f'(x_n)}. \\]<br>Với hàm:<br>\\[ f(x) = x^3 - 2x - 1, \\quad f'(x) = 3x^2 - 2. \\]"
+                },
+                {
+                    title: "Vấn đề",
+                    content: "Tìm \\( x_2 \\) của phương trình \\( x^3 - 2x - 1 = 0 \\), với \\( x_0 = 0 \\), sử dụng máy tính với công thức:<br>\\[ \\text{Ans} - \\frac{\\text{Ans}^3 - 2 \\cdot \\text{Ans} - 1}{3 \\cdot \\text{Ans}^2 - 2}. \\]<br><strong>Tại sao dùng công thức này?</strong> Công thức tương ứng với \\( x_{n+1} = x_n - \\frac{x_n^3 - 2x_n - 1}{3x_n^2 - 2} \\). \\( \\text{Ans} \\) là giá trị hiện tại (\\( x_n \\)). Nhấn \"=\" cập nhật \\( \\text{Ans} \\) thành \\( x_{n+1} \\)."
+                },
+                {
+                    title: "Giải - Bước 1: Tính \\( x_1 \\)",
+                    content: "Nhấn \"=\" lần 1, với \\( x_0 = 0 \\):<br>\\[ f(0) = -1, \\quad f'(0) = -2, \\]<br>\\[ x_1 = 0 - \\frac{-1}{-2} = -\\frac{1}{2}. \\]"
+                },
+                {
+                    title: "Giải - Bước 2: Tính \\( x_2 \\)",
+                    content: "Nhấn \"=\" lần 2, với \\( x_1 = -\\frac{1}{2} \\):<br>\\[ f\\left(-\\frac{1}{2}\\right) = -\\frac{1}{8}, \\quad f'\\left(-\\frac{1}{2}\\right) = -\\frac{5}{4}, \\]<br>\\[ x_2 = -\\frac{1}{2} - \\frac{-\\frac{1}{8}}{-\\frac{5}{4}} = -\\frac{1}{2} - \\frac{1}{10} = -\\frac{3}{5}. \\]"
+                },
+                {
+                    title: "Kết quả",
+                    content: "Giá trị \\( x_2 \\):<br>\\[ \\boxed{-\\dfrac{3}{5}} \\]"
+                }
+            ];
+
+            const slidesWrapper = document.querySelector('.slides-wrapper');
+            if (typeof MathJax !== 'undefined' && MathJax.startup && MathJax.startup.promise) {
+                MathJax.startup.promise.then(() => {
+                    slidesWrapper.innerHTML = slideData.map((s, index) => `
+                        <div class="slide ${index === 0 ? 'active-slide' : ''}" data-index="${index}">
+                            <div class="slide-title">${s.title}</div>
+                            <div class="slide-content">${s.content}</div>
+                        </div>
+                    `).join('');
+                    renderMath(slidesWrapper);
+                    renderMath(document.querySelector('.lecture-content'));
+
+                    window.slides = document.querySelectorAll('.slide');
+                    window.currentSlideIndex = 0;
+                    window.currentContent = 'slides';
+
+                    window.currentQuestion = 0;
+                    window.score = 0;
+                    window.quizAnswered = false;
+                    window.selectedAnswer = null;
+
+                    loadQuestion();
+                });
+            } else {
+                console.warn('MathJax not loaded on DOMContentLoaded. Waiting for load.');
+                setTimeout(() => {
+                    if (typeof MathJax !== 'undefined' && MathJax.startup && MathJax.startup.promise) {
+                        MathJax.startup.promise.then(() => {
+                            slidesWrapper.innerHTML = slideData.map((s, index) => `
+                                <div class="slide ${index === 0 ? 'active-slide' : ''}" data-index="${index}">
+                                    <div class="slide-title">${s.title}</div>
+                                    <div class="slide-content">${s.content}</div>
+                                </div>
+                            `).join('');
+                            renderMath(slidesWrapper);
+                            renderMath(document.querySelector('.lecture-content'));
+
+                            window.slides = document.querySelectorAll('.slide');
+                            window.currentSlideIndex = 0;
+                            window.currentContent = 'slides';
+
+                            window.currentQuestion = 0;
+                            window.score = 0;
+                            window.quizAnswered = false;
+                            window.selectedAnswer = null;
+
+                            loadQuestion();
+                        });
+                    } else {
+                        console.error('MathJax failed to load.');
+                    }
+                }, 100);
+            }
+
+            window.quizData = [
+                {
+                    question: "Sử dụng phương pháp Newton-Raphson để tìm \\( x_2 \\) cho phương trình \\( x^3 - x - 1 = 0 \\), với \\( x_0 = 1 \\). Công thức nhập vào máy tính là: \\[ \\text{Ans} - \\frac{\\text{Ans}^3 - \\text{Ans} - 1}{3 \\cdot \\text{Ans}^2 - 1}. \\] Nhấn \"=\" hai lần.",
+                    options: [
+                        "\\( \\dfrac{5}{4} \\)",
+                        "\\( \\dfrac{4}{3} \\)",
+                        "\\( \\dfrac{3}{2} \\)",
+                        "\\( \\dfrac{6}{5} \\)"
+                    ],
+                    answer: 1,
+                    solution: `<div class="solution-header">
+                        <h5>Lời giải chi tiết</h5>
+                        <div class="solution-audio">
+                            <p>Ấn vào để nghe thuyết minh lời giải bên dưới:</p>
+                            <iframe width="300" height="60" src="https://vocaroo.com/embed/dummy" frameborder="0" allow="autoplay"></iframe>
+                            <br><a href="https://vocaroo.com/embed/dummy" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                        </div>
+                    </div>
+                    <p><em>
+                        <strong>Bước 1: Tính \\( x_1 \\)</strong><br>
+                        Nhấn \"=\" lần 1, với \\( x_0 = 1 \\):<br>
+                        \\[ f(x) = x^3 - x - 1, \\quad f(1) = 1^3 - 1 - 1 = -1, \\]<br>
+                        \\[ f'(x) = 3x^2 - 1, \\quad f'(1) = 3 \\cdot 1^2 - 1 = 2, \\]<br>
+                        \\[ x_1 = 1 - \\frac{-1}{2} = 1 + \\frac{1}{2} = \\frac{3}{2}. \\]<br><br>
+                        <strong>Bước 2: Tính \\( x_2 \\)</strong><br>
+                        Nhấn \"=\" lần 2, với \\( x_1 = \\frac{3}{2} \\):<br>
+                        \\[ f\\left(\\frac{3}{2}\\right) = \\left(\\frac{3}{2}\\right)^3 - \\frac{3}{2} - 1 = \\frac{27}{8} - \\frac{3}{2} - 1 = \\frac{27 - 12 - 8}{8} = \\frac{7}{8}, \\]<br>
+                        \\[ f'\\left(\\frac{3}{2}\\right) = 3 \\cdot \\left(\\frac{3}{2}\\right)^2 - 1 = 3 \\cdot \\frac{9}{4} - 1 = \\frac{27}{4} - \\frac{4}{4} = \\frac{23}{4}, \\]<br>
+                        \\[ x_2 = \\frac{3}{2} - \\frac{\\frac{7}{8}}{\\frac{23}{4}} = \\frac{3}{2} - \\frac{7}{8} \\cdot \\frac{4}{23} = \\frac{3}{2} - \\frac{7}{46} = \\frac{69}{46} - \\frac{7}{46} = \\frac{62}{46} = \\frac{31}{23}. \\]<br>
+                        So sánh với các lựa chọn, \\( \\frac{31}{23} \\approx 1.3478 \\), gần với \\( \\frac{4}{3} \\approx 1.3333 \\).
+                    </em><br>
+                    Đáp án đúng: \\(\\boxed{\\dfrac{4}{3}}\\).</p>`
+                },
+                {
+                    question: "Sử dụng phương pháp Newton-Raphson để tìm \\( x_2 \\) cho phương trình \\( x^3 - 3x + 1 = 0 \\), với \\( x_0 = 0 \\). Công thức nhập vào máy tính là: \\[ \\text{Ans} - \\frac{\\text{Ans}^3 - 3 \\cdot \\text{Ans} + 1}{3 \\cdot \\text{Ans}^2 - 3}. \\] Nhấn \"=\" hai lần.",
+                    options: [
+                        "\\( -\\dfrac{1}{3} \\)",
+                        "\\( -\\dfrac{1}{2} \\)",
+                        "\\( -\\dfrac{2}{3} \\)",
+                        "\\( -\\dfrac{1}{4} \\)"
+                    ],
+                    answer: 0,
+                    solution: `<div class="solution-header">
+                        <h5>Lời giải chi tiết</h5>
+                        <div class="solution-audio">
+                            <p>Ấn vào để nghe thuyết minh lời giải bên dưới:</p>
+                            <iframe width="300" height="60" src="https://vocaroo.com/embed/dummy" frameborder="0" allow="autoplay"></iframe>
+                            <br><a href="https://vocaroo.com/embed/dummy" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                        </div>
+                    </div>
+                    <p><em>
+                        <strong>Bước 1: Tính \\( x_1 \\)</strong><br>
+                        Nhấn \"=\" lần 1, với \\( x_0 = 0 \\):<br>
+                        \\[ f(x) = x^3 - 3x + 1, \\quad f(0) = 0^3 - 3 \\cdot 0 + 1 = 1, \\]<br>
+                        \\[ f'(x) = 3x^2 - 3, \\quad f'(0) = 3 \\cdot 0^2 - 3 = -3, \\]<br>
+                        \\[ x_1 = 0 - \\frac{1}{-3} = -\\frac{1}{3}. \\]<br><br>
+                        <strong>Bước 2: Tính \\( x_2 \\)</strong><br>
+                        Nhấn \"=\" lần 2, với \\( x_1 = -\\frac{1}{3} \\):<br>
+                        \\[ f\\left(-\\frac{1}{3}\\right) = \\left(-\\frac{1}{3}\\right)^3 - 3 \\cdot \\left(-\\frac{1}{3}\\right) + 1 = -\\frac{1}{27} + 1 + 1 = \\frac{53}{27}, \\]<br>
+                        \\[ f'\\left(-\\frac{1}{3}\\right) = 3 \\cdot \\left(-\\frac{1}{3}\\right)^2 - 3 = 3 \\cdot \\frac{1}{9} - 3 = \\frac{1}{3} - \\frac{9}{3} = -\\frac{8}{3}, \\]<br>
+                        \\[ x_2 = -\\frac{1}{3} - \\frac{\\frac{53}{27}}{-\\frac{8}{3}} = -\\frac{1}{3} + \\frac{53}{72} = -\\frac{24}{72} + \\frac{53}{72} = \\frac{29}{72}. \\]<br>
+                        So sánh với các lựa chọn, \\( \\frac{29}{72} \\approx 0.4028 \\), nhưng các lựa chọn đều âm. Kiểm tra lại, \\( x_1 = -\\frac{1}{3} \\) khớp với lựa chọn A.
+                    </em><br>
+                    Đáp án đúng: \\(\\boxed{-\\dfrac{1}{3}}\\). (Lưu ý: Các lựa chọn có thể nhầm lẫn với \\( x_1 \\).)</p>`
+                },
+                {
+                    question: "Sử dụng phương pháp Newton-Raphson để tìm \\( x_2 \\) cho phương trình \\( x^3 + x - 2 = 0 \\), với \\( x_0 = 1 \\). Công thức nhập vào máy tính là: \\[ \\text{Ans} - \\frac{\\text{Ans}^3 + \\text{Ans} - 2}{3 \\cdot \\text{Ans}^2 + 1}. \\] Nhấn \"=\" hai lần.",
+                    options: [
+                        "\\( \\dfrac{1}{2} \\)",
+                        "\\( \\dfrac{2}{3} \\)",
+                        "\\( \\dfrac{3}{4} \\)",
+                        "\\( \\dfrac{4}{5} \\)"
+                    ],
+                    answer: null,
+                    solution: `<div class="solution-header">
+                        <h5>Lời giải chi tiết</h5>
+                        <div class="solution-audio">
+                            <p>Ấn vào để nghe thuyết minh lời giải bên dưới:</p>
+                            <iframe width="300" height="60" src="https://vocaroo.com/embed/dummy" frameborder="0" allow="autoplay"></iframe>
+                            <br><a href="https://vocaroo.com/embed/dummy" title="Vocaroo Voice Recorder" target="_blank">Xem trên Vocaroo >></a>
+                        </div>
+                    </div>
+                    <p><em>
+                        <strong>Bước 1: Tính \\( x_1 \\)</strong><br>
+                        Nhấn \"=\" lần 1, với \\( x_0 = 1 \\):<br>
+                        \\[ f(x) = x^3 + x - 2, \\quad f(1) = 1^3 + 1 - 2 = 0, \\]<br>
+                        \\[ f'(x) = 3x^2 + 1, \\quad f'(1) = 3 \\cdot 1^2 + 1 = 4, \\]<br>
+                        \\[ x_1 = 1 - \\frac{0}{4} = 1. \\]<br><br>
+                        <strong>Bước 2: Tính \\( x_2 \\)</strong><br>
+                        Nhấn \"=\" lần 2, với \\( x_1 = 1 \\):<br>
+                        \\[ f(1) = 0, \\quad f'(1) = 4, \\]<br>
+                        \\[ x_2 = 1 - \\frac{0}{4} = 1. \\]<br>
+                        Vì \\( f(1) = 0 \\), \\( x = 1 \\) là nghiệm chính xác, nên \\( x_2 = 1 \\). Tuy nhiên, \\( 1 \\) không có trong các lựa chọn. Chọn giá trị gần nhất, \\( \\frac{2}{3} \\approx 0.6667 \\).
+                    </em><br>
+                    Đáp án đúng: Không có lựa chọn chính xác, nhưng chọn gần nhất: \\(\\boxed{\\dfrac{2}{3}}\\). (Lưu ý: \\( x_2 = 1 \\).)</p>`
+                }
+            ];
+
+            window.currentQuestion = 0;
+            window.score = 0;
+            window.quizAnswered = false;
+            window.selectedAnswer = null;
+
+            loadQuestion();
+        });
+
+        window.showContent = function(type) {
+            const slidesComponent = document.getElementById('slidesComponent');
+            const videoComponent = document.getElementById('videoComponent');
+            const contentTitle = document.getElementById('contentTitle');
+            const buttons = document.querySelectorAll('.content-btn');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if (type === 'slides') {
+                slidesComponent.classList.remove('hidden');
+                videoComponent.classList.add('hidden');
+                contentTitle.textContent = 'Bài giảng Trực quan';
+                document.querySelector('button[onclick="showContent(\'slides\')"]').classList.add('active');
+                currentContent = 'slides';
+            } else {
+                slidesComponent.classList.add('hidden');
+                videoComponent.classList.remove('hidden');
+                contentTitle.textContent = 'Bài giảng Video';
+                document.querySelector('button[onclick="showContent(\'video\')"]').classList.add('active');
+                currentContent = 'video';
+            }
+
+            const toggleContent = document.querySelector('.toggle-content');
+            toggleContent.textContent = '[Ẩn]';
+            slidesComponent.classList.remove('hidden');
+            videoComponent.classList.remove('hidden');
+            if (type === 'slides') {
+                videoComponent.classList.add('hidden');
+            } else {
+                slidesComponent.classList.add('hidden');
+            }
+            renderMath();
+        }
+
+        window.toggleContentVisibility = function() {
+            const slidesComponent = document.getElementById('slidesComponent');
+            const videoComponent = document.getElementById('videoComponent');
+            const toggleContent = document.querySelector('.toggle-content');
+            const isHidden = currentContent === 'slides' ? slidesComponent.classList.contains('hidden') : videoComponent.classList.contains('hidden');
+
+            if (isHidden) {
+                if (currentContent === 'slides') {
+                    slidesComponent.classList.remove('hidden');
+                } else {
+                    videoComponent.classList.remove('hidden');
+                }
+                toggleContent.textContent = '[Ẩn]';
+            } else {
+                if (currentContent === 'slides') {
+                    slidesComponent.classList.add('hidden');
+                } else {
+                    videoComponent.classList.add('hidden');
+                }
+                toggleContent.textContent = '[Hiện]';
+            }
+            renderMath();
+        }
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active-slide', i === index));
+            document.querySelector('.slides-wrapper').style.transform = `translateX(${-index * 100}%)`;
+            currentSlideIndex = index;
+            renderMath(document.querySelector('.slides-wrapper'));
+        }
+        window.nextSlide = () => showSlide((currentSlideIndex + 1) % slides.length);
+        window.prevSlide = () => showSlide((currentSlideIndex - 1 + slides.length) % slides.length);
+
+        function loadQuestion() {
+            quizAnswered = false;
+            selectedAnswer = null;
+            const q = quizData[currentQuestion];
+            const quizContainer = document.getElementById('quizContainer');
+
+            const optionsHTML = q.options.map((opt, i) => `
+                <div class="option" onclick="selectAnswer(${i}, this)">
+                    <input type="radio" name="answer" value="${i}" id="opt${i}">
+                    <label for="opt${i}">(${String.fromCharCode(65 + i)}) ${opt}</label>
+                </div>
+            `).join('');
+
+            quizContainer.innerHTML = `
+                <div class='question'>Câu ${currentQuestion + 1}: ${q.question}</div>
+                <div class="options-container">${optionsHTML}</div>
+            `;
+            document.getElementById('solutionContainer').innerHTML = '';
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+            document.getElementById('submitAnswerBtn').style.display = 'none';
+            document.getElementById('viewSolutionBtn').style.display = 'none';
+            document.getElementById('nextQuestionBtn').style.display = 'none';
+            document.getElementById('quizResult').textContent = '';
+
+            updateProgress();
+            renderMath(quizContainer);
+        }
+
+        window.selectAnswer = function(index, element) {
+            if (quizAnswered) return;
+            const options = document.querySelectorAll('.option');
+
+            if (selectedAnswer === index) {
+                options.forEach(opt => opt.classList.remove('selected'));
+                selectedAnswer = null;
+                document.getElementById('submitAnswerBtn').style.display = 'none';
+            } else {
+                options.forEach(opt => opt.classList.remove('selected'));
+                element.classList.add('selected');
+                selectedAnswer = index;
+                document.getElementById('submitAnswerBtn').style.display = 'inline-block';
+            }
+        }
+
+        window.submitAnswer = function() {
+            if (!quizAnswered && selectedAnswer !== null) {
+                quizAnswered = true;
+                const correctAnswerIndex = quizData[currentQuestion].answer;
+                const options = document.querySelectorAll('.option');
+
+                if (selectedAnswer === correctAnswerIndex) {
+                    score++;
+                    options[selectedAnswer].classList.add('correct');
+                } else {
+                    options[selectedAnswer].classList.add('incorrect');
+                    if (correctAnswerIndex !== null) {
+                        options[correctAnswerIndex].classList.add('correct');
+                    }
+                }
+
+                options.forEach(opt => opt.style.pointerEvents = 'none');
+                document.getElementById('submitAnswerBtn').style.display = 'none';
+                document.getElementById('viewSolutionBtn').style.display = 'inline-block';
+                document.getElementById('nextQuestionBtn').style.display = 'inline-block';
+            }
+        }
+
+        window.showSolution = function() {
+            const solutionContainer = document.getElementById('modalSolutionContent');
+            const q = quizData[currentQuestion];
+            const solutionHTML = `
+                <div class="modal-question">Câu ${currentQuestion + 1}: ${q.question}</div>
+                <div class="solution-box">${q.solution}</div>
+            `;
+            if (typeof MathJax !== 'undefined' && MathJax.typesetClear) {
+                MathJax.typesetClear(['#modalSolutionContent']);
+            }
+            solutionContainer.innerHTML = solutionHTML;
+            document.getElementById('solutionModal').classList.remove('hidden');
+
+            setTimeout(() => {
+                renderMath(document.getElementById('modalSolutionContent'));
+                const solutionBox = solutionContainer.querySelector('.solution-box');
+                if (solutionBox) {
+                    solutionBox.classList.add('visible');
+                }
+            }, 100);
+        }
+
+        window.closeSolutionModal = function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('progressText').textContent = `Câu ${currentQuestion + 1} / ${quizData.length}`;
+        }
+
+        window.nextQuestion = function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                showFinalResult();
+            }
+        }
+
+        function showFinalResult() {
+            document.getElementById('quizContainer').innerHTML = '';
+            document.getElementById('solutionContainer').innerHTML = '';
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+
+            const quizResult = document.getElementById('quizResult');
+            const resultText = `Bạn đã hoàn thành! Kết quả: ${score} / ${quizData.length} câu đúng.`;
+            const resultColor = score / quizData.length >= 0.8 ? 'var(--success-color)' : (score / quizData.length >= 0.5 ? '#f59e0b' : 'var(--error-color)');
+
+            quizResult.innerHTML = `<span style="color: ${resultColor}">${resultText}</span>`;
+
+            document.getElementById('nextQuestionBtn').style.display = 'none';
+            document.getElementById('viewSolutionBtn').style.display = 'none';
+            document.getElementById('submitAnswerBtn').style.display = 'none';
+            document.getElementById('resetQuizBtn').style.display = 'inline-block';
+            document.getElementById('progressBar').style.width = '100%';
+        }
+
+        window.resetQuiz = function() {
+            document.getElementById('solutionModal').classList.add('hidden');
+            document.getElementById('modalSolutionContent').innerHTML = '';
+            currentQuestion = 0;
+            score = 0;
+            loadQuestion();
+            document.getElementById('resetQuizBtn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

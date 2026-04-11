@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="vi" class="">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathBoard - Bài Giảng Tương Tác</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Lexend (thay thế Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // Cấu hình Tailwind để sử dụng font Lexend
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Lexend', 'sans-serif'],
+                    },
+                },
+            },
+            darkMode: 'class', // Kích hoạt chế độ dark mode bằng class
+        }
+    </script>
+    
+    <style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        .view {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .topic-card {
+            background-color: white;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            transition: all 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+        .topic-card.in-progress {
+            background-color: #fefcbf; /* Màu vàng */
+        }
+        .topic-card.completed {
+            background-color: #d1fae5; /* Màu xanh lá */
+        }
+        .topic-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+        }
+        .topic-card .icon-bg {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .topic-card .title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1rem;
+        }
+        .detail-item {
+            position: relative;
+            transition: all 0.3s ease-in-out;
+        }
+        .detail-item.in-progress {
+            background-color: #fefcbf; /* Màu vàng */
+        }
+        .detail-item.completed {
+            background-color: #d1fae5; /* Màu xanh lá */
+        }
+        .status-indicator {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ccc;
+        }
+        .in-progress .status-indicator {
+            background-color: #facc15; /* Màu vàng */
+        }
+        .completed .status-indicator {
+            background-color: #34d399; /* Màu xanh lá */
+        }
+        .slot-card:hover, .topic-card:hover, .detail-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        /* Điều chỉnh dropdown trong chế độ tối */
+        .status-select {
+            padding: 0.25rem;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+        .dark .status-select {
+            background-color: #4b5563; /* Màu xám đậm hơn */
+            color: #f9fafb; /* Màu trắng sáng */
+            border-color: #6b7280;
+        }
+        .status-select:hover {
+            background-color: #e5e7eb;
+        }
+        .dark .status-select:hover {
+            background-color: #6b7280; /* Màu xám nhạt hơn khi hover */
+        }
+        .status-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+        .dark .status-select:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+    <!-- Nút chuyển đổi Sáng/Tối -->
+    <div class="fixed top-4 left-4 z-50">
+        <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-5xl">
+        <div id="slot-selection" class="view">
+            <header class="text-center mb-10">
+                <h1 class="text-3xl sm:text-4xl font-bold text-indigo-600 dark:text-indigo-400">MathBoard</h1>
+                <p class="text-md text-gray-600 dark:text-gray-400">Bài Giảng Tương Tác Toán Học</p>
+            </header>
+            <div id="slot-container" class="space-y-6"></div>
+        </div>
+        <div id="subtopic-view" class="view hidden">
+            <button class="back-button mb-6 inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Quay lại trang chính
+            </button>
+            <h2 id="subtopic-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8"></h2>
+            <div id="subtopic-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </div>
+        <div id="detail-view" class="view hidden">
+            <button class="back-button mb-6 inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Quay lại danh sách chủ đề
+            </button>
+            <h2 id="detail-title" class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-6"></h2>
+            <div id="detail-container" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- LOGIC CHUYỂN ĐỔI SÁNG/TỐI ---
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        const themeToggleButton = document.getElementById('theme-toggle');
+
+        // Hàm áp dụng theme
+        const applyTheme = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggleLightIcon.classList.remove('hidden');
+                themeToggleDarkIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleDarkIcon.classList.remove('hidden');
+                themeToggleLightIcon.classList.add('hidden');
+            }
+        };
+
+        // Kiểm tra theme đã lưu hoặc theme hệ thống khi tải trang
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme(systemPrefersDark ? 'dark' : 'light');
+        }
+
+        // Sự kiện click nút chuyển đổi
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+
+        // --- LOGIC ỨNG DỤNG ---
+        const slotSelectionView = document.getElementById('slot-selection');
+        const subtopicView = document.getElementById('subtopic-view');
+        const detailView = document.getElementById('detail-view');
+        const slotContainer = document.getElementById('slot-container');
+        const subtopicTitle = document.getElementById('subtopic-title');
+        const subtopicContainer = document.getElementById('subtopic-container');
+        const detailTitle = document.getElementById('detail-title');
+        const detailContainer = document.getElementById('detail-container');
+
+        function showLoading(container) {
+            container.innerHTML = `
+                <div class="flex justify-center items-center p-10">
+                    <div class="w-8 h-8 border-4 border-t-indigo-500 dark:border-t-indigo-400 border-gray-200 dark:border-gray-600 rounded-full animate-spin"></div>
+                </div>
+            `;
+        }
+
+        function showView(viewToShow) {
+            [slotSelectionView, subtopicView, detailView].forEach(v => v.classList.add('hidden'));
+            viewToShow.classList.remove('hidden');
+        }
+
+        // Lưu và tải trạng thái từ localStorage
+        function saveStatus(id, status, type) {
+            const key = type === 'subtopic' ? 'subtopicStatuses' : 'detailStatuses';
+            const statuses = JSON.parse(localStorage.getItem(key) || '{}');
+            statuses[id] = status;
+            localStorage.setItem(key, JSON.stringify(statuses));
+        }
+
+        function loadStatus(id, type) {
+            const key = type === 'subtopic' ? 'subtopicStatuses' : 'detailStatuses';
+            const statuses = JSON.parse(localStorage.getItem(key) || '{}');
+            return statuses[id] || 'not-started';
+        }
+
+        async function fetchSlots() {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            return [{
+                id: 1,
+                title: "Slot 1: Hàm Số, Giới Hạn và Liên Tục",
+                description: "Khám phá các khái niệm cơ bản và nâng cao về hàm số."
+            }];
+        }
+
+        async function fetchSubtopics(slotId) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            if (slotId == 1) {
+                return [
+                    { id: "subtopic-tong-quan", title: "Tổng quan về hàm số", icon: "📐" },
+                    { id: "subtopic-mien-dac-diem", title: "Miền và đặc điểm hàm số", icon: "📏" },
+                    { id: "subtopic-gioi-han", title: "Giới hạn của hàm số", icon: "∞" },
+                    { id: "subtopic-lientuc", title: "Hàm liên tục", icon: "🔗" },
+                    { id: "subtopic-dich-chuyen", title: "Dịch chuyển đồ thị", icon: "📈" },
+                    { id: "subtopic-bai-tap-ung-dung", title: "Bài tập và ứng dụng", icon: "✍️" }
+                ];
+            }
+            return [];
+        }
+
+        async function fetchDetails(subtopicId) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const details = {
+                "subtopic-tong-quan": [
+                    { id: "detail-tong-quan-can-on", text: "Cần ôn lại những kiến thức gì ở lớp dưới", link: "https://www.tiktok.com/@maitheduy1709/video/7330146200961731858?is_from_webapp=1&web_id=7284508482387363330", icon: "📚" },
+                    { id: "detail-tong-quan-ham-so-la-gi", text: "Hàm số là gì", link: "https://www.tiktok.com/@maitheduy1709/video/7321188867061697810?is_from_webapp=1&web_id=7281221797452793345", icon: "📝" },
+                    { id: "detail-tong-quan-bai-dau-tien", text: "Bài đầu tiên về Hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7365749553372417296?_r=1&_d=secCgYIASAHKAESPgo82AY2PFAK4DWDq5B9%2BkcQo9j4bHMeSuO6aOWCsejy6tfEqJMVa1ETjFvO8HHthQGbNKKIZ73iTILdwA2%2FGgA%3D&u_code=e34am86cj4me10&share_item_id=7365749553372417296×tamp=1714976076&utm_campaign=client_share&utm_source=short_fallback&share_app_id=1233", icon: "🎬" },
+                    { id: "detail-tong-quan-cac-kieu-bieu-dien", text: "Các kiểu biểu diễn hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7231033243028507910?is_from_webapp=1&web_id=7284508482387363330", icon: "📊" },
+                    { id: "detail-tong-quan-dinh-nghia-hop", text: "Định nghĩa hàm hợp 1", link: "https://www.tiktok.com/@maitheduy1709/video/7322388384641600786?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "🔍" },
+                    { id: "detail-tong-quan-dinh-nghia-hop", text: "Định nghĩa hàm hợp 2", link: "https://www.tiktok.com/@maitheduy1709/video/7321193501910109447?is_from_webapp=1&web_id=7281221797452793345", icon: "🔍" },
+                    { id: "detail-tong-quan-nhan-dien-do-thi", text: "Nhận diện đồ thị của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7284291689454374151?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📉" },
+                    { id: "detail-tong-quan-ham-chan-le", text: "Hàm chẵn, hàm lẻ", link: "https://www.tiktok.com/@maitheduy1709/video/7321196367639072018?is_from_webapp=1&web_id=7281221797452793345", icon: "⚖️" },
+                    { id: "detail-tong-quan-review-ham-chan-le", text: "Review hàm chẵn, hàm lẻ", link: "https://www.tiktok.com/@maitheduy1709/video/7207964231218515226?is_from_webapp=1&web_id=7284508482387363330", icon: "🔄" }
+                ],
+                "subtopic-mien-dac-diem": [
+                    { id: "detail-mien-xac-dinh", text: "Miền xác định của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7330178965681900808?is_from_webapp=1&web_id=7284508482387363330", icon: "📏" },
+                    { id: "detail-mien-chua-bai-tap-domain-range", text: "Chữa bài tập Domain và Range", link: "https://www.tiktok.com/@maitheduy1709/video/7282646514894163218?is_from_webapp=1&web_id=7284508482387363330", icon: "✅" },
+                ],
+                "subtopic-gioi-han": [
+                    { id: "detail-gioi-han-cach-tinh", text: "Cách tính giới hạn của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7298186922088746258?is_from_webapp=1&web_id=7281221797452793345", icon: "➗" },
+                    { id: "detail-gioi-han-nhan-manh-nguyen-tac", text: "Nhấn mạnh nguyên tắc tính giới hạn của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7368333913212636433?is_from_webapp=1&sender_device=pc&web_id=7354991857157752327", icon: "📌" },
+                    { id: "detail-gioi-han-tinh-dua-vao-do-thi", text: "Tính giới hạn dựa vào đồ thị", link: "https://www.tiktok.com/@maitheduy1709/video/7366876373517913360?_r=1&_d=secCgYIASAHKAESPgo8YnPRkMqpFulrrrdUkKXGKt5iDcQV1JXdy67LtWqN7PF29mo6CnZKbOOo0G7ZHneC0Mp%2BUuhI68YaB0UdGgA%3D&u_code=e34am86cj4me10&share_item_id=7366876373517913360×tamp=1715236434&utm_campaign=client_share&utm_source=short_fallback&share_app_id=1233", icon: "📉" },
+                    { id: "detail-gioi-han-nguyen-tac", text: "Nguyên tắc khi tính giới hạn của hàm số", link: "https://www.tiktok.com/@maitheduy1709/video/7325426228603718919?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📏" },
+                    { id: "detail-gioi-han-7-dang-vo-dinh", text: "7 dạng vô định", link: "https://www.tiktok.com/@maitheduy1709/video/7197059121378610459?is_from_webapp=1&web_id=7284508482387363330", icon: "❓" },
+                    { id: "detail-gioi-han-meo-vat", text: "Mẹo vặt khi tính giới hạn", link: "https://www.tiktok.com/@maitheduy1709/video/7296045595163151634?is_from_webapp=1&web_id=7284508482387363330", icon: "💡" },
+                    { id: "detail-gioi-han-dau-gia-tri-tuyet-doi", text: "Tính giới hạn có chứa dấu giá trị tuyệt đối", link: "https://www.tiktok.com/@maitheduy1709/video/7326119768048684295?is_from_webapp=1&web_id=7284508482387363330", icon: "📏" },
+                    { id: "detail-gioi-han-bai-tap-dau-gia-tri-tuyet-doi", text: "Bài tập Tính giới hạn có chứa dấu giá trị tuyệt đối", link: "https://www.tiktok.com/@maitheduy1709/video/7325102752672107794?is_from_webapp=1&web_id=7284508482387363330", icon: "✍️" },
+                    { id: "detail-gioi-han-dang-1-mu-vo-cung", text: "Giới hạn dạng 1 mũ vô cùng", link: "https://www.tiktok.com/@maitheduy1709/video/7326781296426978568?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "∞" },
+                    { id: "detail-gioi-han-dang-vo-cung-tru-vo-cung", text: "Giới hạn dạng vô cùng trừ vô cùng", link: "https://www.tiktok.com/@maitheduy7/video/7325825939118492946?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "∞" },
+                    { id: "detail-gioi-han-pp-lhopital", text: "Tính giới hạn bằng pp L’Hôpital", link: "https://www.tiktok.com/@maitheduy1709/video/7325602846160719122?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "🔢" },
+                    { id: "detail-gioi-han-pp-lo-pi-tan", text: "Tính giới hạn bằng phương pháp Lô pi tan", link: "https://www.tiktok.com/@maitheduy1709/video/7296123795738217735?is_from_webapp=1&web_id=7284508482387363330", icon: "🔢" },
+                    { id: "detail-gioi-han-dinh-ly-kep", text: "Định lý giới hạn kẹp", link: "https://www.tiktok.com/@maitheduy1709/video/7321284410454658312?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📐" },
+                    { id: "detail-gioi-han-cach-nhin-do-thi", text: "Tính giới hạn bằng cách nhìn đồ thị", link: "https://www.tiktok.com/@maitheduy1709/video/7284581020903460104?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📉" },
+                    { id: "detail-gioi-han-lai-dang-vo-cung-tru-vo-cung", text: "Lại tính giới hạn dạng vô cùng trừ vô cùng", link: "https://www.tiktok.com/@maitheduy1709/video/7199785515841785114?is_from_webapp=1&web_id=7284508482387363330", icon: "∞" }
+                ],
+                "subtopic-lientuc": [
+                    { id: "detail-lientuc-ham-lientuc", text: "Hàm số liên tục", link: "https://www.tiktok.com/@maitheduy1709/video/7323436800230346004?is_from_webapp=1&web_id=7284508482387363330", icon: "🔗" },
+                    { id: "detail-lientuc-bai-tap-tim-tham-so", text: "Bài tập Tìm tham số để Hàm số liên tục", link: "https://www.tiktok.com/@maitheduy7/video/7325459023006911762?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "✍️" },
+                    { id: "detail-lientuc-tai-mot-diem", text: "Hàm số liên tục tại một điểm", link: "https://www.tiktok.com/@maitheduy1709/video/7299016700639317266?is_from_webapp=1&sender_device=pc&web_id=7281221797452793345", icon: "📍" },
+                    { id: "detail-lientuc-tim-tham-so", text: "Tìm tham số để hàm số liên tục", link: "https://www.tiktok.com/@maitheduy1709/video/7321279347778669832?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "🔍" },
+                    { id: "detail-lientuc-bai-tap-toan-truc-so", text: "Bài tập Tìm tham số để hàm số liên tục trên toàn trục số", link: "https://www.tiktok.com/@maitheduy1709/video/7325459023006911762?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "✍️" },
+                    { id: "detail-lientuc-dieu-kien-pieceswise", text: "Tìm điều kiện của tham số để hàm dạng Pieceswise liên tục", link: "https://www.tiktok.com/@maitheduy1709/video/7284308941234883847?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "🔗" },
+                    { id: "detail-lientuc-tim-diem-gian-doan", text: "Tìm điểm gián đoạn", link: "https://www.tiktok.com/@maitheduy1709/video/7321660898337230087?is_from_webapp=1&web_id=7284508482387363330", icon: "⚠️" },
+                    { id: "detail-lientuc-ham-duoi-dang-bang", text: "Hàm số cho dưới dạng bảng", link: "https://www.tiktok.com/@maitheduy1709/video/7321648898068466962?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📋" }
+                ],
+                "subtopic-dich-chuyen": [
+                    { id: "detail-dich-chuyen-dich-chuyen", text: "Dịch chuyển đồ thị", link: "https://www.tiktok.com/@maitheduy7/video/7325809154839284999?is_from_webapp=1&sender_device=pc&web_id=7284508482387363330", icon: "📈" },
+                    { id: "detail-dich-chuyen-bai-tap", text: "Bài tập về dịch chuyển đồ thị", link: "https://www.tiktok.com/@maitheduy1709/video/7282664227372895496?is_from_webapp=1&web_id=7284508482387363330", icon: "✍️" }
+                ],
+                "subtopic-bai-tap-ung-dung": [
+                    { id: "detail-bai-tap-dinh-nghia-hop", text: "Bài tập về định nghĩa Hàm số hợp", link: "https://www.tiktok.com/@maitheduy1709/video/7325810939847068936?is_from_webapp=1&web_id=7284508482387363330", icon: "✍️" },
+                    { id: "detail-bai-tap-chuong-1", text: "Bài tập chương 1", link: "https://www.tiktok.com/@maitheduy1709/video/7282964933409590529?is_from_webapp=1&web_id=7284508482387363330", icon: "📚" }
+                ]
+            };
+            return details[subtopicId] || [];
+        }
+
+        async function renderSlots() {
+            showLoading(slotContainer);
+            const slots = await fetchSlots();
+            slotContainer.innerHTML = '';
+            slots.forEach(slot => {
+                const slotEl = document.createElement('div');
+                slotEl.className = 'bg-white dark:bg-gray-800 p-5 rounded-xl shadow-md hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 ease-in-out cursor-pointer border border-transparent hover:border-indigo-500 dark:hover:border-indigo-400';
+                slotEl.dataset.slotId = slot.id;
+                slotEl.dataset.slotTitle = slot.title;
+                slotEl.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 p-3 rounded-lg mr-5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">${slot.title}</h2>
+                            <p class="text-gray-500 dark:text-gray-400 mt-1 font-light">${slot.description}</p>
+                        </div>
+                        <div class="ml-auto text-gray-400 dark:text-gray-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </div>
+                    </div>
+                `;
+                slotEl.addEventListener('click', handleSlotClick);
+                slotContainer.appendChild(slotEl);
+            });
+        }
+
+        async function renderSubtopics(slotId, title) {
+            subtopicTitle.textContent = title;
+            showLoading(subtopicContainer);
+            const subtopics = await fetchSubtopics(slotId);
+            subtopicContainer.innerHTML = '';
+            subtopics.forEach(subtopic => {
+                const status = loadStatus(subtopic.id, 'subtopic');
+                const subtopicEl = document.createElement('div');
+                subtopicEl.className = `relative text-center p-5 rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 ease-in-out cursor-pointer`;
+                if (status === 'completed') {
+                    subtopicEl.classList.add('bg-emerald-50', 'dark:bg-emerald-900/50');
+                } else if (status === 'in-progress') {
+                    subtopicEl.classList.add('bg-amber-50', 'dark:bg-amber-900/50');
+                } else {
+                    subtopicEl.classList.add('bg-white', 'dark:bg-gray-800');
+                }
+                subtopicEl.dataset.targetId = subtopic.id;
+                subtopicEl.dataset.targetTitle = subtopic.title;
+                subtopicEl.innerHTML = `
+                    <div class="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-3xl">${subtopic.icon}</span>
+                    </div>
+                    <h3 class="font-semibold text-gray-800 dark:text-gray-200">${subtopic.title}</h3>
+                    <div class="status-indicator"></div>
+                `;
+                // Thêm dropdown bên ngoài và không gắn trực tiếp vào click
+                const statusSelect = document.createElement('select');
+                statusSelect.className = 'status-select mt-2';
+                statusSelect.dataset.subtopicId = subtopic.id;
+                statusSelect.innerHTML = `
+                    <option value="not-started" ${status === 'not-started' ? 'selected' : ''}>Chưa học</option>
+                    <option value="in-progress" ${status === 'in-progress' ? 'selected' : ''}>Đang học</option>
+                    <option value="completed" ${status === 'completed' ? 'selected' : ''}>Đã xong</option>
+                `;
+                statusSelect.addEventListener('change', function(e) {
+                    e.stopPropagation(); // Ngăn chặn sự kiện lan ra ngoài
+                    const newStatus = this.value;
+                    saveStatus(subtopic.id, newStatus, 'subtopic');
+                    subtopicEl.className = `relative text-center p-5 rounded-lg shadow-md hover:shadow-lg hover:-translate-y-1.5 transition-all duration-300 ease-in-out cursor-pointer ${newStatus === 'completed' ? 'bg-emerald-50 dark:bg-emerald-900/50' : newStatus === 'in-progress' ? 'bg-amber-50 dark:bg-amber-900/50' : 'bg-white dark:bg-gray-800'}`;
+                });
+                subtopicEl.appendChild(statusSelect);
+                subtopicEl.addEventListener('click', handleSubtopicClick);
+                subtopicContainer.appendChild(subtopicEl);
+            });
+        }
+
+        async function renderDetails(subtopicId, title) {
+            detailTitle.textContent = title;
+            showLoading(detailContainer);
+            const details = await fetchDetails(subtopicId);
+            detailContainer.innerHTML = '';
+            if (details.length > 0) {
+                details.forEach(detail => {
+                    const status = loadStatus(detail.id, 'detail');
+                    const detailEl = document.createElement('a');
+                    detailEl.href = detail.link;
+                    detailEl.target = "_blank";
+                    detailEl.rel = "noopener noreferrer";
+                    detailEl.className = 'group flex items-center p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02]';
+                    if (status === 'completed') {
+                        detailEl.classList.add('bg-emerald-50', 'dark:bg-emerald-900/50');
+                    } else if (status === 'in-progress') {
+                        detailEl.classList.add('bg-amber-50', 'dark:bg-amber-900/50');
+                    } else {
+                        detailEl.classList.add('bg-white', 'dark:bg-gray-800');
+                    }
+                    detailEl.innerHTML = `
+                        <span class="text-2xl mr-4">${detail.icon}</span>
+                        <span class="flex-grow font-medium text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">${detail.text}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-auto text-gray-400 dark:text-gray-500 group-hover:text-indigo-500 transition-transform duration-300 group-hover:translate-x-1"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        <div class="status-indicator"></div>
+                        <select class="ml-2 status-select" data-detail-id="${detail.id}">
+                            <option value="not-started" ${status === 'not-started' ? 'selected' : ''}>Chưa học</option>
+                            <option value="in-progress" ${status === 'in-progress' ? 'selected' : ''}>Đang học</option>
+                            <option value="completed" ${status === 'completed' ? 'selected' : ''}>Đã xong</option>
+                        </select>
+                    `;
+                    detailEl.querySelector('.status-select').addEventListener('change', function() {
+                        const newStatus = this.value;
+                        saveStatus(detail.id, newStatus, 'detail');
+                        detailEl.className = `group flex items-center p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] ${newStatus === 'completed' ? 'bg-emerald-50 dark:bg-emerald-900/50' : newStatus === 'in-progress' ? 'bg-amber-50 dark:bg-amber-900/50' : 'bg-white dark:bg-gray-800'}`;
+                    });
+                    detailContainer.appendChild(detailEl);
+                });
+            } else {
+                detailContainer.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center p-4">Chưa có nội dung chi tiết cho mục này.</p>';
+            }
+        }
+
+        function handleSlotClick(event) {
+            const card = event.currentTarget;
+            renderSubtopics(card.dataset.slotId, card.dataset.slotTitle);
+            showView(subtopicView);
+        }
+
+        function handleSubtopicClick(event) {
+            const card = event.currentTarget;
+            // Ngăn chặn click vào dropdown ảnh hưởng
+            if (event.target.tagName !== 'SELECT') {
+                const targetId = card.dataset.targetId;
+                const targetTitle = card.dataset.targetTitle;
+                renderDetails(targetId, targetTitle);
+                showView(detailView);
+            }
+        }
+
+        document.querySelectorAll('.back-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const parentView = button.closest('.view');
+                if (parentView.id === 'detail-view') showView(subtopicView);
+                else if (parentView.id === 'subtopic-view') showView(slotSelectionView);
+            });
+        });
+
+        renderSlots();
+        showView(slotSelectionView);
+    });
+    </script>
+</body>
+</html>

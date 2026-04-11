@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duymt Speak - Công cụ dịch giọng nói</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --danger-color: #f72585;
+            --success-color: #4cc9f0;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --text-color: #2b2d42;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #4361ee, #3f37c9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        .language-config {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            position: relative;
+        }
+
+        .language-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .language-box label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            color: var(--text-color);
+            background-color: white;
+            appearance: none;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 0.5rem;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .voice-select {
+            font-size: 0.9rem;
+            padding: 0.6rem 0.8rem;
+        }
+
+        #swap-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        #swap-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        #toggleBtn {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        #toggleBtn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        #toggleBtn.recording {
+            background-color: var(--danger-color);
+            animation: pulse 1.5s infinite;
+        }
+
+        #toggleBtn:disabled {
+            background-color: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(247, 37, 133, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0); }
+        }
+
+        #status {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+            min-height: 1.5rem;
+        }
+
+        .result-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .box {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9ecef;
+            transition: var(--transition);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .box h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 0.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .speaker-icon, .copy-icon, .edit-icon, .refresh-icon {
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .speaker-icon:hover, .copy-icon:hover, .edit-icon:hover, .refresh-icon:hover {
+            background-color: #f8f9fa;
+            color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .box p {
+            flex-grow: 1;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #495057;
+            overflow-y: auto;
+            max-height: 200px;
+            padding: 0.5rem 0;
+        }
+
+        .box textarea {
+            flex-grow: 1;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #495057;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            resize: none;
+            max-height: 200px;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .box textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .conversation-history {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+
+        .conversation-history h3 {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .conversation-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .conversation-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .conversation-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .conversation-item.selected {
+            border: 2px solid var(--accent-color);
+            background-color: #e6f0ff;
+        }
+
+        .conversation-item p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .conversation-item textarea {
+            width: 100%;
+            font-size: 0.9rem;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            resize: vertical;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .conversation-item textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+        }
+
+        .item-action {
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.3rem;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .item-action:hover {
+            background-color: #f8f9fa;
+            color: var(--accent-color);
+        }
+
+        .checkbox-container {
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        .history-controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .history-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .select-all-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .select-all-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .delete-selected-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .delete-selected-btn:hover {
+            background-color: #d00070;
+        }
+
+        .merge-btn {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .merge-btn:hover {
+            background-color: #3a9bb8;
+        }
+
+        .toggle-history-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .toggle-history-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #adb5bd;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6c757d;
+        }
+
+        .mic-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            position: relative;
+        }
+
+        .mic-icon::before {
+            content: "🎤";
+            position: absolute;
+            animation: bounce 0.8s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
+        [title] {
+            position: relative;
+        }
+
+        [title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--dark-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 10;
+            margin-bottom: 0.5rem;
+        }
+
+        optgroup {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        option {
+            padding: 0.5rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(67, 97, 238, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .copied-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--success-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .copied-message.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .language-config {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            #swap-btn {
+                position: relative;
+                left: auto;
+                transform: none;
+                margin: 1rem 0;
+            }
+
+            .result-container {
+                grid-template-columns: 1fr;
+            }
+
+            .history-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Duymt Speak</h1>
+            <p class="subtitle">Công cụ dịch giọng nói và nhập văn bản đa ngôn ngữ</p>
+        </header>
+
+        <div class="language-config">
+            <div class="language-box">
+                <label for="source-lang">Ngôn ngữ nói</label>
+                <select id="source-lang"></select>
+                <select id="source-voice" class="voice-select"></select>
+            </div>
+            <div id="swap-btn" class="swap-icon" title="Đảo ngược ngôn ngữ">⇆</div>
+            <div class="language-box">
+                <label for="target-lang">Ngôn ngữ dịch</label>
+                <select id="target-lang"></select>
+                <select id="target-voice" class="voice-select"></select>
+            </div>
+        </div>
+
+        <button id="toggleBtn">
+            <span class="mic-icon"></span>
+            <span>Bắt đầu ghi âm</span>
+        </button>
+        
+        <p id="status">Sẵn sàng</p>
+
+        <div class="result-container">
+            <div class="box" id="original-box">
+                <h2 id="original-title">
+                    <span>Văn bản gốc</span>
+                    <div class="action-buttons">
+                        <span class="speaker-icon" id="speak-original-btn" title="Nghe lại">🔊</span>
+                        <span class="copy-icon" id="copy-original-btn" title="Sao chép">⎘</span>
+                        <span class="refresh-icon" id="refresh-original-btn" title="Làm mới dịch">↻</span>
+                    </div>
+                </h2>
+                <textarea id="original-text" placeholder="Nhập hoặc nói văn bản..."></textarea>
+            </div>
+            <div class="box" id="translated-box">
+                <h2 id="translated-title">
+                    <span>Bản dịch</span>
+                    <div class="action-buttons">
+                        <span class="speaker-icon" id="speak-translated-btn" title="Nghe lại">🔊</span>
+                        <span class="copy-icon" id="copy-translated-btn" title="Sao chép">⎘</span>
+                        <span class="edit-icon" id="edit-translated-btn" title="Chỉnh sửa">✎</span>
+                        <span class="refresh-icon" id="refresh-translated-btn" title="Làm mới dịch">↻</span>
+                    </div>
+                </h2>
+                <p id="translated-text">...</p>
+            </div>
+        </div>
+
+        <div class="conversation-history" id="conversationHistory">
+            <h3>Lịch sử hội thoại</h3>
+            <div class="conversation-list" id="conversationList"></div>
+            <div class="history-controls">
+                <button class="history-btn select-all-btn" id="selectAllBtn">Chọn tất cả</button>
+                <button class="history-btn delete-selected-btn" id="deleteSelectedBtn" style="display: none;">Xóa đã chọn</button>
+                <button class="history-btn merge-btn" id="mergeBtn" style="display: none;">Gộp hội thoại</button>
+                <button class="history-btn toggle-history-btn" id="toggleHistoryBtn">Ẩn danh sách</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="copied-message" id="copiedMessage">Đã sao chép!</div>
+
+    <script>
+        const GEMINI_API_KEY = 'AIzaSyAagwNYrGBzUo42P5pyJ_dNYV_xxRofV2I';
+
+        const sourceLangSelect = document.getElementById('source-lang');
+        const targetLangSelect = document.getElementById('target-lang');
+        const sourceVoiceSelect = document.getElementById('source-voice');
+        const targetVoiceSelect = document.getElementById('target-voice');
+        const swapBtn = document.getElementById('swap-btn');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const statusEl = document.getElementById('status');
+        const originalTitle = document.getElementById('original-title').querySelector('span');
+        const originalTextEl = document.getElementById('original-text');
+        const translatedTitle = document.getElementById('translated-title').querySelector('span');
+        const translatedTextEl = document.getElementById('translated-text');
+        const speakOriginalBtn = document.getElementById('speak-original-btn');
+        const speakTranslatedBtn = document.getElementById('speak-translated-btn');
+        const copyOriginalBtn = document.getElementById('copy-original-btn');
+        const copyTranslatedBtn = document.getElementById('copy-translated-btn');
+        const editTranslatedBtn = document.getElementById('edit-translated-btn');
+        const refreshOriginalBtn = document.getElementById('refresh-original-btn');
+        const refreshTranslatedBtn = document.getElementById('refresh-translated-btn');
+        const copiedMessage = document.getElementById('copiedMessage');
+        const conversationHistory = document.getElementById('conversationHistory');
+        const conversationList = document.getElementById('conversationList');
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+        const mergeBtn = document.getElementById('mergeBtn');
+        const toggleHistoryBtn = document.getElementById('toggleHistoryBtn');
+
+        const languageMap = new Map([
+            ['vi', { fullName: 'Vietnamese', displayName: 'Tiếng Việt' }],
+            ['en', { fullName: 'English', displayName: 'Tiếng Anh' }],
+            ['ja', { fullName: 'Japanese', displayName: 'Tiếng Nhật' }],
+            ['ko', { fullName: 'Korean', displayName: 'Tiếng Hàn' }],
+            ['zh-CN', { fullName: 'Chinese (Simplified)', displayName: 'Tiếng Trung' }],
+            ['fr', { fullName: 'French', displayName: 'Tiếng Pháp' }],
+            ['de', { fullName: 'German', displayName: 'Tiếng Đức' }],
+            ['es', { fullName: 'Spanish', displayName: 'Tiếng Tây Ban Nha' }]
+        ]);
+        
+        let recognition;
+        let isRecording = false;
+        let voices = [];
+        let voicesReady = false;
+        let isEditingTranslated = false;
+        let typingTimeout;
+        let conversationHistoryData = [];
+        let isHistoryListVisible = true;
+        let allSelected = false;
+
+        function init() {
+            populateLanguageSelectors();
+            setupEventListeners();
+            setupSpeechRecognition();
+            loadVoices();
+            loadConversationHistory();
+            checkMicrophonePermission();
+        }
+
+        async function checkMicrophonePermission() {
+            if (!navigator.permissions || !navigator.permissions.query) {
+                // Nếu API Permissions không được hỗ trợ, yêu cầu quyền trực tiếp
+                await requestMicrophonePermission();
+                return;
+            }
+
+            try {
+                const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+                if (permissionStatus.state === 'granted') {
+                    toggleBtn.disabled = false;
+                    statusEl.textContent = 'Sẵn sàng';
+                } else if (permissionStatus.state === 'prompt') {
+                    toggleBtn.disabled = true;
+                    statusEl.textContent = 'Vui lòng cấp quyền sử dụng microphone.';
+                    await requestMicrophonePermission();
+                } else {
+                    toggleBtn.disabled = true;
+                    statusEl.textContent = 'Quyền sử dụng microphone bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.';
+                }
+
+                permissionStatus.onchange = () => {
+                    if (permissionStatus.state === 'granted') {
+                        toggleBtn.disabled = false;
+                        statusEl.textContent = 'Sẵn sàng';
+                    } else {
+                        toggleBtn.disabled = true;
+                        statusEl.textContent = 'Quyền sử dụng microphone bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.';
+                    }
+                };
+            } catch (error) {
+                console.error('Lỗi khi kiểm tra quyền microphone:', error);
+                statusEl.textContent = 'Lỗi khi kiểm tra quyền microphone. Vui lòng thử lại.';
+                await requestMicrophonePermission();
+            }
+        }
+
+        async function requestMicrophonePermission() {
+            try {
+                await navigator.mediaDevices.getUserMedia({ audio: true });
+                toggleBtn.disabled = false;
+                statusEl.textContent = 'Sẵn sàng';
+            } catch (error) {
+                console.error('Lỗi khi yêu cầu quyền microphone:', error);
+                toggleBtn.disabled = true;
+                statusEl.textContent = 'Không thể truy cập microphone. Vui lòng cấp quyền trong cài đặt trình duyệt.';
+            }
+        }
+
+        function populateLanguageSelectors() {
+            languageMap.forEach((lang, code) => {
+                sourceLangSelect.add(new Option(lang.displayName, code));
+                targetLangSelect.add(new Option(lang.displayName, code));
+            });
+            sourceLangSelect.value = 'vi';
+            targetLangSelect.value = 'en';
+            populateVoiceSelect('vi', sourceVoiceSelect);
+            populateVoiceSelect('en', targetVoiceSelect);
+        }
+
+        function setupEventListeners() {
+            swapBtn.addEventListener('click', handleSwapLanguages);
+            sourceLangSelect.addEventListener('change', () => {
+                updateRecognitionLanguage();
+                populateVoiceSelect(sourceLangSelect.value, sourceVoiceSelect);
+                handleTextChange();
+            });
+            targetLangSelect.addEventListener('change', () => {
+                populateVoiceSelect(targetLangSelect.value, targetVoiceSelect);
+                handleTextChange();
+            });
+            toggleBtn.addEventListener('click', handleToggleRecording);
+            speakOriginalBtn.addEventListener('click', handleSpeakOriginal);
+            speakTranslatedBtn.addEventListener('click', handleSpeakTranslated);
+            copyOriginalBtn.addEventListener('click', () => copyToClipboard(originalTextEl));
+            copyTranslatedBtn.addEventListener('click', () => copyToClipboard(translatedTextEl));
+            editTranslatedBtn.addEventListener('click', () => toggleEditMode('translated'));
+            refreshOriginalBtn.addEventListener('click', () => handleRefresh('original'));
+            refreshTranslatedBtn.addEventListener('click', () => handleRefresh('translated'));
+            sourceVoiceSelect.addEventListener('change', () => {});
+            targetVoiceSelect.addEventListener('change', () => {});
+            originalTextEl.addEventListener('input', handleTextChange);
+            selectAllBtn.addEventListener('click', toggleSelectAll);
+            deleteSelectedBtn.addEventListener('click', deleteSelectedConversations);
+            mergeBtn.addEventListener('click', mergeSelectedConversations);
+            toggleHistoryBtn.addEventListener('click', toggleHistoryListVisibility);
+        }
+
+        function handleTextChange() {
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                const text = originalTextEl.value.trim();
+                if (text) {
+                    statusEl.innerHTML = '<span class="loading"></span> Đang dịch...';
+                    translate(text);
+                } else {
+                    translatedTextEl.textContent = '...';
+                    statusEl.textContent = 'Sẵn sàng';
+                }
+            }, 500);
+        }
+
+        function toggleEditMode(type) {
+            if (type === 'translated') {
+                if (!isEditingTranslated) {
+                    const text = translatedTextEl.textContent;
+                    if (text === '...') return;
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    translatedTextEl.replaceWith(textarea);
+                    textarea.focus();
+                    isEditingTranslated = true;
+                    editTranslatedBtn.textContent = '💾';
+                    editTranslatedBtn.title = 'Lưu';
+                    textarea.addEventListener('blur', () => saveEdit('translated', textarea));
+                } else {
+                    saveEdit('translated', translatedTextEl.parentNode.querySelector('textarea'));
+                }
+            }
+        }
+
+        function saveEdit(type, textarea) {
+            const newText = textarea.value.trim();
+            const p = document.createElement('p');
+            p.id = 'translated-text';
+            p.textContent = newText || '...';
+            textarea.replaceWith(p);
+            isEditingTranslated = false;
+            editTranslatedBtn.textContent = '✎';
+            editTranslatedBtn.title = 'Chỉnh sửa';
+        }
+
+        async function handleRefresh(type) {
+            if (isEditingTranslated) saveEdit('translated', translatedTextEl.parentNode.querySelector('textarea'));
+
+            if (type === 'original') {
+                const text = originalTextEl.value.trim();
+                if (text) {
+                    statusEl.innerHTML = '<span class="loading"></span> Đang làm mới dịch...';
+                    await translate(text);
+                }
+            } else {
+                const text = translatedTextEl.textContent;
+                if (text && text !== '...') {
+                    statusEl.innerHTML = '<span class="loading"></span> Đang làm mới dịch...';
+                    await translateBack(text);
+                }
+            }
+        }
+
+        function copyToClipboard(element) {
+            const text = element.value || element.textContent;
+            if (text && text !== '...') {
+                navigator.clipboard.writeText(text).then(() => {
+                    showCopiedMessage();
+                }).catch(err => {
+                    console.error('Lỗi khi sao chép: ', err);
+                    statusEl.textContent = "Không thể sao chép văn bản";
+                });
+            }
+        }
+
+        function showCopiedMessage() {
+            copiedMessage.classList.add('show');
+            setTimeout(() => {
+                copiedMessage.classList.remove('show');
+            }, 2000);
+        }
+
+        function setupSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (SpeechRecognition && 'speechSynthesis' in window) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.onstart = handleRecognitionStart;
+                recognition.onend = handleRecognitionEnd;
+                recognition.onerror = handleRecognitionError;
+                recognition.onresult = handleRecognitionResult;
+                updateRecognitionLanguage();
+            } else {
+                statusEl.textContent = "Trình duyệt không hỗ trợ các API cần thiết. Vui lòng dùng Chrome.";
+                [toggleBtn, sourceLangSelect, targetLangSelect, swapBtn, sourceVoiceSelect, targetVoiceSelect].forEach(el => el.disabled = true);
+            }
+        }
+
+        async function handleToggleRecording() {
+            if (!recognition) return;
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                try {
+                    const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+                    if (permissionStatus.state === 'granted') {
+                        recognition.start();
+                    } else {
+                        await requestMicrophonePermission();
+                        if (!toggleBtn.disabled) {
+                            recognition.start();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi kiểm tra quyền:', error);
+                    statusEl.textContent = 'Lỗi khi kiểm tra quyền microphone. Vui lòng thử lại.';
+                }
+            }
+        }
+
+        function handleSwapLanguages() {
+            const sourceVal = sourceLangSelect.value;
+            const targetVal = targetLangSelect.value;
+            sourceLangSelect.value = targetVal;
+            targetLangSelect.value = sourceVal;
+            populateVoiceSelect(sourceLangSelect.value, sourceVoiceSelect);
+            populateVoiceSelect(targetLangSelect.value, targetVoiceSelect);
+            updateRecognitionLanguage();
+            const originalText = originalTextEl.value.trim();
+            const translatedText = translatedTextEl.textContent;
+            originalTextEl.value = translatedText === '...' ? '' : translatedText;
+            translatedTextEl.textContent = originalText || '...';
+            const sourceLangName = languageMap.get(sourceLangSelect.value).displayName;
+            const targetLangName = languageMap.get(targetLangSelect.value).displayName;
+            originalTitle.textContent = `Văn bản gốc (${sourceLangName})`;
+            translatedTitle.textContent = `Bản dịch (${targetLangName})`;
+            handleTextChange();
+        }
+
+        function handleSpeakOriginal() {
+            const text = originalTextEl.value.trim();
+            if (text) {
+                speakText(text, sourceLangSelect.value, sourceVoiceSelect.value);
+            }
+        }
+
+        function handleSpeakTranslated() {
+            const text = translatedTextEl.textContent;
+            if (text && text !== '...') {
+                speakText(text, targetLangSelect.value, targetVoiceSelect.value);
+            }
+        }
+
+        function handleRecognitionStart() {
+            isRecording = true;
+            window.speechSynthesis.cancel();
+            statusEl.textContent = "Đang nghe...";
+            toggleBtn.innerHTML = '<span class="loading"></span><span> Đang ghi âm</span>';
+            toggleBtn.classList.add('recording');
+            if (isEditingTranslated) saveEdit('translated', translatedTextEl.parentNode.querySelector('textarea'));
+            originalTextEl.value = '';
+            translatedTextEl.textContent = '...';
+            const sourceLangName = languageMap.get(sourceLangSelect.value).displayName;
+            const targetLangName = languageMap.get(targetLangSelect.value).displayName;
+            originalTitle.textContent = `Văn bản gốc (${sourceLangName})`;
+            translatedTitle.textContent = `Bản dịch (${targetLangName})`;
+        }
+
+        function handleRecognitionEnd() {
+            isRecording = false;
+            if (statusEl.textContent.indexOf('Lỗi') === -1) {
+                statusEl.textContent = "Sẵn sàng";
+            }
+            toggleBtn.innerHTML = '<span class="mic-icon"></span><span> Bắt đầu ghi âm</span>';
+            toggleBtn.classList.remove('recording');
+        }
+
+        function handleRecognitionError(event) {
+            let errorMessage = "Đã xảy ra lỗi: " + event.error;
+            if (event.error === 'no-speech') errorMessage = "Không nhận thấy giọng nói. Vui lòng thử lại.";
+            else if (event.error === 'not-allowed') errorMessage = "Bạn chưa cấp quyền sử dụng micro. Vui lòng cấp quyền trong cài đặt trình duyệt.";
+            else if (event.error === 'language-not-supported') errorMessage = `Ngôn ngữ '${languageMap.get(sourceLangSelect.value).displayName}' không được hỗ trợ nhận dạng.`;
+            statusEl.textContent = errorMessage;
+            toggleBtn.innerHTML = '<span class="mic-icon"></span><span> Bắt đầu ghi âm</span>';
+            toggleBtn.classList.remove('recording');
+        }
+
+        function handleRecognitionResult(event) {
+            const transcript = event.results[0][0].transcript;
+            originalTextEl.value = transcript;
+            statusEl.innerHTML = '<span class="loading"></span> Đã nhận diện xong. Đang dịch...';
+            translate(transcript);
+        }
+
+        function updateRecognitionLanguage() {
+            if (recognition) {
+                recognition.lang = sourceLangSelect.value;
+            }
+        }
+
+        function speakText(text, langCode, voiceName) {
+            if (!voicesReady || !window.speechSynthesis) {
+                statusEl.textContent = "Hệ thống phát âm chưa sẵn sàng.";
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = langCode;
+
+            let selectedVoice = voices.find(v => v.name === voiceName && v.lang.startsWith(langCode));
+            if (!selectedVoice) {
+                selectedVoice = voices.find(v => v.lang.startsWith(langCode)) || voices[0];
+            }
+
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            } else {
+                statusEl.textContent = `Không tìm thấy giọng nói cho ngôn ngữ ${languageMap.get(langCode).displayName}.`;
+                return;
+            }
+
+            utterance.onerror = (e) => {
+                console.error('Lỗi SpeechSynthesis:', e);
+                statusEl.textContent = `Lỗi phát âm: ${e.error || 'Không thể phát âm văn bản.'}`;
+            };
+
+            utterance.onend = () => {
+                statusEl.textContent = "Sẵn sàng";
+            };
+
+            try {
+                window.speechSynthesis.speak(utterance);
+            } catch (error) {
+                console.error('Lỗi khi phát âm:', error);
+                statusEl.textContent = "Lỗi khi phát âm văn bản.";
+            }
+        }
+
+        async function translate(text) {
+            const sourceLangCode = sourceLangSelect.value;
+            const targetLangCode = targetLangSelect.value;
+            if (sourceLangCode === targetLangCode) {
+                translatedTextEl.textContent = text;
+                statusEl.textContent = "Ngôn ngữ gốc và đích giống nhau.";
+                speakText(text, targetLangCode, targetVoiceSelect.value);
+                return;
+            }
+            await translateWithGeminiAPI(text, sourceLangCode, targetLangCode);
+        }
+
+        async function translateBack(text) {
+            const sourceLangCode = targetLangSelect.value;
+            const targetLangCode = sourceLangSelect.value;
+            if (sourceLangCode === targetLangCode) {
+                originalTextEl.value = text;
+                statusEl.textContent = "Ngôn ngữ gốc và đích giống nhau.";
+                speakText(text, targetLangCode, sourceVoiceSelect.value);
+                return;
+            }
+            await translateWithGeminiAPI(text, sourceLangCode, targetLangCode, true);
+        }
+
+        async function translateWithGeminiAPI(text, sourceLangCode, targetLangCode, isBackTranslation = false) {
+            const MODEL_NAME = "gemini-1.5-flash-latest"; 
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
+            const sourceLanguageName = languageMap.get(sourceLangCode)?.fullName || sourceLangCode;
+            const targetLanguageName = languageMap.get(targetLangCode)?.fullName || targetLangCode;
+            const prompt = `Translate the following ${sourceLanguageName} text to ${targetLanguageName}. Provide only the translation, without any additional explanations or text.\n${sourceLanguageName} text: "${text}"\n${targetLanguageName} translation:`;
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0, maxOutputTokens: 1024 }
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error.message || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data?.candidates?.[0]?.content?.parts?.length) {
+                    const translatedText = data.candidates[0].content.parts[0].text.trim();
+                    if (isBackTranslation) {
+                        originalTextEl.value = translatedText;
+                        statusEl.textContent = "Dịch ngược thành công! Đang phát âm...";
+                        speakText(translatedText, sourceLangSelect.value, sourceVoiceSelect.value);
+                    } else {
+                        translatedTextEl.textContent = translatedText;
+                        statusEl.textContent = "Dịch thành công! Đang phát...";
+                        saveConversation(text, translatedText, sourceLangCode, targetLangCode);
+                        speakText(translatedText, targetLangCode, targetVoiceSelect.value);
+                    }
+                } else {
+                    const finishReason = data.candidates?.[0]?.finishReason;
+                    if (finishReason === 'SAFETY') {
+                        throw new Error("Kết quả bị chặn bởi lý do an toàn.");
+                    } else {
+                        throw new Error("Không nhận được kết quả hợp lệ từ API Gemini.");
+                    }
+                }
+            } catch (error) {
+                console.error(`Lỗi dịch với Gemini API:`, error);
+                if (isBackTranslation) {
+                    originalTextEl.value = "Không thể dịch ngược được văn bản.";
+                } else {
+                    translatedTextEl.textContent = "Không thể dịch được văn bản.";
+                }
+                statusEl.textContent = `Lỗi dịch: ${error.message}`;
+            }
+        }
+
+        function saveConversation(originalText, translatedText, sourceLang, targetLang) {
+            const timestamp = new Date().toLocaleString();
+            conversationHistoryData.push({
+                originalText,
+                translatedText,
+                sourceLang,
+                targetLang,
+                timestamp
+            });
+            localStorage.setItem('conversationHistory', JSON.stringify(conversationHistoryData));
+            renderConversationHistory();
+        }
+
+        function loadConversationHistory() {
+            const savedHistory = localStorage.getItem('conversationHistory');
+            if (savedHistory) {
+                conversationHistoryData = JSON.parse(savedHistory);
+                renderConversationHistory();
+            }
+        }
+
+        function renderConversationHistory() {
+            conversationList.innerHTML = '';
+            conversationHistoryData.forEach((item, index) => {
+                const conversationItem = document.createElement('div');
+                conversationItem.className = 'conversation-item';
+                conversationItem.dataset.index = index;
+                conversationItem.innerHTML = `
+                    <div class="checkbox-container">
+                        <input type="checkbox" class="conversation-checkbox" data-index="${index}">
+                    </div>
+                    <p><strong>${languageMap.get(item.sourceLang).displayName}:</strong> <span class="original-text">${item.originalText}</span></p>
+                    <p><strong>${languageMap.get(item.targetLang).displayName}:</strong> <span class="translated-text">${item.translatedText}</span></p>
+                    <p><small>${item.timestamp}</small></p>
+                    <div class="item-actions">
+                        <span class="item-action edit-item" title="Chỉnh sửa">✎</span>
+                        <span class="item-action delete-item" title="Xóa">🗑</span>
+                    </div>
+                `;
+                conversationItem.querySelector('.conversation-checkbox').addEventListener('change', updateButtonVisibility);
+                conversationItem.querySelector('.edit-item').addEventListener('click', () => editConversationItem(index));
+                conversationItem.querySelector('.delete-item').addEventListener('click', () => deleteConversationItem(index));
+                conversationItem.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('item-action') && !e.target.classList.contains('conversation-checkbox')) {
+                        loadConversationItem(index);
+                    }
+                });
+                conversationList.appendChild(conversationItem);
+            });
+            updateButtonVisibility();
+        }
+
+        function editConversationItem(index) {
+            const item = conversationHistoryData[index];
+            const conversationItem = conversationList.querySelector(`.conversation-item[data-index="${index}"]`);
+            conversationItem.innerHTML = `
+                <div class="checkbox-container">
+                    <input type="checkbox" class="conversation-checkbox" data-index="${index}">
+                </div>
+                <p><strong>${languageMap.get(item.sourceLang).displayName}:</strong></p>
+                <textarea class="original-text">${item.originalText}</textarea>
+                <p><strong>${languageMap.get(item.targetLang).displayName}:</strong></p>
+                <textarea class="translated-text">${item.translatedText}</textarea>
+                <p><small>${item.timestamp}</small></p>
+                <div class="item-actions">
+                    <span class="item-action save-item" title="Lưu">💾</span>
+                    <span class="item-action cancel-item" title="Hủy">✖</span>
+                </div>
+            `;
+            conversationItem.querySelector('.save-item').addEventListener('click', () => saveEditedItem(index));
+            conversationItem.querySelector('.cancel-item').addEventListener('click', () => renderConversationHistory());
+            conversationItem.querySelector('.conversation-checkbox').addEventListener('change', updateButtonVisibility);
+        }
+
+        function saveEditedItem(index) {
+            const conversationItem = conversationList.querySelector(`.conversation-item[data-index="${index}"]`);
+            const originalText = conversationItem.querySelector('.original-text').value.trim();
+            const translatedText = conversationItem.querySelector('.translated-text').value.trim();
+            if (originalText && translatedText) {
+                conversationHistoryData[index].originalText = originalText;
+                conversationHistoryData[index].translatedText = translatedText;
+                localStorage.setItem('conversationHistory', JSON.stringify(conversationHistoryData));
+                renderConversationHistory();
+                statusEl.textContent = 'Đã lưu chỉnh sửa hội thoại';
+            } else {
+                statusEl.textContent = 'Vui lòng nhập đầy đủ nội dung';
+            }
+        }
+
+        function deleteConversationItem(index) {
+            conversationHistoryData.splice(index, 1);
+            localStorage.setItem('conversationHistory', JSON.stringify(conversationHistoryData));
+            renderConversationHistory();
+            statusEl.textContent = 'Đã xóa hội thoại';
+        }
+
+        function loadConversationItem(index) {
+            const item = conversationHistoryData[index];
+            sourceLangSelect.value = item.sourceLang;
+            targetLangSelect.value = item.targetLang;
+            originalTextEl.value = item.originalText;
+            translatedTextEl.textContent = item.translatedText;
+            populateVoiceSelect(item.sourceLang, sourceVoiceSelect);
+            populateVoiceSelect(item.targetLang, targetVoiceSelect);
+            updateRecognitionLanguage();
+            const sourceLangName = languageMap.get(item.sourceLang).displayName;
+            const targetLangName = languageMap.get(item.targetLang).displayName;
+            originalTitle.textContent = `Văn bản gốc (${sourceLangName})`;
+            translatedTitle.textContent = `Bản dịch (${targetLangName})`;
+            statusEl.textContent = 'Đã tải hội thoại từ lịch sử';
+        }
+
+        function toggleSelectAll() {
+            allSelected = !allSelected;
+            const checkboxes = conversationList.querySelectorAll('.conversation-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = allSelected;
+                const item = conversationList.querySelector(`.conversation-item[data-index="${checkbox.dataset.index}"]`);
+                item.classList.toggle('selected', allSelected);
+            });
+            selectAllBtn.textContent = allSelected ? 'Bỏ chọn tất cả' : 'Chọn tất cả';
+            updateButtonVisibility();
+        }
+
+        function deleteSelectedConversations() {
+            const checkboxes = conversationList.querySelectorAll('.conversation-checkbox:checked');
+            const indices = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index)).sort((a, b) => b - a);
+            indices.forEach(index => conversationHistoryData.splice(index, 1));
+            localStorage.setItem('conversationHistory', JSON.stringify(conversationHistoryData));
+            renderConversationHistory();
+            statusEl.textContent = 'Đã xóa các hội thoại được chọn';
+        }
+
+        function mergeSelectedConversations() {
+            const checkboxes = conversationList.querySelectorAll('.conversation-checkbox:checked');
+            if (checkboxes.length === 0) {
+                statusEl.textContent = 'Vui lòng chọn ít nhất một hội thoại';
+                return;
+            }
+
+            const selectedIndices = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index));
+            const mergedText = selectedIndices.map(index => {
+                const item = conversationHistoryData[index];
+                return `${item.originalText}\n${item.translatedText}`;
+            }).join('\n');
+
+            originalTextEl.value = mergedText;
+            translatedTextEl.textContent = '...';
+            statusEl.textContent = 'Đã gộp hội thoại. Nhập ngôn ngữ đích để dịch lại hoặc sao chép.';
+            handleTextChange();
+        }
+
+        function updateButtonVisibility() {
+            const checkboxes = conversationList.querySelectorAll('.conversation-checkbox:checked');
+            deleteSelectedBtn.style.display = checkboxes.length > 0 ? 'block' : 'none';
+            mergeBtn.style.display = checkboxes.length > 0 ? 'block' : 'none';
+        }
+
+        function toggleHistoryListVisibility() {
+            isHistoryListVisible = !isHistoryListVisible;
+            conversationList.style.display = isHistoryListVisible ? 'block' : 'none';
+            toggleHistoryBtn.textContent = isHistoryListVisible ? 'Ẩn danh sách' : 'Hiện danh sách';
+        }
+
+        function loadVoices() {
+            function setVoices() {
+                voices = window.speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    voicesReady = true;
+                    populateVoiceSelect(sourceLangSelect.value, sourceVoiceSelect);
+                    populateVoiceSelect(targetLangSelect.value, targetVoiceSelect);
+                } else {
+                    setTimeout(setVoices, 100);
+                }
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = setVoices;
+                setVoices();
+            } else {
+                statusEl.textContent = "Trình duyệt không hỗ trợ phát âm.";
+            }
+        }
+
+        function populateVoiceSelect(langCode, selectEl) {
+            if (!voicesReady || voices.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Đang tải giọng nói...';
+                selectEl.innerHTML = '';
+                selectEl.appendChild(opt);
+                return;
+            }
+
+            const voiceOptions = getVoiceOptionsForLang(langCode);
+            let filtered = voices.filter(v => v.lang.startsWith(langCode));
+            if (filtered.length === 0) {
+                filtered = voices.filter(v => v.lang.includes(langCode.toLowerCase()));
+            }
+            if (filtered.length === 0) {
+                filtered = voices;
+            }
+
+            filtered.sort((a, b) => {
+                const aScore = voiceOptions.priorities.findIndex(p => a.name.toLowerCase().includes(p.toLowerCase()));
+                const bScore = voiceOptions.priorities.findIndex(p => b.name.toLowerCase().includes(p.toLowerCase()));
+                return (aScore === -1 ? 99 : aScore) - (bScore === -1 ? 99 : bScore);
+            });
+
+            selectEl.innerHTML = '';
+            for (const gender of ['female', 'male']) {
+                const group = document.createElement('optgroup');
+                group.label = gender === 'female' ? 'Giọng nữ' : 'Giọng nam';
+                const genderVoices = filtered.filter(v => 
+                    (v.gender && v.gender.toLowerCase() === gender) ||
+                    voiceOptions[gender].some(pattern => v.name.toLowerCase().includes(pattern.toLowerCase()))
+                );
+                for (const v of genderVoices) {
+                    const opt = document.createElement('option');
+                    opt.value = v.name;
+                    opt.textContent = v.name;
+                    group.appendChild(opt);
+                }
+                if (group.children.length > 0) {
+                    selectEl.appendChild(group);
+                }
+            }
+
+            if (selectEl.options.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Không có giọng nói phù hợp';
+                selectEl.appendChild(opt);
+            } else {
+                const femaleOpt = Array.from(selectEl.options).find(o => o.parentNode.label === 'Giọng nữ');
+                selectEl.value = femaleOpt ? femaleOpt.value : selectEl.options[0].value;
+            }
+        }
+
+        function getVoiceOptionsForLang(langCode) {
+            const voicePatterns = {
+                vi: {
+                    female: ['vbee', 'fpt', 'viettel', 'female', 'nữ'],
+                    male: ['vbee', 'fpt', 'viettel', 'male', 'nam'],
+                    priorities: ['vbee', 'fpt', 'viettel', 'Google', 'female', 'nữ', 'male', 'nam']
+                },
+                en: {
+                    female: ['zira', 'susan', 'eva', 'female', 'samantha', 'victoria', 'karen', 'linda', 'Google US English', 'Google UK English Female'],
+                    male: ['david', 'mark', 'male', 'Google UK English Male', 'daniel', 'fred', 'alex'],
+                    priorities: ['Google US English', 'Google UK English', 'female', 'zira', 'susan', 'eva', 'samantha', 'victoria', 'karen', 'linda', 'male', 'david', 'mark', 'daniel', 'fred', 'alex']
+                },
+                ja: {
+                    female: ['female', 'nữ'],
+                    male: ['male', 'nam'],
+                    priorities: ['female', 'male']
+                },
+                ko: {
+                    female: ['female', 'nữ'],
+                    male: ['male', 'nam'],
+                    priorities: ['female', 'male']
+                },
+                'zh-CN': {
+                    female: ['female', 'nữ'],
+                    male: ['male', 'nam'],
+                    priorities: ['female', 'male']
+                },
+                fr: {
+                    female: ['female', 'nữ'],
+                    male: ['male', 'nam'],
+                    priorities: ['female', 'male']
+                },
+                de: {
+                    female: ['female', 'nữ'],
+                    male: ['male', 'nam'],
+                    priorities: ['female', 'male']
+                },
+                es: {
+                    female: ['female', 'nữ'],
+                    male: ['male', 'nam'],
+                    priorities: ['female', 'male']
+                }
+            };
+            return voicePatterns[langCode] || voicePatterns.en;
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

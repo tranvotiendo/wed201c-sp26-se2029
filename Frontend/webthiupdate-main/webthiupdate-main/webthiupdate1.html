@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý và Thi Trắc Nghiệm - Giao diện Mới</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background-color: #f1f5f9;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='hexagons' fill='%239ca3af' fill-opacity='0.1' fill-rule='nonzero'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.99-7.5L26 15v19L13 41.5 0 34V15z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .math-content {
+        line-height: 1.5;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #a5b4fc;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #818cf8;
+    }
+    .tab-active {
+        background-color: #4f46e5 !important;
+        color: white !important;
+    }
+    /* Modal styles */
+    .modal-backdrop {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        animation: fadeIn 0.3s ease-out;
+    }
+    .modal-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        width: 90%;
+        max-width: 500px;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-4 sm:p-6 lg:p-8">
+  <!-- Progress Bar and Countdown Timer -->
+  <div id="progressBarContainer" class="hidden fixed top-0 left-0 w-full h-2 bg-slate-200 z-50">
+    <div id="progressBar" class="h-full bg-indigo-500 transition-all duration-300 ease-in-out" style="width: 0%"></div>
+  </div>
+  <div id="countdown" class="hidden fixed top-4 right-4 bg-red-600 text-white font-bold text-lg px-4 py-2 rounded-lg shadow-lg z-50 transition-transform duration-300">00:30</div>
+  
+  <div class="max-w-6xl mx-auto bg-white shadow-2xl rounded-2xl p-4 sm:p-8 overflow-hidden">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-slate-200">
+        <h1 class="text-3xl font-bold text-slate-800 flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+            </svg>
+            <span>Trắc Nghiệm Thông Minh</span>
+        </h1>
+        <p class="text-slate-500 mt-2 sm:mt-0">Tạo, quản lý và thực hành các bài thi</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex mb-6 bg-slate-100 p-1 rounded-xl">
+      <button id="folderTab" class="flex-1 py-2.5 text-center font-semibold text-slate-600 rounded-lg transition-all duration-300 hover:bg-white hover:text-indigo-600">
+        📁 Quản lý Thư Mục
+      </button>
+      <button id="manageTab" class="flex-1 py-2.5 text-center font-semibold text-slate-600 rounded-lg transition-all duration-300 hover:bg-white hover:text-indigo-600">
+        📝 Quản lý Câu Hỏi
+      </button>
+      <button id="quizTab" class="flex-1 py-2.5 text-center font-semibold text-slate-600 rounded-lg transition-all duration-300 hover:bg-white hover:text-indigo-600">
+        🚀 Chế độ Thi
+      </button>
+    </div>
+
+    <!-- Sections container for fade-in effect -->
+    <div id="sections-container">
+        <!-- Quản lý Thư Mục -->
+        <div id="folderSection" class="hidden fade-in">
+          <div class="mb-6 p-6 bg-slate-50 rounded-xl border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-700 mb-4">Tạo Thư Mục Mới</h2>
+            <div class="flex flex-col sm:flex-row gap-3">
+              <input id="newFolderName" type="text" placeholder="Ví dụ: Giải tích chương 1"
+                class="flex-grow border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm transition-all" />
+              <select id="parentFolderSelect" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm bg-white">
+                 <option value="null">Là thư mục gốc</option>
+              </select>
+              <button onclick="addFolder()" class="bg-indigo-600 text-white font-semibold hover:bg-indigo-700 px-5 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                <span>Tạo Mới</span>
+              </button>
+            </div>
+          </div>
+          <div id="folderList" class="space-y-1"></div>
+        </div>
+
+        <!-- Quản lý Câu Hỏi -->
+        <div id="manageSection" class="hidden fade-in">
+            <div class="mb-6 p-6 bg-slate-50 rounded-xl border border-slate-200">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                  <h2 class="text-xl font-bold text-slate-700">Thêm & Chỉnh Sửa Câu Hỏi</h2>
+                  <select id="currentFolder" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm transition-all bg-white w-full sm:w-auto">
+                    <option value="">Chọn thư mục...</option>
+                  </select>
+                </div>
+                <div class="grid grid-cols-1 gap-4">
+                  <textarea id="question" placeholder="Nội dung câu hỏi (hỗ trợ LaTeX, ví dụ: \\(x^2 + 2x + 1 = 0\\))" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm transition-all h-24"></textarea>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input id="option1" type="text" placeholder="Đáp án 1" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm" />
+                    <input id="option2" type="text" placeholder="Đáp án 2" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm" />
+                    <input id="option3" type="text" placeholder="Đáp án 3" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm" />
+                    <input id="option4" type="text" placeholder="Đáp án 4" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm" />
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <select id="correctOption" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm">
+                      <option value="">Chọn đáp án đúng</option>
+                      <option value="1">Đáp án 1</option><option value="2">Đáp án 2</option><option value="3">Đáp án 3</option><option value="4">Đáp án 4</option>
+                    </select>
+                    <select id="difficulty" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm">
+                      <option value="easy">Dễ</option><option value="medium">Trung bình</option><option value="hard">Khó</option>
+                    </select>
+                  </div>
+                  <textarea id="explanation" placeholder="Giải thích đáp án (hỗ trợ LaTeX)" class="border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm h-24"></textarea>
+                </div>
+                <div class="flex flex-wrap gap-3 mt-4">
+                  <button onclick="addQuestion()" class="bg-indigo-600 text-white font-semibold hover:bg-indigo-700 px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6a1 1 0 10-2 0v5.586L7.707 10.293zM5 4a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" /></svg>
+                    Lưu Câu Hỏi
+                  </button>
+                  <button onclick="exportQuestions()" class="bg-teal-600 text-white font-semibold hover:bg-teal-700 px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    Xuất JSON
+                  </button>
+                  <input type="file" id="importFile" class="hidden" onchange="importQuestions(event)" accept=".json" />
+                  <button onclick="document.getElementById('importFile').click()" class="bg-sky-600 text-white font-semibold hover:bg-sky-700 px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                    Nhập JSON
+                  </button>
+                </div>
+            </div>
+             <!-- Bulk Actions Bar -->
+            <div id="bulkActionsBar" class="hidden sticky bottom-4 z-20 bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-slate-200 flex items-center justify-between gap-4">
+                <span id="selectionCount" class="font-semibold text-slate-700"></span>
+                <div class="flex gap-2">
+                    <button onclick="moveSelectedQuestions()" class="bg-blue-100 text-blue-800 font-semibold hover:bg-blue-200 px-3 py-1 rounded-lg transition-all flex items-center gap-2 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+                        Di chuyển
+                    </button>
+                    <button onclick="deleteSelectedQuestions()" class="bg-red-100 text-red-700 font-semibold hover:bg-red-200 px-3 py-1 rounded-lg transition-all flex items-center gap-2 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                        Xóa
+                    </button>
+                </div>
+            </div>
+            <div id="questionListHeader" class="flex items-center gap-3 px-5 py-2">
+                 <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" class="h-5 w-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                 <label for="selectAllCheckbox" class="font-semibold text-slate-600">Chọn tất cả</label>
+            </div>
+            <div id="questionList" class="space-y-4"></div>
+        </div>
+
+        <!-- Chế độ Thi -->
+        <div id="quizSection" class="hidden fade-in">
+          <div id="quizArea" class="mb-6">
+            <div id="quizStart" class="p-6 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+                <div class="flex-grow">
+                    <h2 class="text-xl font-bold text-slate-700">🚀 Sẵn sàng chinh phục thử thách?</h2>
+                    <p class="text-slate-500 mt-1">Chọn một thư mục để bắt đầu bài thi của bạn.</p>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                  <select id="quizFolder" class="flex-grow border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm transition-all bg-white">
+                    <option value="">Chọn thư mục để thi</option>
+                  </select>
+                  <button onclick="startQuiz()" class="bg-indigo-600 text-white font-semibold hover:bg-indigo-700 px-5 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
+                    Bắt đầu
+                  </button>
+                </div>
+            </div>
+            <div id="quizContent" class="hidden">
+              <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Question Content -->
+                <div class="w-full lg:w-3/5 bg-white rounded-xl shadow-lg p-6 border border-slate-200">
+                  <div id="quizQuestion" class="font-bold text-lg text-slate-800 mb-4 math-content"></div>
+                  <div id="quizOptions" class="space-y-3"></div>
+                  <div id="quizFeedback" class="mt-4 hidden"></div>
+                  <div class="flex flex-wrap gap-3 mt-6 pt-4 border-t border-slate-200">
+                     <button id="prevQuestion" onclick="prevQuestion()" class="bg-slate-500 text-white font-semibold hover:bg-slate-600 px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                        Câu Trước
+                    </button>
+                    <button id="submitAnswer" onclick="submitAnswer()" class="bg-indigo-600 text-white font-semibold hover:bg-indigo-700 px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                        Nộp Đáp Án
+                    </button>
+                    <button id="retryQuestion" onclick="retryQuestion()" class="border border-slate-400 text-slate-600 font-semibold hover:bg-slate-100 px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center gap-2 hidden">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                        Làm lại
+                    </button>
+                     <button id="nextQuestion" onclick="nextQuestion()" class="bg-indigo-600 text-white font-semibold hover:bg-indigo-700 px-4 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center gap-2">
+                        Câu Tiếp Theo
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                    </button>
+                  </div>
+                </div>
+                <!-- Question Map -->
+                <div class="w-full lg:w-2/5 bg-white rounded-xl shadow-lg p-6 border border-slate-200">
+                  <h3 class="text-xl font-bold text-slate-700 mb-4">Bản đồ câu hỏi</h3>
+                  <div id="questionMapGrid" class="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-7 lg:grid-cols-5 gap-2"></div>
+                </div>
+              </div>
+            </div>
+             <!-- Quiz Results -->
+            <div id="quizResults" class="hidden"></div>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Move Questions Modal -->
+  <div id="moveQuestionModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <h3 class="text-xl font-bold text-slate-800 mb-4">Di chuyển câu hỏi</h3>
+        <p class="text-slate-600 mb-4">Chọn thư mục đích để di chuyển <span id="moveCount" class="font-bold"></span> câu hỏi.</p>
+        <select id="moveFolderTarget" class="w-full border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none rounded-lg px-4 py-2 shadow-sm bg-white"></select>
+        <div class="flex justify-end gap-3 mt-6">
+            <button onclick="closeMoveModal()" class="bg-slate-200 text-slate-800 font-semibold hover:bg-slate-300 px-5 py-2 rounded-lg transition-all">Hủy</button>
+            <button onclick="confirmMoveQuestions()" class="bg-indigo-600 text-white font-semibold hover:bg-indigo-700 px-5 py-2 rounded-lg shadow-md transition-all">Xác nhận</button>
+        </div>
+    </div>
+  </div>
+
+  <script>
+    let folders = JSON.parse(localStorage.getItem("folders")) || [];
+    let currentFolderId = null;
+    let selectedQuestions = []; // For bulk actions
+    
+    // Quiz state variables
+    let currentQuestionIndex = 0;
+    let userAnswers = [];
+    let selectedAnswer = null;
+    let quizTimer = null;
+    let shuffledQuizQuestions = [];
+
+    // --- Tab Management ---
+    function switchTab(tabId) {
+        const sections = ["folderSection", "manageSection", "quizSection"];
+        const tabs = ["folderTab", "manageTab", "quizTab"];
+        
+        sections.forEach(section => document.getElementById(section).classList.add("hidden"));
+        tabs.forEach(tab => {
+            const tabEl = document.getElementById(tab);
+            tabEl.classList.remove("tab-active");
+            tabEl.classList.add("text-slate-600", "hover:bg-white", "hover:text-indigo-600");
+        });
+
+        const targetSection = document.getElementById(`${tabId}Section`);
+        const targetTab = document.getElementById(`${tabId}Tab`);
+        targetSection.classList.remove("hidden");
+        setTimeout(() => targetSection.classList.add('fade-in'), 10); 
+        
+        targetTab.classList.add("tab-active");
+        targetTab.classList.remove("text-slate-600", "hover:bg-white", "hover:text-indigo-600");
+        
+        if(tabId !== 'quiz') {
+            clearInterval(quizTimer);
+            document.getElementById("progressBarContainer").classList.add("hidden");
+            document.getElementById("countdown").classList.add("hidden");
+        }
+
+        if (tabId === "folder") {
+            renderFolders();
+            renderFolderSelect('parentFolderSelect', true); // Update parent folder dropdown
+        }
+        if (tabId === "manage") {
+            renderFolderSelect('currentFolder');
+            renderQuestions();
+        }
+        if (tabId === "quiz") {
+            renderQuizFolderSelect();
+            resetQuizInterface();
+        }
+    }
+
+    document.getElementById("folderTab").addEventListener("click", () => switchTab("folder"));
+    document.getElementById("manageTab").addEventListener("click", () => switchTab("manage"));
+    document.getElementById("quizTab").addEventListener("click", () => switchTab("quiz"));
+
+    // --- MathJax Rendering ---
+    function renderMath() {
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+    }
+    
+    // --- Utility Functions ---
+    function shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    }
+
+    function getGridColumnCount() {
+        const grid = document.getElementById('questionMapGrid');
+        if (!grid || !grid.children.length || typeof window.getComputedStyle !== 'function') {
+            return 5; // Fallback to a default number of columns
+        }
+        const gridComputedStyle = window.getComputedStyle(grid);
+        const gridTemplateColumns = gridComputedStyle.getPropertyValue('grid-template-columns');
+        if (gridTemplateColumns) {
+            // This counts the number of space-separated values, which corresponds to the number of columns.
+            return gridTemplateColumns.split(' ').length;
+        }
+        return 5; // Fallback
+    }
+    
+    // --- Folder Management (Upgraded for Nesting) ---
+    function getFolder(folderId) {
+        return folders.find(f => f.id === folderId);
+    }
+
+    function getChildren(parentId) {
+        return folders.filter(f => f.parentId === parentId);
+    }
+    
+    function renderFolders(parentId = null, level = 0) {
+        const folderList = parentId === null ? document.getElementById("folderList") : null;
+        if (parentId === null) {
+            folderList.innerHTML = "";
+        }
+        
+        const children = getChildren(parentId);
+        if (parentId === null && children.length === 0) {
+            folderList.innerHTML = `<p class="text-center text-slate-500 py-8">Chưa có thư mục nào. Hãy tạo một thư mục mới!</p>`;
+            return;
+        }
+
+        children.forEach(folder => {
+            const questionCount = folder.questions.length;
+            const totalQuestionCount = countQuestionsInFolder(folder.id, true);
+            const div = document.createElement("div");
+            div.style.marginLeft = `${level * 2}rem`;
+            div.className = `bg-white shadow-lg rounded-xl p-4 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-transform duration-200 hover:scale-[1.01] hover:shadow-xl`;
+            div.innerHTML = `
+                <div class="flex-grow">
+                  <span class="text-lg font-semibold text-slate-800">${folder.name}</span>
+                  <p class="text-sm text-slate-500">${questionCount} câu hỏi (tổng ${totalQuestionCount} trong các thư mục con)</p>
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                  <button onclick="openFolder('${folder.id}')" class="bg-indigo-100 text-indigo-700 font-semibold hover:bg-indigo-200 px-3 py-1 rounded-lg transition-all flex items-center gap-2 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                    Mở
+                  </button>
+                  <button onclick="renameFolder('${folder.id}')" class="bg-yellow-100 text-yellow-800 font-semibold hover:bg-yellow-200 px-3 py-1 rounded-lg transition-all flex items-center gap-2 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                    Đổi tên
+                  </button>
+                  <button onclick="deleteFolder('${folder.id}')" class="bg-red-100 text-red-700 font-semibold hover:bg-red-200 px-3 py-1 rounded-lg transition-all flex items-center gap-2 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                    Xóa
+                  </button>
+                </div>
+            `;
+            document.getElementById("folderList").appendChild(div);
+            // Recursive call for children
+            renderFolders(folder.id, level + 1);
+        });
+        if (parentId === null) {
+            localStorage.setItem("folders", JSON.stringify(folders));
+        }
+    }
+    
+    function countQuestionsInFolder(folderId, recursive = false) {
+        const folder = getFolder(folderId);
+        if (!folder) return 0;
+        let count = folder.questions.length;
+        if (recursive) {
+            const children = getChildren(folderId);
+            children.forEach(child => {
+                count += countQuestionsInFolder(child.id, true);
+            });
+        }
+        return count;
+    }
+
+    function addFolder() {
+        const nameInput = document.getElementById("newFolderName");
+        const parentSelect = document.getElementById("parentFolderSelect");
+        const name = nameInput.value.trim();
+        const parentId = parentSelect.value === 'null' ? null : parentSelect.value;
+        if (!name) { alert("Vui lòng nhập tên thư mục."); return; }
+        folders.push({ id: crypto.randomUUID(), name, parentId, questions: [] });
+        nameInput.value = "";
+        renderFolders();
+        renderFolderSelect('parentFolderSelect', true);
+    }
+    
+    function getFolderAndAllChildrenIds(folderId) {
+        let ids = [folderId];
+        const children = getChildren(folderId);
+        children.forEach(child => {
+            ids = ids.concat(getFolderAndAllChildrenIds(child.id));
+        });
+        return ids;
+    }
+
+    function deleteFolder(folderId) {
+        const folder = getFolder(folderId);
+        if (confirm(`Bạn có chắc muốn xóa thư mục "${folder.name}" và TẤT CẢ thư mục con cùng câu hỏi bên trong không? Hành động này không thể hoàn tác.`)) {
+            const idsToDelete = getFolderAndAllChildrenIds(folderId);
+            folders = folders.filter(f => !idsToDelete.includes(f.id));
+            if (currentFolderId === folderId) currentFolderId = null;
+            renderFolders();
+            renderAllFolderSelects();
+        }
+    }
+
+    function renameFolder(folderId) {
+        const folder = getFolder(folderId);
+        const newName = prompt("Nhập tên mới cho thư mục:", folder.name);
+        if (newName && newName.trim()) {
+            folder.name = newName.trim();
+            renderFolders();
+            renderAllFolderSelects();
+        }
+    }
+
+    function openFolder(folderId) {
+        currentFolderId = folderId;
+        switchTab("manage");
+    }
+
+    function renderAllFolderSelects() {
+        renderFolderSelect('parentFolderSelect', true);
+        renderFolderSelect('currentFolder');
+        renderQuizFolderSelect();
+    }
+
+    function renderFolderSelectOptions(select, parentId, level, includeRoot = false, excludeFolderId = null) {
+        if (level === 0 && includeRoot) {
+            const option = document.createElement("option");
+            option.value = 'null';
+            option.textContent = "Là thư mục gốc";
+            select.appendChild(option);
+        }
+        const children = getChildren(parentId);
+        children.forEach(folder => {
+            if (folder.id === excludeFolderId) return; // Skip the folder being moved itself
+            const option = document.createElement("option");
+            option.value = folder.id;
+            option.textContent = `${'—'.repeat(level)} ${folder.name}`;
+            if (folder.id === currentFolderId) option.selected = true;
+            select.appendChild(option);
+            renderFolderSelectOptions(select, folder.id, level + 1, false, excludeFolderId);
+        });
+    }
+
+    function renderFolderSelect(selectId, includeRoot = false, excludeFolderId = null) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = `<option value="">Chọn thư mục...</option>`;
+        renderFolderSelectOptions(select, null, 0, includeRoot, excludeFolderId);
+        select.value = currentFolderId;
+    }
+    
+    function renderQuizFolderSelect() {
+        const select = document.getElementById("quizFolder");
+        select.innerHTML = '<option value="">Chọn thư mục để thi</option>';
+        renderFolderSelectOptions(select, null, 0, false, null);
+    }
+    
+    document.getElementById("currentFolder").addEventListener("change", (e) => {
+       currentFolderId = e.target.value;
+       renderQuestions();
+    });
+
+    // --- Question Management (Upgraded for Bulk Actions) ---
+    function updateSelectionState() {
+        const bulkBar = document.getElementById('bulkActionsBar');
+        const countSpan = document.getElementById('selectionCount');
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        
+        if (selectedQuestions.length > 0) {
+            bulkBar.classList.remove('hidden');
+            countSpan.textContent = `Đã chọn ${selectedQuestions.length} câu hỏi`;
+        } else {
+            bulkBar.classList.add('hidden');
+        }
+        
+        const folder = currentFolderId ? getFolder(currentFolderId) : null;
+        if (folder && folder.questions.length > 0 && selectedQuestions.length === folder.questions.length) {
+            selectAllCheckbox.checked = true;
+        } else {
+            selectAllCheckbox.checked = false;
+        }
+    }
+    
+    function toggleSelectAll(checked) {
+        selectedQuestions = [];
+        const folder = getFolder(currentFolderId);
+        const checkboxes = document.querySelectorAll('.question-checkbox');
+        checkboxes.forEach((cb, index) => {
+            cb.checked = checked;
+            if(checked) {
+                selectedQuestions.push(index);
+            }
+        });
+        updateSelectionState();
+    }
+    
+    function toggleQuestionSelection(index, isChecked) {
+        const qIndex = selectedQuestions.indexOf(index);
+        if (isChecked && qIndex === -1) {
+            selectedQuestions.push(index);
+        } else if (!isChecked && qIndex > -1) {
+            selectedQuestions.splice(qIndex, 1);
+        }
+        updateSelectionState();
+    }
+    
+    function deleteSelectedQuestions() {
+        if (selectedQuestions.length === 0) return;
+        if (confirm(`Bạn có chắc muốn xóa vĩnh viễn ${selectedQuestions.length} câu hỏi đã chọn không?`)) {
+            const folder = getFolder(currentFolderId);
+            // Sort indices descending to avoid shifting issues during splice
+            selectedQuestions.sort((a, b) => b - a);
+            selectedQuestions.forEach(index => {
+                folder.questions.splice(index, 1);
+            });
+            selectedQuestions = [];
+            renderQuestions();
+        }
+    }
+
+    function moveSelectedQuestions() {
+        if (selectedQuestions.length === 0) return;
+        const modal = document.getElementById('moveQuestionModal');
+        const select = document.getElementById('moveFolderTarget');
+        const countSpan = document.getElementById('moveCount');
+        
+        countSpan.textContent = selectedQuestions.length;
+        select.innerHTML = ''; // Clear previous options
+        renderFolderSelectOptions(select, null, 0, false, currentFolderId); // Don't allow moving to the same folder
+        
+        modal.classList.remove('hidden');
+    }
+
+    function closeMoveModal() {
+        document.getElementById('moveQuestionModal').classList.add('hidden');
+    }
+
+    function confirmMoveQuestions() {
+        const targetFolderId = document.getElementById('moveFolderTarget').value;
+        if (!targetFolderId) {
+            alert("Vui lòng chọn thư mục đích.");
+            return;
+        }
+
+        const sourceFolder = getFolder(currentFolderId);
+        const targetFolder = getFolder(targetFolderId);
+
+        // Sort indices descending to avoid shifting issues during splice
+        selectedQuestions.sort((a, b) => b - a);
+        const questionsToMove = [];
+        selectedQuestions.forEach(index => {
+            questionsToMove.push(sourceFolder.questions[index]);
+            sourceFolder.questions.splice(index, 1);
+        });
+        
+        // Add questions to the target folder
+        targetFolder.questions.push(...questionsToMove.reverse()); // reverse to maintain original order
+
+        selectedQuestions = [];
+        closeMoveModal();
+        renderQuestions();
+    }
+
+
+    function isValidForQuiz(q) {
+        const hasQuestionContent = q.question && q.question.trim().length > 0;
+        const hasFourOptions = q.options && q.options.length === 4 && q.options.every(opt => opt && opt.trim().length > 0);
+        const hasCorrectOption = q.correctOption && ["1", "2", "3", "4"].includes(q.correctOption);
+        const reasons = [];
+        if (!hasQuestionContent) reasons.push("Thiếu nội dung câu hỏi");
+        if (!hasFourOptions) reasons.push("Cần đủ 4 đáp án");
+        if (!hasCorrectOption) reasons.push("Thiếu đáp án đúng");
+        return { isValid: hasQuestionContent && hasFourOptions && hasCorrectOption, reasons };
+    }
+
+    function renderQuestions() {
+        const questionListContainer = document.getElementById("questionList");
+        const header = document.getElementById('questionListHeader');
+        questionListContainer.innerHTML = "";
+        selectedQuestions = []; // Reset selection on re-render
+        updateSelectionState();
+
+        if (!currentFolderId) {
+            questionListContainer.innerHTML = `<p class='text-center text-slate-500 py-8'>Vui lòng chọn một thư mục để xem câu hỏi.</p>`;
+            header.classList.add('hidden');
+            return;
+        }
+
+        const folder = getFolder(currentFolderId);
+        if (!folder || folder.questions.length === 0) {
+            questionListContainer.innerHTML = `<p class='text-center text-slate-500 py-8'>Thư mục này chưa có câu hỏi nào. Hãy thêm một câu hỏi mới!</p>`;
+            header.classList.add('hidden');
+            return;
+        }
+
+        header.classList.remove('hidden');
+        document.getElementById('selectAllCheckbox').checked = false;
+
+        folder.questions.forEach((q, index) => {
+            const { isValid, reasons } = isValidForQuiz(q);
+            const difficultyMap = { easy: 'Dễ', medium: 'Trung bình', hard: 'Khó' };
+            const difficultyColorMap = { easy: 'bg-green-100 text-green-800', medium: 'bg-yellow-100 text-yellow-800', hard: 'bg-red-100 text-red-800' };
+            
+            const div = document.createElement("div");
+            div.className = "bg-white shadow-lg rounded-xl p-5 border border-slate-200 transition-shadow duration-200 hover:shadow-xl flex items-start gap-4";
+            div.innerHTML = `
+                <input type="checkbox" onchange="toggleQuestionSelection(${index}, this.checked)" class="question-checkbox h-5 w-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 mt-1">
+                <div class="flex-grow">
+                  <div class="flex justify-between items-start">
+                      <p class="text-xs font-semibold uppercase text-slate-400">Câu hỏi ${index + 1}</p>
+                      <div class="flex items-center gap-2">
+                           <span class="text-xs font-semibold px-2 py-1 rounded-full ${difficultyColorMap[q.difficulty]}">${difficultyMap[q.difficulty]}</span>
+                           <span class="text-xs font-semibold px-2 py-1 rounded-full ${isValid ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800'}">${isValid ? 'Sẵn sàng thi' : 'Chưa hợp lệ'}</span>
+                      </div>
+                  </div>
+                  <div class="math-content text-base font-semibold text-slate-800 my-3">${q.question || "(Chưa có nội dung)"}</div>
+                  <ul class="space-y-2 ml-4 text-sm list-disc list-inside">
+                    ${q.options.map((opt, i) => `<li class="${q.correctOption === String(i + 1) ? 'font-bold text-green-600' : 'text-slate-600'}">${opt || '(Trống)'}</li>`).join('')}
+                  </ul>
+                  ${q.explanation ? `<div class="mt-3 pt-3 border-t border-slate-200 text-sm text-slate-600"><strong class="font-semibold text-slate-800">Giải thích:</strong> <span class="math-content">${q.explanation}</span></div>` : "<div class='mt-3 pt-3 border-t border-slate-200 text-sm text-slate-500 italic'>(Chưa có giải thích)</div>"}
+                  ${!isValid ? `<div class='mt-2 text-xs text-red-500'>Lý do chưa hợp lệ: ${reasons.join(", ")}</div>` : ''}
+                  <div class="flex gap-2 mt-4">
+                    <button onclick="editQuestion(${index})" class="bg-yellow-100 text-yellow-800 font-semibold hover:bg-yellow-200 px-3 py-1 rounded-lg transition-all flex items-center gap-2 text-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                      Sửa
+                    </button>
+                    <button onclick="deleteQuestion(${index})" class="bg-red-100 text-red-700 font-semibold hover:bg-red-200 px-3 py-1 rounded-lg transition-all flex items-center gap-2 text-sm">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+            `;
+            questionListContainer.appendChild(div);
+        });
+        renderMath();
+        localStorage.setItem("folders", JSON.stringify(folders));
+    }
+
+    function addQuestion() {
+        if (!currentFolderId) { alert("Vui lòng chọn thư mục."); return; }
+        const question = document.getElementById("question").value.trim();
+        const options = [
+            document.getElementById("option1").value.trim(),
+            document.getElementById("option2").value.trim(),
+            document.getElementById("option3").value.trim(),
+            document.getElementById("option4").value.trim()
+        ];
+        const correctOption = document.getElementById("correctOption").value;
+        const difficulty = document.getElementById("difficulty").value;
+        const explanation = document.getElementById("explanation").value.trim();
+
+        if (!question && options.every(opt => !opt) && !explanation) {
+             alert("Vui lòng điền ít nhất một thông tin cho câu hỏi.");
+             return;
+        }
+
+        const newQuestion = { question, options, correctOption, difficulty, explanation };
+        const folder = getFolder(currentFolderId);
+        folder.questions.push(newQuestion);
+        clearForm();
+        renderQuestions();
+    }
+
+    function clearForm() {
+        document.getElementById("question").value = "";
+        document.getElementById("option1").value = "";
+        document.getElementById("option2").value = "";
+        document.getElementById("option3").value = "";
+        document.getElementById("option4").value = "";
+        document.getElementById("correctOption").value = "";
+        document.getElementById("difficulty").value = "easy";
+        document.getElementById("explanation").value = "";
+    }
+
+    function editQuestion(index) {
+        const folder = getFolder(currentFolderId);
+        const q = folder.questions[index];
+        document.getElementById("question").value = q.question;
+        document.getElementById("option1").value = q.options[0] || "";
+        document.getElementById("option2").value = q.options[1] || "";
+        document.getElementById("option3").value = q.options[2] || "";
+        document.getElementById("option4").value = q.options[3] || "";
+        document.getElementById("correctOption").value = q.correctOption || "";
+        document.getElementById("difficulty").value = q.difficulty;
+        document.getElementById("explanation").value = q.explanation;
+        folder.questions.splice(index, 1);
+        renderQuestions();
+        window.scrollTo({ top: document.getElementById('manageSection').offsetTop, behavior: 'smooth' });
+    }
+
+    function deleteQuestion(index) {
+        if (confirm("Bạn có chắc muốn xóa câu hỏi này?")) {
+            const folder = getFolder(currentFolderId);
+            folder.questions.splice(index, 1);
+            renderQuestions();
+        }
+    }
+
+    function exportQuestions() {
+        if (!currentFolderId) { alert("Vui lòng chọn thư mục để xuất."); return; }
+        const folder = getFolder(currentFolderId);
+        const blob = new Blob([JSON.stringify(folder.questions, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${folder.name.replace(/\s+/g, '_')}_questions.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function importQuestions(event) {
+        if (!currentFolderId) { alert("Vui lòng chọn thư mục để nhập vào."); return; }
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (!Array.isArray(imported)) { alert("File JSON phải chứa một mảng câu hỏi."); return; }
+                const folder = getFolder(currentFolderId);
+                folder.questions = folder.questions.concat(imported);
+                alert(`Đã nhập thành công ${imported.length} câu hỏi.`);
+                renderQuestions();
+            } catch (err) {
+                alert("Lỗi đọc file JSON: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = null; // Reset input
+    }
+    
+    // --- Quiz Mode ---
+    function resetQuizInterface() {
+        document.getElementById("quizStart").classList.remove("hidden");
+        document.getElementById("quizContent").classList.add("hidden");
+        document.getElementById("quizResults").classList.add("hidden");
+        document.getElementById("quizFolder").value = "";
+        currentFolderId = null;
+        userAnswers = [];
+        selectedAnswer = null;
+        shuffledQuizQuestions = [];
+    }
+    
+    function returnToQuizStart() {
+         resetQuizInterface();
+         renderQuizFolderSelect();
+    }
+
+    function startQuiz(resetAnswers = true) {
+        const folderId = document.getElementById("quizFolder").value;
+        if (!folderId) { alert("Vui lòng chọn một thư mục để bắt đầu."); return; }
+        
+        currentFolderId = folderId;
+        const allQuestionsInBranch = [];
+        const folderIdsToScan = getFolderAndAllChildrenIds(folderId);
+        folderIdsToScan.forEach(id => {
+            const folder = getFolder(id);
+            if (folder) {
+                allQuestionsInBranch.push(...folder.questions);
+            }
+        });
+        
+        const validQuestions = allQuestionsInBranch.filter(q => isValidForQuiz(q).isValid);
+
+        if (validQuestions.length === 0) {
+            alert("Thư mục này (và các thư mục con) không có câu hỏi nào hợp lệ để thi. Một câu hỏi hợp lệ cần có nội dung, đủ 4 đáp án và có chọn đáp án đúng.");
+            return;
+        }
+        
+        shuffledQuizQuestions = shuffleArray(validQuestions).map(q => {
+            const originalOptions = [...q.options];
+            const correctAnswerText = originalOptions[parseInt(q.correctOption) - 1];
+            const shuffledOptions = shuffleArray(originalOptions);
+            const newCorrectIndex = shuffledOptions.indexOf(correctAnswerText) + 1;
+            return { ...q, options: shuffledOptions, correctOption: String(newCorrectIndex) };
+        });
+
+        currentQuestionIndex = 0;
+        if (resetAnswers) {
+            userAnswers = new Array(shuffledQuizQuestions.length).fill(null);
+        }
+        selectedAnswer = userAnswers[0];
+        
+        document.getElementById("quizStart").classList.add("hidden");
+        document.getElementById("quizResults").classList.add("hidden");
+        document.getElementById("quizContent").classList.remove("hidden");
+        
+        document.getElementById("progressBarContainer").classList.remove("hidden");
+        document.getElementById("countdown").classList.remove("hidden");
+        
+        displayQuestion();
+    }
+
+    function startTimer() {
+        let timeLeft = 30;
+        const countdownEl = document.getElementById("countdown");
+        countdownEl.textContent = `00:${String(timeLeft).padStart(2, '0')}`;
+        countdownEl.classList.remove('bg-red-600', 'scale-110');
+        countdownEl.classList.add('bg-indigo-600');
+
+        clearInterval(quizTimer);
+        quizTimer = setInterval(() => {
+            timeLeft--;
+            countdownEl.textContent = `00:${String(timeLeft).padStart(2, '0')}`;
+            if (timeLeft <= 5) {
+                countdownEl.classList.add('bg-red-600', 'scale-110');
+                countdownEl.classList.remove('bg-indigo-600');
+            }
+            if (timeLeft <= 0) {
+                clearInterval(quizTimer);
+                submitAnswer(true); // Auto-submit
+            }
+        }, 1000);
+    }
+    
+    function updateProgressBar() {
+        const progress = (currentQuestionIndex / shuffledQuizQuestions.length) * 100;
+        document.getElementById("progressBar").style.width = `${progress}%`;
+    }
+
+    function displayQuestion() {
+        const q = shuffledQuizQuestions[currentQuestionIndex];
+        const isSubmitted = userAnswers[currentQuestionIndex] !== null;
+
+        // Display question content
+        const difficultyMap = { easy: 'Dễ', medium: 'Trung bình', hard: 'Khó' };
+        const difficultyColorMap = { easy: 'bg-green-100 text-green-800', medium: 'bg-yellow-100 text-yellow-800', hard: 'bg-red-100 text-red-800' };
+        document.getElementById("quizQuestion").innerHTML = `<div class="flex justify-between items-center"><span class="text-sm font-bold text-slate-500">Câu ${currentQuestionIndex + 1}/${shuffledQuizQuestions.length}</span><span class="text-xs font-semibold px-2 py-1 rounded-full ${difficultyColorMap[q.difficulty]}">${difficultyMap[q.difficulty]}</span></div><div class="mt-2">${q.question}</div>`;
+        
+        // Display options
+        const optionsDiv = document.getElementById("quizOptions");
+        optionsDiv.innerHTML = "";
+        q.options.forEach((option, i) => {
+            const value = `${i + 1}`;
+            const isSelected = selectedAnswer === value;
+            let optionClass = 'border-slate-300 hover:border-indigo-500 hover:bg-indigo-50';
+            if (isSubmitted) {
+                optionClass = 'border-slate-300 opacity-60'; // General submitted style
+                if (q.correctOption === value) {
+                    optionClass = 'bg-green-100 border-green-500 text-green-800'; // Correct answer
+                }
+                if (userAnswers[currentQuestionIndex] === value && q.correctOption !== value) {
+                    optionClass = 'bg-red-100 border-red-500 text-red-800'; // Incorrectly chosen answer
+                }
+            } else if (isSelected) {
+                optionClass = 'bg-indigo-100 border-indigo-500 ring-2 ring-indigo-300';
+            }
+            const div = document.createElement("div");
+            div.className = `p-3 border rounded-lg cursor-pointer transition-all duration-200 ${optionClass} ${isSubmitted ? 'pointer-events-none' : ''}`;
+            div.innerHTML = `<span class="font-semibold mr-2">${String.fromCharCode(65 + i)}.</span> <span class="math-content">${option}</span>`;
+            if (!isSubmitted) {
+                div.onclick = () => selectAnswer(value);
+            }
+            optionsDiv.appendChild(div);
+        });
+
+        // Display feedback (explanation) if submitted
+        const feedbackDiv = document.getElementById("quizFeedback");
+        if (isSubmitted) {
+            const isCorrect = userAnswers[currentQuestionIndex] === q.correctOption;
+            feedbackDiv.classList.remove("hidden");
+            feedbackDiv.innerHTML = `
+                <div class="fade-in p-4 rounded-lg mt-4 ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border">
+                    <h4 class="font-bold text-lg ${isCorrect ? 'text-green-700' : 'text-red-700'}">${isCorrect ? '✅ Chính xác!' : '❌ Sai rồi!'}</h4>
+                    ${!isCorrect ? `<p class="text-sm text-slate-700 mt-1"><strong>Đáp án đúng:</strong> <span class="math-content">${q.options[parseInt(q.correctOption) - 1]}</span></p>` : ''}
+                    <p class="text-sm text-slate-600 mt-2"><strong class="font-semibold text-slate-800">Giải thích:</strong> <span class="math-content">${q.explanation || "(Không có giải thích)"}</span></p>
+                </div>
+            `;
+        } else {
+            feedbackDiv.classList.add("hidden");
+            feedbackDiv.innerHTML = '';
+        }
+
+        // Control buttons for mouse interaction
+        document.getElementById("prevQuestion").classList.remove('hidden');
+        document.getElementById("nextQuestion").classList.remove('hidden');
+        document.getElementById("prevQuestion").classList.toggle("opacity-50", currentQuestionIndex === 0);
+        document.getElementById("nextQuestion").classList.toggle("opacity-50", currentQuestionIndex >= shuffledQuizQuestions.length - 1);
+        document.getElementById("submitAnswer").classList.toggle("hidden", isSubmitted || selectedAnswer === null);
+        document.getElementById("retryQuestion").classList.toggle("hidden", !isSubmitted);
+        
+        // Timer
+        if (!isSubmitted) {
+            startTimer();
+        } else {
+            clearInterval(quizTimer);
+            document.getElementById('countdown').classList.add('hidden');
+        }
+
+        updateProgressBar();
+        renderQuestionMap();
+        renderMath();
+    }
+
+    function renderQuestionMap() {
+        const mapGrid = document.getElementById("questionMapGrid");
+        mapGrid.innerHTML = '';
+        shuffledQuizQuestions.forEach((q, index) => {
+            const isAnswered = userAnswers[index] !== null;
+            let statusClass = 'bg-slate-200 text-slate-600 hover:bg-slate-300'; // Unanswered
+            if (index === currentQuestionIndex) {
+                statusClass = 'bg-indigo-600 text-white ring-2 ring-offset-2 ring-indigo-500'; // Current
+            } else if (isAnswered) {
+                statusClass = userAnswers[index] === q.correctOption ? 'bg-green-500 text-white' : 'bg-red-500 text-white'; // Correct or Incorrect
+            }
+            const button = document.createElement('button');
+            button.className = `w-10 h-10 flex items-center justify-center rounded-lg font-bold text-sm transition-all duration-200 ${statusClass}`;
+            button.textContent = index + 1;
+            button.onclick = () => goToQuestion(index);
+            mapGrid.appendChild(button);
+        });
+    }
+
+    function goToQuestion(index) {
+        currentQuestionIndex = index;
+        selectedAnswer = userAnswers[index];
+        displayQuestion();
+    }
+
+    function selectAnswer(value) {
+        if (userAnswers[currentQuestionIndex] !== null) return;
+        selectedAnswer = (selectedAnswer === value) ? null : value;
+        displayQuestion();
+    }
+
+    function submitAnswer(isAutoSubmit = false) {
+        if (selectedAnswer === null && !isAutoSubmit) { return; } // Don't alert, just do nothing
+        
+        clearInterval(quizTimer);
+        const answer = selectedAnswer;
+        userAnswers[currentQuestionIndex] = answer;
+        selectedAnswer = null;
+
+        displayQuestion();
+        
+        if (userAnswers.every(a => a !== null) && currentQuestionIndex >= shuffledQuizQuestions.length - 1) {
+            showResults();
+        }
+    }
+    
+    function retryQuestion() {
+        userAnswers[currentQuestionIndex] = null;
+        selectedAnswer = null;
+        displayQuestion();
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            goToQuestion(currentQuestionIndex - 1);
+        }
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < shuffledQuizQuestions.length - 1) {
+            goToQuestion(currentQuestionIndex + 1);
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        let correctCount = 0;
+        let incorrectItems = [];
+        shuffledQuizQuestions.forEach((q, i) => {
+            if (userAnswers[i] === q.correctOption) {
+                correctCount++;
+            } else { // Show all non-correct answers, including skipped ones
+                incorrectItems.push({
+                    qNum: i + 1,
+                    question: q.question,
+                    userAnswer: userAnswers[i] ? q.options[parseInt(userAnswers[i]) - 1] : '(Bỏ qua)',
+                    correctAnswer: q.options[parseInt(q.correctOption) - 1],
+                    explanation: q.explanation || "(Không có giải thích)"
+                });
+            }
+        });
+        
+        const score = (correctCount / shuffledQuizQuestions.length * 100).toFixed(2);
+        const resultsDiv = document.getElementById("quizResults");
+        
+        resultsDiv.innerHTML = `
+            <div class="fade-in text-center p-6 bg-white rounded-xl shadow-xl border border-slate-200">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">🏆 Hoàn thành bài thi!</h2>
+                <p class="text-lg text-slate-600">Điểm số của bạn:</p>
+                <p class="text-6xl font-bold text-indigo-600 my-4">${score}%</p>
+                <div class="flex justify-center gap-6 text-slate-700">
+                    <p><strong>Đúng:</strong> <span class="font-bold text-green-600">${correctCount}</span></p>
+                    <p><strong>Sai:</strong> <span class="font-bold text-red-600">${shuffledQuizQuestions.length - correctCount}</span></p>
+                    <p><strong>Tổng:</strong> <span class="font-bold">${shuffledQuizQuestions.length}</span></p>
+                </div>
+                <div class="flex justify-center gap-3 mt-8">
+                  <button onclick="startQuiz()" class="bg-indigo-600 text-white font-semibold hover:bg-indigo-700 px-5 py-2 rounded-lg shadow-md transition-all duration-200 active:scale-95 flex items-center gap-2">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" /></svg>
+                     Làm lại
+                  </button>
+                  <button onclick="returnToQuizStart()" class="bg-slate-200 text-slate-800 font-semibold hover:bg-slate-300 px-5 py-2 rounded-lg transition-all duration-200 active:scale-95 flex items-center gap-2">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                     Trở lại
+                  </button>
+                </div>
+                ${incorrectItems.length > 0 ? `
+                    <div class="mt-8 pt-6 border-t border-slate-200 text-left">
+                        <h3 class="text-xl font-bold text-slate-700 mb-4">📝 Xem lại các câu sai</h3>
+                        <div class="space-y-4 max-h-96 overflow-y-auto p-4 bg-slate-50 rounded-lg">
+                            ${incorrectItems.map(item => `
+                                <div class="p-4 bg-white border border-red-200 rounded-xl shadow-sm">
+                                    <p class="font-bold text-slate-800 math-content">Câu ${item.qNum}: ${item.question}</p>
+                                    <p class="text-sm text-red-600 mt-2"><strong>Bạn chọn:</strong> <span class="math-content">${item.userAnswer}</span></p>
+                                    <p class="text-sm text-green-600 mt-1"><strong>Đáp án đúng:</strong> <span class="math-content">${item.correctAnswer}</span></p>
+                                    <p class="text-sm text-slate-600 mt-1"><strong>Giải thích:</strong> <span class="math-content">${item.explanation}</span></p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''
+                }
+            </div>
+        `;
+        document.getElementById("quizContent").classList.add("hidden");
+        resultsDiv.classList.remove("hidden");
+        document.getElementById("progressBarContainer").classList.add("hidden");
+        document.getElementById("countdown").classList.add("hidden");
+        renderMath();
+    }
+
+
+    // --- Initialization ---
+    function initialize() {
+        if (folders.length === 0) {
+            const folderId = crypto.randomUUID();
+            folders = [{
+                id: folderId, name: "Toán Học Cơ Bản", parentId: null, questions: [
+                    { question: "Tìm nghiệm của phương trình \\(x^2 - 4 = 0\\)", options: ["\\(x = 2, -2\\)", "\\(x = 4, -4\\)", "\\(x = 1, -1\\)", "\\(x = 3, -3\\)"], correctOption: "1", difficulty: "easy", explanation: "Phương trình \\(x^2 - 4 = 0\\) tương đương \\(x^2 = 4\\), suy ra \\(x = \\pm 2\\)." },
+                    { question: "Tính \\(\\int_0^1 x^2 dx\\)", options: ["\\(\\frac{1}{3}\\)", "\\(\\frac{1}{2}\\)", "\\(1\\)", "\\(\\frac{2}{3}\\)"], correctOption: "1", difficulty: "medium", explanation: "Ta có \\(\\int x^2 dx = \\frac{x^3}{3}\\). Vậy \\(\\int_0^1 x^2 dx = \\left[\\frac{x^3}{3}\\right]_0^1 = \\frac{1^3}{3} - \\frac{0^3}{3} = \\frac{1}{3}\\)." },
+                    { question: "Công thức tính diện tích hình tròn có bán kính \\(r\\) là gì?", options: ["\\(S = \\pi r^2\\)", "\\(S = 2\\pi r\\)", "\\(S = \\pi r\\)", "\\(S = \\frac{1}{2}\\pi r^2\\)"], correctOption: "1", difficulty: "easy", explanation: "Diện tích hình tròn được tính bằng công thức \\(S = \\pi r^2\\), trong đó \\(\\pi \\approx 3.14159\\) và \\(r\\) là bán kính." },
+                    { question: "Tìm giá trị của \\(\\sin(\\frac{\\pi}{2})\\)", options: ["1", "0", "\\(\\frac{\\sqrt{2}}{2}\\)", "-1"], correctOption: "1", difficulty: "easy", explanation: "Dựa vào đường tròn lượng giác, \\(\\sin(\\frac{\\pi}{2}) = 1\\)." },
+                    { question: "Phương trình bậc hai \\(ax^2 + bx + c = 0\\) (với \\(a \\neq 0\\)) có hai nghiệm phân biệt khi nào?", options: ["\\(\\Delta > 0\\)", "\\(\\Delta < 0\\)", "\\(\\Delta = 0\\)", "\\(\\Delta \\geq 0\\)"], correctOption: "1", difficulty: "hard", explanation: "Phương trình bậc hai có hai nghiệm phân biệt khi biệt thức delta \\(\\Delta = b^2 - 4ac > 0\\)." }
+                ]
+            }];
+            localStorage.setItem("folders", JSON.stringify(folders));
+        }
+        currentFolderId = folders.find(f => f.parentId === null)?.id || null;
+        switchTab("folder");
+    }
+    
+    // --- Keyboard Shortcuts for Quiz Mode ---
+    document.addEventListener('keydown', function(event) {
+        const quizContent = document.getElementById('quizContent');
+        const isModalOpen = !!document.querySelector('.modal-backdrop:not(.hidden)');
+        if (quizContent.classList.contains('hidden') || isModalOpen) {
+            return;
+        }
+
+        const keysToPreventDefault = ['Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'r', 'a', 'b', 'c', 'd'];
+        if (keysToPreventDefault.includes(event.key.toLowerCase())) {
+             event.preventDefault();
+        }
+
+        switch (event.key.toLowerCase()) {
+            case 'enter':
+                if (!document.getElementById('submitAnswer').classList.contains('hidden')) {
+                    submitAnswer();
+                }
+                break;
+            case 'arrowright':
+                if (currentQuestionIndex < shuffledQuizQuestions.length - 1) {
+                    goToQuestion(currentQuestionIndex + 1);
+                }
+                break;
+            case 'arrowleft':
+                if (currentQuestionIndex > 0) {
+                    goToQuestion(currentQuestionIndex - 1);
+                }
+                break;
+            case 'arrowdown': {
+                const columns = getGridColumnCount();
+                const newIndex = currentQuestionIndex + columns;
+                if (newIndex < shuffledQuizQuestions.length) {
+                    goToQuestion(newIndex);
+                }
+                break;
+            }
+            case 'arrowup': {
+                const columns = getGridColumnCount();
+                const newIndex = currentQuestionIndex - columns;
+                if (newIndex >= 0) {
+                    goToQuestion(newIndex);
+                }
+                break;
+            }
+            case 'r':
+                if (!document.getElementById('retryQuestion').classList.contains('hidden')) {
+                    retryQuestion();
+                }
+                break;
+            case 'a':
+                selectAnswer('1');
+                break;
+            case 'b':
+                selectAnswer('2');
+                break;
+            case 'c':
+                selectAnswer('3');
+                break;
+            case 'd':
+                selectAnswer('4');
+                break;
+        }
+    });
+
+
+    // Run initialization on load
+    window.onload = initialize;
+
+  </script>
+</body>
+</html>

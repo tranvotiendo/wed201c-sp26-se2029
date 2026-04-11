@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương 12: Deadlock (Tắc nghẽn)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            scroll-behavior: smooth;
+            background-color: #f8fafc;
+        }
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .sidebar-link.active {
+            background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        }
+        .card-animate {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-animate:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { animation: fadeInUp 0.6s ease-out forwards; }
+        
+        .condition-box {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .condition-box:hover {
+            border-color: #f43f5e;
+            background-color: #fff1f2;
+        }
+    </style>
+</head>
+<body class="text-slate-900">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-slate-400 hidden md:flex flex-col p-8 z-50 border-r border-slate-800">
+        <div class="mb-10 flex items-center gap-3">
+            <div class="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                <i data-lucide="lock" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="text-white font-extrabold text-xl tracking-tight">OS Hub</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Chương 12: Deadlock</p>
+            </div>
+        </div>
+        
+        <nav class="space-y-2 flex-1 overflow-y-auto text-xs">
+            <p class="text-[10px] font-bold text-slate-600 uppercase mb-4 px-3 tracking-widest">Nội dung cốt lõi</p>
+            <a href="#resources" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition active">
+                <i data-lucide="box" class="w-4 h-4"></i>
+                <span class="font-medium">1. Tài nguyên (Resources)</span>
+            </a>
+            <a href="#intro" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="alert-octagon" class="w-4 h-4"></i>
+                <span class="font-medium">2. Khái niệm Deadlock</span>
+            </a>
+            <a href="#ostrich" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="bird" class="w-4 h-4"></i>
+                <span class="font-medium">3. Thuật toán Đà điểu</span>
+            </a>
+            <a href="#detection" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                <span class="font-medium">4. Phát hiện & Khôi phục</span>
+            </a>
+            <a href="#avoidance" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                <span class="font-medium">5. Tránh Deadlock</span>
+            </a>
+            <a href="#prevention" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                <span class="font-medium">6. Phòng ngừa (Prevention)</span>
+            </a>
+            <a href="#others" class="sidebar-link group flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 hover:text-white transition">
+                <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+                <span class="font-medium">7. Các vấn đề khác</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-72 min-h-screen">
+        
+        <!-- Header -->
+        <header class="sticky top-0 glass-header z-40 p-4 px-8 flex justify-between items-center shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-rose-600 uppercase tracking-widest bg-rose-50 px-3 py-1 rounded-full">Chapter 12: Deadlock Management</span>
+            </div>
+            <div class="text-slate-500 text-xs font-semibold uppercase text-right italic">Tiếng Việt (Chính) | English (Keywords)</div>
+        </header>
+
+        <div class="max-w-5xl mx-auto p-6 md:p-12 space-y-24">
+
+            <!-- Section 1: Resources -->
+            <section id="resources" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-rose-100 text-rose-600 rounded-full text-[10px] font-bold uppercase tracking-widest text-center">Phần 1</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Tài nguyên (Resources)</h2>
+                    <p class="text-slate-500 italic max-w-2xl mx-auto">Đối tượng cần được cấp phát, sử dụng và giải phóng trong hệ thống.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center shadow-sm"><i data-lucide="repeat"></i></div>
+                            <h3 class="text-xl font-bold italic">Preemptable Resources</h3>
+                        </div>
+                        <p class="text-sm text-slate-600 leading-relaxed font-medium">Tài nguyên <strong>có thể thu hồi</strong>: Có thể lấy lại từ tiến trình mà không gây lỗi hệ thống.</p>
+                        <p class="text-xs text-rose-500 mt-4 font-bold uppercase tracking-tight">Giải pháp: Cấp phát lại để xử lý Deadlock.</p>
+                    </div>
+                    <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-xl card-animate">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-rose-600 text-white rounded-2xl flex items-center justify-center shadow-lg"><i data-lucide="ban"></i></div>
+                            <h3 class="text-xl font-bold italic text-rose-400">Nonpreemptable Resources</h3>
+                        </div>
+                        <p class="text-sm text-slate-300 leading-relaxed font-medium italic">Tài nguyên <strong>không thể thu hồi</strong>: Lấy lại sẽ làm hỏng quá trình xử lý.</p>
+                        <p class="text-xs text-rose-400 mt-4 font-bold uppercase tracking-tight">Cảnh báo: Deadlock thường xảy ra ở đây.</p>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row items-center gap-8">
+                    <div class="flex-1 space-y-4">
+                        <h4 class="font-bold text-slate-800 flex items-center gap-2"><i data-lucide="list-checks" class="text-rose-500"></i> Quy trình sử dụng tài nguyên</h4>
+                        <div class="flex items-center gap-2">
+                            <span class="px-3 py-1 bg-slate-100 rounded-lg text-[10px] font-bold">1. Yêu cầu (Request)</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                            <span class="px-3 py-1 bg-slate-100 rounded-lg text-[10px] font-bold">2. Sử dụng (Use)</span>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-300"></i>
+                            <span class="px-3 py-1 bg-slate-100 rounded-lg text-[10px] font-bold">3. Giải phóng (Release)</span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 text-xs text-blue-800 italic">
+                        <strong>Kiểm soát:</strong> Sử dụng Semaphore (Down để chiếm, Up để trả).
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Introduction to Deadlocks -->
+            <section id="intro" class="reveal space-y-12 scroll-mt-24">
+                <div class="border-l-4 border-rose-600 pl-6 space-y-2">
+                    <span class="text-rose-600 font-bold text-xs uppercase tracking-widest">Khái niệm cốt lõi</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Thế nào là Deadlock?</h2>
+                </div>
+
+                <div class="bg-rose-50 p-8 rounded-[2.5rem] border border-rose-100">
+                    <p class="text-lg text-rose-900 leading-relaxed italic font-medium">
+                        "Xảy ra khi một nhóm tiến trình bị chặn vì mỗi tiến trình giữ một tài nguyên và đang chờ tài nguyên khác do tiến trình khác trong cùng nhóm giữ."
+                    </p>
+                    <div class="mt-6 flex items-center gap-4 text-xs text-rose-700 font-bold">
+                        <i data-lucide="alert-triangle"></i>
+                        <span>Kết quả: Tất cả tiến trình chờ vô thời hạn (Waiting forever).</span>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <!-- 4 Necessary Conditions -->
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-bold flex items-center gap-2"><i data-lucide="key" class="text-rose-600"></i> 4 Điều kiện cần (Necessary Conditions)</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="condition-box p-4 bg-white rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-xs uppercase text-slate-400 mb-1">1. Mutual Exclusion</h4>
+                                <p class="text-[11px] text-slate-600 italic">Độc quyền: Tài nguyên chỉ cấp cho đúng 1 tiến trình hoặc đang rảnh.</p>
+                            </div>
+                            <div class="condition-box p-4 bg-white rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-xs uppercase text-slate-400 mb-1">2. Hold and Wait</h4>
+                                <p class="text-[11px] text-slate-600 italic">Giữ và chờ: Đang giữ tài nguyên lại chờ thêm tài nguyên khác.</p>
+                            </div>
+                            <div class="condition-box p-4 bg-white rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-xs uppercase text-slate-400 mb-1">3. No Preemption</h4>
+                                <p class="text-[11px] text-slate-600 italic">Không thu hồi: Chỉ giải phóng khi tiến trình tự nguyện.</p>
+                            </div>
+                            <div class="condition-box p-4 bg-white rounded-2xl shadow-sm">
+                                <h4 class="font-bold text-xs uppercase text-slate-400 mb-1">4. Circular Wait</h4>
+                                <p class="text-[11px] text-slate-600 italic">Chờ vòng tròn: Tồn tại chuỗi tròn các tiến trình chờ nhau.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Deadlock Modeling -->
+                    <div class="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl space-y-6">
+                        <h3 class="text-xl font-bold italic text-blue-400">Deadlock Modeling (Holt, 1972)</h3>
+                        <div class="flex items-center justify-around p-4 bg-white/5 rounded-2xl border border-white/10">
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-[10px]">P</div>
+                                <span class="text-[9px] uppercase font-bold">Process (Tròn)</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-2">
+                                <div class="w-8 h-8 border-2 border-blue-400 flex items-center justify-center text-[10px]">R</div>
+                                <span class="text-[9px] uppercase font-bold text-blue-400">Resource (Vuông)</span>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-[11px]">
+                            <p class="flex gap-2"><i data-lucide="arrow-right" class="w-3 h-3 text-emerald-400"></i> <strong>R → P:</strong> Tiến trình đang giữ tài nguyên.</p>
+                            <p class="flex gap-2"><i data-lucide="arrow-right" class="w-3 h-3 text-rose-400"></i> <strong>P → R:</strong> Tiến trình đang chờ tài nguyên.</p>
+                            <p class="pt-2 border-t border-white/10 italic text-slate-400">Không chu trình = Không deadlock. Có chu trình = Có thể deadlock.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Ostrich Algorithm -->
+            <section id="ostrich" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight italic">The Ostrich Algorithm (Thuật toán Đà điểu)</h2>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-8 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col items-center text-center">
+                        <i data-lucide="bird" class="w-12 h-12 text-orange-500 mb-6"></i>
+                        <h4 class="font-bold mb-2 uppercase text-xs tracking-widest text-slate-400">Khái niệm</h4>
+                        <p class="text-sm text-slate-600">Phớt lờ hoàn toàn vấn đề. "Vùi đầu xuống cát" và giả vờ như nó không tồn tại.</p>
+                    </div>
+                    <div class="p-8 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col items-center text-center">
+                        <i data-lucide="users" class="w-12 h-12 text-blue-500 mb-6"></i>
+                        <h4 class="font-bold mb-2 uppercase text-xs tracking-widest text-slate-400">Triết lý</h4>
+                        <p class="text-sm text-slate-600"><strong>Toán học:</strong> Không chấp nhận. <br> <strong>Kỹ sư:</strong> Ưu tiên thực tế và hiệu năng.</p>
+                    </div>
+                    <div class="p-8 bg-white rounded-3xl shadow-sm border border-slate-100 card-animate flex flex-col items-center text-center">
+                        <i data-lucide="check-circle" class="w-12 h-12 text-emerald-500 mb-6"></i>
+                        <h4 class="font-bold mb-2 uppercase text-xs tracking-widest text-slate-400">Áp dụng</h4>
+                        <p class="text-sm text-slate-600">Thích hợp khi Deadlock hiếm gặp và hậu quả thấp. Hệ điều hành không can thiệp.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 4: Detection & Recovery -->
+            <section id="detection" class="reveal space-y-12 scroll-mt-24">
+                <div class="text-center space-y-4">
+                    <span class="px-4 py-1.5 bg-rose-100 text-rose-600 rounded-full text-[10px] font-bold uppercase tracking-widest">Phát hiện & Khôi phục</span>
+                    <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight">Detection & Recovery</h2>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <!-- Matrix Algorithm -->
+                    <div class="p-10 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl space-y-6">
+                        <h3 class="text-xl font-bold flex items-center gap-2 italic text-rose-400">
+                            <i data-lucide="grid"></i> Matrix-based Detection
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 text-[10px] font-mono">
+                            <div class="p-3 bg-white/5 border border-white/10 rounded-xl"><strong>E:</strong> Existing Resource Vector</div>
+                            <div class="p-3 bg-white/5 border border-white/10 rounded-xl"><strong>A:</strong> Available Resource Vector</div>
+                            <div class="p-3 bg-white/5 border border-white/10 rounded-xl"><strong>C:</strong> Current Allocation Matrix</div>
+                            <div class="p-3 bg-white/5 border border-white/10 rounded-xl"><strong>R:</strong> Request Matrix</div>
+                        </div>
+                        <div class="p-4 bg-rose-900/20 border border-rose-500/30 rounded-2xl text-[11px] italic leading-relaxed">
+                            <strong>Thuật toán:</strong> Tìm Pi chưa xét sao cho Ri ≤ A. Nếu có, giả định Pi xong, trả lại Ci cho A. Lặp lại. Các Pi chưa xét cuối cùng bị Deadlock.
+                        </div>
+                    </div>
+
+                    <!-- Recovery Methods -->
+                    <div class="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
+                        <h3 class="text-xl font-bold italic">Phương pháp khôi phục (Recovery)</h3>
+                        <div class="space-y-4 text-sm text-slate-600">
+                            <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl">
+                                <i data-lucide="shield-off" class="text-rose-500 w-5 h-5 shrink-0"></i>
+                                <div><strong>Preemption:</strong> Thu hồi tài nguyên cấp cho người khác (chỉ với Preemptable).</div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl">
+                                <i data-lucide="rotate-ccw" class="text-blue-500 w-5 h-5 shrink-0"></i>
+                                <div><strong>Rollback:</strong> Hoàn tác tiến trình về checkpoint trước đó.</div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl">
+                                <i data-lucide="skull" class="text-slate-900 w-5 h-5 shrink-0"></i>
+                                <div><strong>Killing Processes:</strong> Kết thúc tiến trình trong chu trình kẹt (Mạnh tay nhất).</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5: Avoidance & Banker's -->
+            <section id="avoidance" class="reveal space-y-12 scroll-mt-24">
+                <div class="p-10 bg-rose-900 text-white rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                    <div class="absolute -left-10 -bottom-10 w-48 h-48 bg-rose-400/20 blur-3xl rounded-full"></div>
+                    <div class="text-center space-y-4 relative z-10">
+                        <h2 class="text-3xl font-extrabold tracking-tight">Tránh Deadlock (Avoidance)</h2>
+                        <p class="text-rose-200 italic text-sm">"Luôn giữ hệ thống ở trạng thái an toàn (Safe State)."</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-10 mt-12 relative z-10">
+                        <div class="space-y-4 text-sm">
+                            <h4 class="font-bold text-rose-300 uppercase tracking-widest text-xs">Safe vs Unsafe State</h4>
+                            <p class="bg-white/5 p-4 rounded-2xl border border-white/10 leading-relaxed italic">
+                                <strong>Safe State:</strong> Tồn tại chuỗi an toàn (Safe sequence) để mọi tiến trình hoàn tất. <br><br>
+                                <strong>Unsafe State:</strong> Không đảm bảo kẹt, nhưng có nguy cơ cao xảy ra Deadlock.
+                            </p>
+                        </div>
+                        <div class="space-y-6">
+                            <h4 class="font-bold text-rose-300 uppercase tracking-widest text-xs">Thuật toán Ngân hàng (Banker's)</h4>
+                            <div class="bg-rose-800/40 p-5 rounded-2xl border border-rose-500/50">
+                                <p class="text-xs leading-relaxed italic mb-4">Mô phỏng yêu cầu: Nếu cấp phát vẫn giữ hệ thống ở Safe State thì đồng ý, ngược lại thì hoãn.</p>
+                                <div class="space-y-2 text-[10px] uppercase font-black tracking-tighter">
+                                    <p class="text-rose-200">Nhược điểm thực tế:</p>
+                                    <ul class="list-disc list-inside space-y-1 text-slate-300">
+                                        <li>Khó biết trước nhu cầu tối đa.</li>
+                                        <li>Số tài nguyên thay đổi động.</li>
+                                        <li>Tài nguyên có thể mất đột ngột.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive: Simple Safe State Checker -->
+                <div class="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-inner">
+                    <h3 class="text-xl font-bold mb-6 text-center text-rose-600">Interactive: Safe State Simulator</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold uppercase text-slate-400">Available (Sẵn có)</label>
+                            <input id="avail" type="number" value="3" class="w-full bg-slate-50 border border-slate-200 p-2 rounded-lg text-sm focus:outline-none focus:border-rose-500">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold uppercase text-slate-400">P1 Held (Đang giữ)</label>
+                            <input id="p1-held" type="number" value="2" class="w-full bg-slate-50 border border-slate-200 p-2 rounded-lg text-sm">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold uppercase text-slate-400">P1 Need (Cần thêm)</label>
+                            <input id="p1-need" type="number" value="5" class="w-full bg-slate-50 border border-slate-200 p-2 rounded-lg text-sm">
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="checkState()" class="w-full bg-rose-600 text-white font-bold py-2 rounded-lg text-xs hover:bg-rose-700 transition">Kiểm tra P1</button>
+                        </div>
+                    </div>
+                    <div id="check-result" class="p-4 bg-slate-50 rounded-2xl text-center text-xs font-bold text-slate-500 italic uppercase">Nhập số liệu để kiểm tra tính an toàn...</div>
+                </div>
+            </section>
+
+            <!-- Section 6: Prevention -->
+            <section id="prevention" class="reveal space-y-12 scroll-mt-24">
+                <div class="flex items-end justify-between border-l-4 border-emerald-500 pl-6">
+                    <div class="space-y-1">
+                        <span class="text-emerald-600 font-bold text-xs uppercase tracking-widest">Chiến lược Phòng ngừa</span>
+                        <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight italic">Deadlock Prevention</h2>
+                    </div>
+                </div>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <h4 class="font-bold text-slate-800 text-xs mb-3 italic">Tấn công Mutual Exclusion</h4>
+                        <p class="text-[10px] text-slate-500">Sử dụng Spooling / Daemon để ảo hóa tài nguyên độc quyền (VD: Máy in).</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <h4 class="font-bold text-slate-800 text-xs mb-3 italic">Tấn công Hold and Wait</h4>
+                        <p class="text-[10px] text-slate-500">Yêu cầu tất cả tài nguyên ngay từ đầu. Lãng phí nhưng an toàn tuyệt đối.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <h4 class="font-bold text-slate-800 text-xs mb-3 italic">Tấn công No Preemption</h4>
+                        <p class="text-[10px] text-slate-500">Nếu yêu cầu thêm bị từ chối, giải phóng hết tài nguyên đang giữ và xin lại sau.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-3xl border border-slate-100 shadow-sm card-animate">
+                        <h4 class="font-bold text-slate-800 text-xs mb-3 italic">Tấn công Circular Wait</h4>
+                        <p class="text-[10px] text-slate-500">Đặt thứ tự toàn cục (Global ordering). Chỉ được yêu cầu theo thứ tự tăng dần.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 7: Other Issues -->
+            <section id="others" class="reveal space-y-12 scroll-mt-24 pb-20">
+                <div class="text-center space-y-4">
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Các vấn đề liên quan</h2>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Livelock & Starvation -->
+                    <div class="space-y-6">
+                        <div class="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:border-orange-200 transition-colors">
+                            <h4 class="font-bold text-orange-600 mb-3 flex items-center gap-2 italic">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Live Lock
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed italic">
+                                Không bị chặn nhưng không có tiến triển. Các tiến trình liên tục nhường nhau hoặc thử lại các hành động gây nhiễu. <br><strong>Giải pháp:</strong> Chờ ngẫu nhiên (Random backoff).
+                            </p>
+                        </div>
+                        <div class="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:border-indigo-200 transition-colors">
+                            <h4 class="font-bold text-indigo-600 mb-3 flex items-center gap-2 italic">
+                                <i data-lucide="timer" class="w-4 h-4"></i> Starvation (Đói tài nguyên)
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed italic">
+                                Tiến trình bị bỏ qua vô hạn do chính sách lập lịch không công bằng (VD: Ưu tiên thấp). <br><strong>Giải pháp:</strong> Lão hóa (Aging) hoặc FCFS.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- DB & Comms -->
+                    <div class="p-8 bg-slate-100 rounded-[2.5rem] border border-slate-200 space-y-6">
+                        <div class="p-6 bg-white rounded-2xl shadow-sm">
+                            <h5 class="font-bold text-xs uppercase text-slate-400 mb-2">Two-Phase Locking (DB)</h5>
+                            <p class="text-[11px] text-slate-600 italic">GĐ 1: Chiếm hết khóa. GĐ 2: Giải phóng hết khóa. Đảm bảo tính nhất quán nhưng vẫn có thể kẹt.</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-2xl shadow-sm">
+                            <h5 class="font-bold text-xs uppercase text-slate-400 mb-2">Communication Deadlock</h5>
+                            <p class="text-[11px] text-slate-600 italic">Do tin nhắn bị mất. Giải quyết bằng <strong>Timeout</strong> hoặc Alarm.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 py-12 px-8 text-center border-t border-slate-800">
+            <div class="flex flex-col items-center gap-4">
+                <p class="text-slate-500 text-sm">Hệ thống hóa Chương 12 • Deadlock Management • 2024</p>
+                <div class="flex gap-4 text-[10px] text-slate-600 font-bold uppercase tracking-widest">
+                    <span>Safety</span>
+                    <span class="text-rose-600">•</span>
+                    <span>Recovery</span>
+                    <span class="text-rose-600">•</span>
+                    <span>Fairness</span>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Safe State Checker Logic
+        function checkState() {
+            const avail = parseInt(document.getElementById('avail').value);
+            const held = parseInt(document.getElementById('p1-held').value);
+            const need = parseInt(document.getElementById('p1-need').value);
+            const resultBox = document.getElementById('check-result');
+
+            if (isNaN(avail) || isNaN(held) || isNaN(need)) {
+                resultBox.innerText = "Vui lòng nhập đầy đủ các số liệu.";
+                return;
+            }
+
+            if (need <= avail) {
+                resultBox.innerHTML = `<span class="text-emerald-600">SAFE! Hệ thống có thể cấp phát cho P1. Sau khi xong, Available mới = ${avail + held}</span>`;
+                resultBox.className = "p-4 bg-emerald-50 rounded-2xl text-center text-xs font-bold shadow-sm border border-emerald-100 uppercase";
+            } else {
+                resultBox.innerHTML = `<span class="text-rose-600">UNSAFE! P1 cần ${need} nhưng hệ thống chỉ có ${avail}. Cấp phát lúc này có thể gây Deadlock.</span>`;
+                resultBox.className = "p-4 bg-rose-50 rounded-2xl text-center text-xs font-bold shadow-sm border border-rose-100 uppercase";
+            }
+        }
+
+        // Sidebar highlight logic
+        const links = document.querySelectorAll('.sidebar-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => {
+                if (pageYOffset >= s.offsetTop - 150) current = s.getAttribute('id');
+            });
+            links.forEach(l => {
+                l.classList.remove('active');
+                if (l.getAttribute('href').includes(current)) l.classList.add('active');
+            });
+        });
+
+        // Intersection Observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('reveal'); });
+        }, { threshold: 0.1 });
+        sections.forEach(s => observer.observe(s));
+    </script>
+</body>
+</html>

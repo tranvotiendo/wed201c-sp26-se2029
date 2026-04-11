@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô phỏng Hệ thống DNS & CDN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-ring {
+            0% { transform: scale(0.33); opacity: 1; }
+            80%, 100% { opacity: 0; }
+        }
+        .packet {
+            transition: all 1s ease-in-out;
+            z-index: 50;
+        }
+        .node {
+            transition: transform 0.3s;
+        }
+        .node:hover {
+            transform: scale(1.05);
+        }
+        .terminal {
+            background: #1a1a1a;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-2 text-blue-400">Trực quan hóa DNS & CDN</h1>
+            <p class="text-slate-400">Dựa trên bài Lab 15.4.8 - Cisco Networking Academy</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="flex justify-center space-x-4 mb-8">
+            <button onclick="switchTab('dns')" id="btn-dns" class="px-6 py-2 rounded-full bg-blue-600 font-semibold transition hover:bg-blue-500">Quy trình DNS</button>
+            <button onclick="switchTab('cdn')" id="btn-cdn" class="px-6 py-2 rounded-full bg-slate-700 font-semibold transition hover:bg-blue-500">Mạng CDN</button>
+            <button onclick="switchTab('mx')" id="btn-mx" class="px-6 py-2 rounded-full bg-slate-700 font-semibold transition hover:bg-blue-500">Bản ghi MX (Mail)</button>
+        </div>
+
+        <!-- Main Interaction Area -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Visualization Canvas -->
+            <div class="lg:col-span-2 bg-slate-800 rounded-2xl p-6 relative overflow-hidden min-h-[500px] border border-slate-700 shadow-2xl">
+                <div id="visual-content" class="relative w-full h-full">
+                    <!-- Nodes will be rendered here via JS -->
+                </div>
+                
+                <!-- Floating Packet -->
+                <div id="packet" class="hidden absolute w-4 h-4 bg-yellow-400 rounded-full shadow-[0_0_10px_#facc15] packet"></div>
+            </div>
+
+            <!-- Controls & Terminal -->
+            <div class="space-y-6">
+                <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl">
+                    <h3 class="text-xl font-semibold mb-4 text-blue-300">Bảng điều khiển</h3>
+                    <div id="controls-content" class="space-y-4">
+                        <!-- Controls change based on tab -->
+                    </div>
+                </div>
+
+                <div class="terminal rounded-2xl p-4 border border-slate-700 shadow-xl h-64 overflow-y-auto">
+                    <div class="flex items-center space-x-2 mb-2 border-b border-slate-800 pb-1">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span class="text-xs text-slate-500 ml-2 italic text-green-700">Windows Command Prompt</span>
+                    </div>
+                    <div id="terminal-output" class="text-sm leading-relaxed">
+                        C:\Users\Cisco> _
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Explanation Footer -->
+        <div id="explanation" class="mt-12 p-6 bg-blue-900/20 border-l-4 border-blue-500 rounded-r-2xl">
+            <h4 class="text-lg font-bold mb-2">Đang xem: <span id="exp-title">Quy trình DNS cơ bản</span></h4>
+            <p id="exp-text" class="text-slate-300">Khi bạn nhập một URL, trình duyệt sẽ gửi yêu cầu tới DNS Resolver để tìm địa chỉ IP.</p>
+        </div>
+    </div>
+
+    <script>
+        const packet = document.getElementById('packet');
+        const visualContent = document.getElementById('visual-content');
+        const terminalOutput = document.getElementById('terminal-output');
+        const controlsContent = document.getElementById('controls-content');
+        const expTitle = document.getElementById('exp-title');
+        const expText = document.getElementById('exp-text');
+
+        let currentTab = 'dns';
+
+        const nodes = {
+            browser: { x: 10, y: 50, label: 'Trình duyệt', icon: '🌐' },
+            resolver: { x: 40, y: 50, label: 'DNS Resolver', icon: '🔍' },
+            authServer: { x: 80, y: 50, label: 'Authoritative Server', icon: '💾' },
+            webServer: { x: 80, y: 20, label: 'Web Server (IP)', icon: '🖥️' },
+            edgeVN: { x: 80, y: 20, label: 'Edge Server (VN)', icon: '🇻🇳' },
+            edgeUS: { x: 80, y: 80, label: 'Edge Server (US)', icon: '🇺🇸' },
+            mail1: { x: 80, y: 30, label: 'MX Server 1 (P10)', icon: '📧' },
+            mail2: { x: 80, y: 70, label: 'MX Server 2 (P20)', icon: '📧' }
+        };
+
+        function drawNode(key, config) {
+            const div = document.createElement('div');
+            div.className = `absolute node flex flex-col items-center justify-center p-3 bg-slate-700 rounded-lg border border-slate-600 w-32 shadow-lg`;
+            div.style.left = `${config.x}%`;
+            div.style.top = `${config.y}%`;
+            div.style.transform = `translate(-50%, -50%)`;
+            div.innerHTML = `
+                <span class="text-3xl mb-1">${config.icon}</span>
+                <span class="text-xs font-bold text-center">${config.label}</span>
+            `;
+            div.id = `node-${key}`;
+            visualContent.appendChild(div);
+        }
+
+        async function animatePacket(from, to) {
+            const fromNode = document.getElementById(`node-${from}`);
+            const toNode = document.getElementById(`node-${to}`);
+            
+            const fromRect = fromNode.getBoundingClientRect();
+            const toRect = toNode.getBoundingClientRect();
+            const parentRect = visualContent.getBoundingClientRect();
+
+            packet.style.left = `${fromRect.left - parentRect.left + fromRect.width/2}px`;
+            packet.style.top = `${fromRect.top - parentRect.top + fromRect.height/2}px`;
+            packet.classList.remove('hidden');
+
+            await new Promise(r => setTimeout(r, 50));
+
+            packet.style.left = `${toRect.left - parentRect.left + toRect.width/2}px`;
+            packet.style.top = `${toRect.top - parentRect.top + toRect.height/2}px`;
+
+            await new Promise(r => setTimeout(r, 1000));
+            packet.classList.add('hidden');
+        }
+
+        function writeTerminal(text) {
+            const line = document.createElement('div');
+            line.className = "mb-2";
+            line.innerHTML = text.replace(/\n/g, '<br>');
+            terminalOutput.appendChild(line);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            ['dns', 'cdn', 'mx'].forEach(t => {
+                document.getElementById(`btn-${t}`).className = t === tab 
+                    ? "px-6 py-2 rounded-full bg-blue-600 font-semibold transition" 
+                    : "px-6 py-2 rounded-full bg-slate-700 font-semibold transition hover:bg-blue-500";
+            });
+            renderStage();
+        }
+
+        function renderStage() {
+            visualContent.innerHTML = '';
+            controlsContent.innerHTML = '';
+            
+            if (currentTab === 'dns') {
+                expTitle.innerText = "Quy trình DNS cơ bản (icann.org)";
+                expText.innerText = "Trình duyệt gửi truy vấn đến Resolver. Resolver sẽ trả về địa chỉ IP duy nhất 192.0.32.7 cho icann.org.";
+                
+                drawNode('browser', nodes.browser);
+                drawNode('resolver', nodes.resolver);
+                drawNode('authServer', nodes.authServer);
+                drawNode('webServer', nodes.webServer);
+
+                controlsContent.innerHTML = `
+                    <button onclick="runDnsProcess()" class="w-full bg-green-600 hover:bg-green-500 py-3 rounded-lg font-bold">Thực hiện Ping icann.org</button>
+                    <p class="text-xs text-slate-400">Dấu nhắc: ping www.icann.org</p>
+                `;
+            } else if (currentTab === 'cdn') {
+                expTitle.innerText = "Cơ chế CDN (cisco.com)";
+                expText.innerText = "Mạng phân phối nội dung (CDN) sẽ điều hướng người dùng tới Edge Server gần nhất. Đó là lý do tại sao IP bạn nhận được ở VN khác với ở Mỹ.";
+                
+                drawNode('browser', nodes.browser);
+                drawNode('resolver', nodes.resolver);
+                drawNode('edgeVN', nodes.edgeVN);
+                drawNode('edgeUS', nodes.edgeUS);
+
+                controlsContent.innerHTML = `
+                    <div class="space-y-3">
+                        <button onclick="runCdnProcess('VN')" class="w-full bg-red-600 hover:bg-red-500 py-3 rounded-lg font-bold">Ping từ Việt Nam</button>
+                        <button onclick="runCdnProcess('US')" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-lg font-bold">Ping từ Mỹ</button>
+                    </div>
+                `;
+            } else if (currentTab === 'mx') {
+                expTitle.innerText = "Bản ghi Mail Exchange (MX)";
+                expText.innerText = "Khi gửi email, DNS trả về danh sách máy chủ với độ ưu tiên (Priority). Máy chủ có số Priority THẤP nhất sẽ được thử trước.";
+                
+                drawNode('browser', nodes.browser);
+                drawNode('resolver', nodes.resolver);
+                drawNode('mail1', nodes.mail1);
+                drawNode('mail2', nodes.mail2);
+
+                controlsContent.innerHTML = `
+                    <button onclick="runMxProcess()" class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded-lg font-bold">nslookup -type=mx cisco.com</button>
+                `;
+            }
+        }
+
+        async function runDnsProcess() {
+            writeTerminal("> ping www.icann.org");
+            await animatePacket('browser', 'resolver');
+            await animatePacket('resolver', 'authServer');
+            await animatePacket('authServer', 'resolver');
+            await animatePacket('resolver', 'browser');
+            writeTerminal("Pinging www.icann.org [192.0.32.7] with 32 bytes of data...");
+            await animatePacket('browser', 'webServer');
+            writeTerminal("Reply from 192.0.32.7: bytes=32 time=42ms TTL=53");
+        }
+
+        async function runCdnProcess(loc) {
+            writeTerminal(`> ping www.cisco.com (Vị trí: ${loc})`);
+            const ip = loc === 'VN' ? '23.196.68.92' : '173.223.44.110';
+            const target = loc === 'VN' ? 'edgeVN' : 'edgeUS';
+            
+            await animatePacket('browser', 'resolver');
+            await animatePacket('resolver', 'browser');
+            writeTerminal(`Pinging www.cisco.com [${ip}] ...`);
+            await animatePacket('browser', target);
+            writeTerminal(`Reply from ${ip}: bytes=32 time=10ms (Rất nhanh nhờ CDN)`);
+        }
+
+        async function runMxProcess() {
+            writeTerminal("> nslookup -type=mx cisco.com");
+            await animatePacket('browser', 'resolver');
+            await animatePacket('resolver', 'browser');
+            writeTerminal("Non-authoritative answer:\ncisco.com mail exchanger = 10 mx1.cisco.com\ncisco.com mail exchanger = 20 mx2.cisco.com");
+            writeTerminal("<span class='text-yellow-400'>Hệ thống sẽ thử máy chủ mx1 (Priority 10) trước.</span>");
+            await animatePacket('browser', 'mail1');
+        }
+
+        // Initialize
+        window.onload = () => {
+            switchTab('dns');
+            writeTerminal("Hệ thống đã sẵn sàng. Hãy chọn một quy trình để bắt đầu.");
+        };
+    </script>
+</body>
+</html>
